@@ -1,0 +1,4 @@
+*.pyc
+*.npy
+spline_rl/logs
+__pycache__
