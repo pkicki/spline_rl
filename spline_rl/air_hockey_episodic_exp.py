@@ -183,7 +183,7 @@ def experiment(env: str = 'air_hockey',
             V_sto = np.mean(core.agent.value_function(context).detach().numpy())
             E = np.mean(core.agent.distribution.entropy(context).detach().numpy())
             VJ_bias = V_sto - J_sto
-            constraints_violation_sto = core.agent.compute_constraint_losses(torch.cat(dataset_callback.get().theta_list, axis=0), context).detach().numpy()
+            constraints_violation_sto = core.agent.compute_constraint_losses(torch.stack(dataset_callback.get().theta_list, axis=0), context).detach().numpy()
             constraints_violation_sto_mean = np.mean(constraints_violation_sto, axis=0)
             constraints_violation_sto_max = np.max(constraints_violation_sto, axis=0)
             mu = core.agent.distribution.estimate_mu(context)
