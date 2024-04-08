@@ -35,7 +35,7 @@ class BSMPPolicy(Policy):
         self.q_ddot = None
         self.duration = None
 
-        self._weights = None
+        self._weights = np.zeros((self._n_trainable_q_pts * self.n_dim + self._n_trainable_t_pts,))
         self._trainable_q_cps = None
         self._trainable_t_cps = None
 
@@ -179,14 +179,14 @@ class BSMPPolicy(Policy):
         for k in range(q_0.shape[0]):
             success, q_d = self.optimizer.solve_hit_config(x_des[k], v_des.detach().numpy()[k], q_0.detach().numpy()[k, 0])
             q_d_s.append(q_d)
-        q_d_bias = torch.tensor(q_d_s)[:, None]
+        q_d_bias = torch.tensor(np.array(q_d_s))[:, None]
         q_d = q_d_bias + trainable_q_d 
 
         q_dot_d_s = []
         for k in range(q_0.shape[0]):
             q_dot_d = self.optimizer.solve_hitting_veocity(q_d.detach().numpy()[k, 0], v_des.detach().numpy()[k])
             q_dot_d_s.append(q_dot_d)
-        q_dot_d = torch.tensor(q_dot_d_s)[:, None] + trainable_q_dot_d
+        q_dot_d = torch.tensor(np.array(q_dot_d_s))[:, None] + trainable_q_dot_d
 
         # hax
         #q_d = trainable_q_cps[:, -1:] + q_0
@@ -274,6 +274,7 @@ class BSMPPolicy(Policy):
             self.q_dot = interp1d(t[0], q_dot[0], axis=0)
             self.q_ddot = interp1d(t[0], q_ddot[0], axis=0)
             self.duration = duration[0]
+            #return np.array([0], dtype=np.int32)
             return torch.tensor([0], dtype=torch.int32)
         
 
@@ -303,6 +304,7 @@ class BSMPPolicy(Policy):
         action = np.stack([q, q_dot, q_ddot], axis=-2) 
         action = torch.tensor(action, dtype=torch.float32)
         return action, torch.tensor(policy_state)
+        #return action, policy_state
 
     def extract_qt(self, x):
         # TODO: make it suitable for parallel envs
@@ -316,6 +318,9 @@ class BSMPPolicy(Policy):
 
     def set_weights(self, weights):
         self._weights = weights
+
+    def get_weights(self):
+        return self._weights
 
     def compute_boundary_control_points(self, dtau_dt, q0, q_dot_0, q_ddot_0, qd, q_dot_d, q_ddot_d):
         q1 = q_dot_0 / dtau_dt[:, :1] / self._qd1 + q0

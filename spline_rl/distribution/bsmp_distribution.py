@@ -140,9 +140,9 @@ class DiagonalGaussianBSMPSigmaDistribution(AbstractGaussianTorchDistribution):
 
     def estimate_mu(self, context):
         if context is None:
-            context = np.zeros(self._mu_approximator.input_shape, dtype=np.float32)[None]
-        if len(context.shape) == 1:
-            context = context[None]
+            context = np.zeros(self._mu_approximator.input_shape, dtype=np.float32)#[None]
+        #if len(context.shape) == 1:
+        #    context = context[None]
         if isinstance(context, np.ndarray):
             context = torch.from_numpy(context)
         mu = self._mu_approximator(context)
@@ -150,9 +150,9 @@ class DiagonalGaussianBSMPSigmaDistribution(AbstractGaussianTorchDistribution):
 
     def estimate_log_sigma(self, context):
         if context is None:
-            context = np.zeros(self._log_sigma_approximator.input_shape, dtype=np.float32)[None]
-        if len(context.shape) == 1:
-            context = context[None]
+            context = np.zeros(self._log_sigma_approximator.input_shape, dtype=np.float32)#[None]
+        #if len(context.shape) == 1:
+        #    context = context[None]
         if isinstance(context, np.ndarray):
             context = torch.from_numpy(context)
         log_sigma = self._log_sigma_approximator(context)
