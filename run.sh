@@ -5,7 +5,7 @@ xhost + local:root
 docker run -it \
     --env="DISPLAY" \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:ro" \
-    --volume="$(pwd)/spline_rl:/home/user/spline_rl" \
+    --volume="$(pwd):/home/user/spline_rl" \
     --env PYTHONPATH="/home/user/spline_rl:/usr/local/lib/python3.8/dist-packages" \
     --privileged \
     --network=host \
