@@ -41,5 +41,3 @@ RUN git clone https://github.com/pkicki/mushroom-rl.git && \
      
 RUN pip install hiyapyco imageio mujoco dm_control wandb hydra urdf_parser_py mp-pytorch \
                 protobuf==4.23.0 torch opencv-python scikit-learn pygame matplotlib
-
-
