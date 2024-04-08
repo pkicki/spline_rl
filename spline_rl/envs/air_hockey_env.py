@@ -43,9 +43,14 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
                        - self.env_info['table']['length'] / 2 + self.env_info['mallet']['radius']
         self.ee_y_lb = - self.env_info['table']['width'] / 2 + self.env_info['mallet']['radius']
         self.ee_y_ub = self.env_info['table']['width'] / 2 - self.env_info['mallet']['radius']
-        self.constraints = AirHockeyConstraints(self.env_info['robot']['joint_vel_limit'][1],
-                                                    self.env_info['robot']['joint_acc_limit'][1],
-                                                    self.ee_x_lb, self.ee_y_lb, self.ee_y_ub, self.ee_z_eb)
+        self.constraints = AirHockeyConstraints(
+            self.env_info['robot']['joint_vel_limit'][1],
+            self.env_info['robot']['joint_acc_limit'][1],
+            self.ee_x_lb,
+            self.ee_y_lb,
+            self.ee_y_ub,
+            self.ee_z_eb
+        )
         self.env_info['rl_info'].constraints = self.constraints
 
         self.hit_range = np.array([[-0.7, -0.2], [-0.35, 0.35]])
