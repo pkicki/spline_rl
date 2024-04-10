@@ -74,6 +74,14 @@ class BSMPePPO(ePPO):
         _, theta = super().episode_start(initial_state, episode_info)
         return self._convert_to_env_backend(self.policy.reset(initial_state)), theta
 
+    def draw_action(self, state, policy_state=None):
+        action, policy_state = super().draw_action(state, policy_state)
+        if self.mdp_info.interpolation_order in [1, 2]:
+            action = action[:1]
+        elif self.mdp_info.interpolation_order in [-1, 3, 4]:
+            action = action[:2]
+        return action, policy_state
+
     def _unpack_qt(self, qt, trainable=False):
         n_q_pts = self._n_trainable_q_pts if trainable else self._n_q_pts
         q = qt[..., :self._n_dim * n_q_pts]

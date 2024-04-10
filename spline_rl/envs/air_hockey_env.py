@@ -35,8 +35,8 @@ class AbsorbType(Enum):
 
 
 class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
-    def __init__(self, gamma, horizon, moving_init):
-        super().__init__(gamma=gamma, horizon=horizon, interpolation_order=5)
+    def __init__(self, gamma, horizon, moving_init, interpolation_order):
+        super().__init__(gamma=gamma, horizon=horizon, interpolation_order=interpolation_order)
 
         self.ee_z_eb = self.env_info['robot']['ee_desired_height']
         self.ee_x_lb = - self.env_info['robot']['base_frame'][0][0, 3] \
@@ -65,7 +65,14 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         high = np.stack([self.env_info['robot']['joint_pos_limit'][1],
                          self.env_info['robot']['joint_vel_limit'][1],
                          self.env_info['robot']['joint_acc_limit'][1]])
+        if interpolation_order in [1, 2]:
+            low = low[:1]
+            high = high[:1]
+        elif interpolation_order in [-1, 3, 4]:
+            low = low[:2]
+            high = high[:2]
         self.env_info['rl_info'].action_space = Box(low, high)
+        self.env_info['rl_info'].interpolation_order = interpolation_order
 
 
 

@@ -30,24 +30,25 @@ def experiment(env: str = 'air_hockey',
                n_epochs: int = 100000,
                n_steps: int = None,
                n_steps_per_fit: int = None,
-               n_episodes: int = 4,
-               n_episodes_per_fit: int = 4,
-               n_eval_episodes: int = 2,
+               n_episodes: int = 64,
+               n_episodes_per_fit: int = 64,
+               n_eval_episodes: int = 10,
 
-               batch_size: int = 4,
+               batch_size: int = 64,
                use_cuda: bool = False,
 
                horizon: int = 150,
                gamma: float = 0.99,
-               moving_init: bool = False,
+               moving_init: bool = True,
+               interpolation_order: int = -1,
 
-               #mode: str = "online",
-               mode: str = "disabled",
+               mode: str = "online",
+               #mode: str = "disabled",
 
                seed: int = 444,
                quiet: bool = True,
-               render: bool = True,
-               #render: bool = False,
+               #render: bool = True,
+               render: bool = False,
                results_dir: str = './logs',
                **kwargs):
     np.random.seed(seed)
@@ -80,7 +81,7 @@ def experiment(env: str = 'air_hockey',
         entropy_lb_ep=kwargs["entropy_lb_ep"] if 'entropy_lb_ep' in kwargs.keys() else 2000,
     )
 
-    name = (f"ePPO_gamma2_divq50t5_"
+    name = (f"ePPO_gamma2_tdiv1qdiv50_150_10qdotscaled_50_"
             f"gamma099_hor150_"
             f"lr{agent_params['mu_lr']}_valuelr{agent_params['value_lr']}_bs{batch_size}_"
             f"constrlr{agent_params['constraint_lr']}_nep{n_episodes}_neppf{n_episodes_per_fit}_"
@@ -108,11 +109,12 @@ def experiment(env: str = 'air_hockey',
         moving_init=moving_init,
         horizon=horizon,
         gamma=gamma,
+        interpolation_order=interpolation_order,
     )
 
     config = {**agent_params, **run_params, **env_params}
 
-    wandb_run = wandb.init(project="air_hockey_not_moving", config=config, dir=results_dir, name=name,
+    wandb_run = wandb.init(project="air_hockey_moving", config=config, dir=results_dir, name=name,
               group=f'{env}_{alg}', tags=[env, alg], mode=mode)
 
     eval_params = dict(
