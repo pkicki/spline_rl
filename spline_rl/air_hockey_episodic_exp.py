@@ -174,9 +174,7 @@ def experiment(env: str = 'air_hockey',
     for epoch in range(n_epochs):
         print("Epoch: ", epoch)
         if if_learn:
-            #core.agent.set_deterministic(True)
             core.learn(n_episodes=n_episodes, n_episodes_per_fit=n_episodes_per_fit, quiet=quiet)
-            #core.agent.set_deterministic(False)
             print("Rs train: ", dataset_callback.get().undiscounted_return)
             print("Js train: ", dataset_callback.get().discounted_return)
             J_sto = np.mean(dataset_callback.get().discounted_return)
@@ -231,7 +229,7 @@ def experiment(env: str = 'air_hockey',
                                  "max/": {str(i): a for i, a in enumerate(constraints_violation_sto_max)}},
             "Constraints_det/": {"avg/": {str(i): a for i, a in enumerate(constraints_violation_det_mean)},
                                  "max/": {str(i): a for i, a in enumerate(constraints_violation_det_max)}},
-            "Stats/": {"mean_duration": mean_duration, "time_to_hit": time_to_hit, "max_puck_vel": max_puck_vel},
+            "Stats/": {"mean_duration": mean_duration, "hit_time": time_to_hit, "max_puck_vel": max_puck_vel},
         }, step=epoch)
         logger.info(f"BEST J_det: {best_J_det}")
         logger.info(f"BEST J_sto: {best_J_sto}")
@@ -274,7 +272,7 @@ def compute_metrics(core, eval_params):
         hit_time = dataset.info["hit_time"][current_idx + episode_len - 1]
         puck_poses.append(dataset.state[current_idx, :2])
         scored.append(dataset.info["success"][current_idx + episode_len - 1])
-        if hit_time is not None:
+        if hit_time > 0:
             time_to_hit.append(hit_time)
         max_puck_vel.append(np.max(dataset.info["puck_velocity"][current_idx:current_idx + episode_len]))
         current_idx += episode_len
