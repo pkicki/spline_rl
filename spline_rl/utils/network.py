@@ -79,8 +79,8 @@ class LogSigmaNetwork(AirHockeyNetwork):
 
     def __call__(self, x):
         x, q0, qd, dq0, dqd, ddq0, ddqd = self.prepare_data(x)
-        x = torch.log(self._init_sigma)[None].to(torch.float64)
-        #x = self.fc(x) + torch.log(self._init_sigma)[None]
+        #x = torch.log(self._init_sigma)[None].to(torch.float64)
+        x = self.fc(x) + torch.log(self._init_sigma)[None]
         return x
 
 class LogSigmaNetworkWrapper(LogSigmaNetwork):
