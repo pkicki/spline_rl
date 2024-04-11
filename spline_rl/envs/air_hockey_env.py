@@ -169,9 +169,8 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         return False
 
     def _create_info_dictionary(self, state):
-        success = False
-        if self.absorb_type == AbsorbType.GOAL:
-            success = True
+        success = puck_pos[0] - (self.env_info['table']['length'] / 2 - self.env_info['puck']['radius']) > 0 and \
+                  np.abs(puck_pos[1]) - self.env_info['table']['goal_width'] / 2 < 0
 
         puck_pos, puck_vel = self.get_puck(state)
         ee_pos, ee_vel = self.get_ee()
