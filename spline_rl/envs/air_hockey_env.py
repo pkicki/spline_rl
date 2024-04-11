@@ -169,12 +169,11 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         return False
 
     def _create_info_dictionary(self, state):
-        success = puck_pos[0] - (self.env_info['table']['length'] / 2 - self.env_info['puck']['radius']) > 0 and \
-                  np.abs(puck_pos[1]) - self.env_info['table']['goal_width'] / 2 < 0
-
         puck_pos, puck_vel = self.get_puck(state)
         ee_pos, ee_vel = self.get_ee()
 
+        success = puck_pos[0] - (self.env_info['table']['length'] / 2 - self.env_info['puck']['radius']) > 0 and \
+                  np.abs(puck_pos[1]) - self.env_info['table']['goal_width'] / 2 < 0
         hit_time = -1.
         puck_mallet_dist = self.env_info['puck']['radius'] + self.env_info['mallet']['radius'] + 5e-3
         if np.linalg.norm(puck_pos[:2] - ee_pos[:2]) < puck_mallet_dist and np.abs(ee_pos[2] - 0.065) < 0.02:
