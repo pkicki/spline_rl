@@ -57,6 +57,7 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         self.moving_init = moving_init
         self.init_velocity_range = (0, 0.3)
         self.init_state = np.array([-7.16000830e-06, 6.97494070e-01, 7.26955352e-06, -5.04898567e-01, 6.60813111e-07, 1.92857916e+00, 0.])
+        self.ee_puck_dist = np.inf
 
 
         low = np.stack([self.env_info['robot']['joint_pos_limit'][0],
@@ -109,6 +110,7 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         self._write_data("puck_y_vel", puck_vel[1])
         self._write_data("puck_yaw_vel", puck_vel[2])
         self.absorb_type = AbsorbType.NONE
+        self.ee_puck_dist = np.inf
 
         for i in range(7):
             self._data.joint("iiwa_1/joint_" + str(i + 1)).qpos = self.init_state[i]
@@ -142,6 +144,14 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
             horizon = self.info.horizon
             gamma = self.info.gamma 
             factor = (1 - gamma ** (horizon - it + 1)) / (1 - gamma)
+
+        ee_pos = self.get_ee()[0][:2] + np.array([1.51, 0.])
+        ee_puck_dist = np.linalg.norm(ee_pos - puck_pos[:2])
+        if self.ee_puck_dist == np.inf:
+            self.ee_puck_dist = ee_puck_dist
+        elif ee_puck_dist < self.ee_puck_dist:
+            r += (self.ee_puck_dist - ee_puck_dist) * 10
+            self.ee_puck_dist = ee_puck_dist
         return r * factor
 
     def is_absorbing(self, obs):
