@@ -207,7 +207,7 @@ def experiment(env: str = 'air_hockey',
             mean_duration = 0.
 
         # Evaluate
-        J_det, R, success, states, actions, time_to_hit, max_puck_vel = compute_metrics(core, eval_params)
+        J_det, R, success, states, actions, time_to_hit, max_puck_vel, episode_length, dataset_info = compute_metrics(core, eval_params)
         #assert False
         #wandb_plotting(core, states, actions, epoch)
 
@@ -301,7 +301,7 @@ def compute_metrics(core, eval_params):
     state = dataset.state
     action = dataset.action
 
-    return J, R, success, state, action, np.mean(time_to_hit), np.mean(max_puck_vel)
+    return J, R, success, state, action, np.mean(time_to_hit), np.mean(max_puck_vel), np.mean(eps_length), dataset.info
 
 
 if __name__ == "__main__":
