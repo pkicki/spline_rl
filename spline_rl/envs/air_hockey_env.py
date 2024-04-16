@@ -58,6 +58,7 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         self.init_velocity_range = (0, 0.3)
         self.init_state = np.array([-7.16000830e-06, 6.97494070e-01, 7.26955352e-06, -5.04898567e-01, 6.60813111e-07, 1.92857916e+00, 0.])
         self.ee_puck_dist = np.inf
+        self.hit_time = -1
 
 
         low = np.stack([self.env_info['robot']['joint_pos_limit'][0],
@@ -111,6 +112,7 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         self._write_data("puck_yaw_vel", puck_vel[2])
         self.absorb_type = AbsorbType.NONE
         self.ee_puck_dist = np.inf
+        self.hit_time = -1
 
         for i in range(7):
             self._data.joint("iiwa_1/joint_" + str(i + 1)).qpos = self.init_state[i]
@@ -145,7 +147,7 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
             gamma = self.info.gamma 
             factor = (1 - gamma ** (horizon - it + 1)) / (1 - gamma)
 
-        ee_pos = self.get_ee()[0][:2] + np.array([1.51, 0.])
+        ee_pos = self.get_ee()[0][:2]
         ee_puck_dist = np.linalg.norm(ee_pos - puck_pos[:2])
         if self.ee_puck_dist == np.inf:
             self.ee_puck_dist = ee_puck_dist
@@ -181,15 +183,29 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
     def _create_info_dictionary(self, state):
         puck_pos, puck_vel = self.get_puck(state)
         ee_pos, ee_vel = self.get_ee()
+        j_pos, j_vel = self.get_joints(state)
 
-        success = puck_pos[0] - (self.env_info['table']['length'] / 2 - self.env_info['puck']['radius']) > 0 and \
-                  np.abs(puck_pos[1]) - self.env_info['table']['goal_width'] / 2 < 0
-        hit_time = -1.
+        task_info = {}
+
+        task_info['joint_pos_constraint'] = np.sum(np.maximum(np.abs(j_pos) - self.env_info['robot']['joint_pos_limit'][-1], 0))
+        task_info['joint_vel_constraint'] = np.sum(np.maximum(np.abs(j_vel) - self.env_info['robot']['joint_vel_limit'][-1], 0))
+        task_info['ee_xlb_constraint'] = np.maximum(-self.env_info['table']['length'] / 2 + self.env_info['mallet']['radius'] - ee_pos[0], 0)
+        task_info['ee_ylb_constraint'] = np.maximum(-self.env_info['table']['width'] / 2 + self.env_info['mallet']['radius'] - ee_pos[1], 0)
+        task_info['ee_yub_constraint'] = np.maximum(ee_pos[1] - self.env_info['table']['width'] / 2 + self.env_info['mallet']['radius'], 0)
+        task_info['ee_zeb_constraint'] = np.abs(ee_pos[2] - self.env_info['robot']['universal_height'])
+        task_info['ee_zlb_constraint'] = np.maximum(self.env_info['robot']['universal_height'] - 0.02 - ee_pos[2], 0)
+        task_info['ee_zub_constraint'] = np.maximum(ee_pos[2] - 0.02 - self.env_info['robot']['universal_height'], 0)
+
+        task_info["success"] = puck_pos[0] - (self.env_info['table']['length'] / 2 - self.env_info['puck']['radius']) > 0 and \
+                               np.abs(puck_pos[1]) - self.env_info['table']['goal_width'] / 2 < 0
+
         puck_mallet_dist = self.env_info['puck']['radius'] + self.env_info['mallet']['radius'] + 5e-3
-        if np.linalg.norm(puck_pos[:2] - ee_pos[:2]) < puck_mallet_dist and np.abs(ee_pos[2] - 0.065) < 0.02:
-            hit_time = self._data.time
+        if self.hit_time < 0 and np.linalg.norm(puck_pos[:2] - ee_pos[:2]) < puck_mallet_dist and np.abs(ee_pos[2] - 0.065) < 0.02:
+            self.hit_time = self._data.time
+        task_info["hit_time"] = self.hit_time
+        task_info["puck_velocity"] = np.linalg.norm(puck_vel[:2])
 
-        return {'success': success, "hit_time": hit_time, "puck_velocity": np.linalg.norm(puck_vel[:2])}
+        return task_info
 
 
 if __name__ == '__main__':
