@@ -231,7 +231,22 @@ def experiment(env: str = 'air_hockey',
                                  "max/": {str(i): a for i, a in enumerate(constraints_violation_sto_max)}},
             "Constraints_det/": {"avg/": {str(i): a for i, a in enumerate(constraints_violation_det_mean)},
                                  "max/": {str(i): a for i, a in enumerate(constraints_violation_det_max)}},
-            "Stats/": {"mean_duration": mean_duration, "hit_time": time_to_hit, "max_puck_vel": max_puck_vel},
+            "Stats/": {
+                "mean_duration": mean_duration,
+                "hit_time": time_to_hit,
+                "max_puck_vel": max_puck_vel,
+                 "episode_length": episode_length,
+            },
+            "Constraints/": {
+                    "joint_pos": np.mean(dataset_info['joint_pos_constraint']),
+                    "joint_vel": np.mean(dataset_info['joint_vel_constraint']),
+                    "ee_xlb": np.mean(dataset_info['ee_xlb_constraint']),
+                    "ee_ylb": np.mean(dataset_info['ee_ylb_constraint']),
+                    "ee_yub": np.mean(dataset_info['ee_yub_constraint']),
+                    "ee_zlb": np.mean(dataset_info['ee_zlb_constraint']),
+                    "ee_zub": np.mean(dataset_info['ee_zub_constraint']),
+                    "ee_zeb": np.mean(dataset_info['ee_zeb_constraint']),
+                }
         }, step=epoch)
         logger.info(f"BEST J_det: {best_J_det}")
         logger.info(f"BEST J_sto: {best_J_sto}")
