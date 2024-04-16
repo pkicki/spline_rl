@@ -51,6 +51,8 @@ def experiment(env: str = 'air_hockey',
                render: bool = False,
                results_dir: str = './logs',
                **kwargs):
+    if len(sys.argv) > 1:
+        seed = int(sys.argv[1])
     np.random.seed(seed)
     torch.manual_seed(seed)
 
