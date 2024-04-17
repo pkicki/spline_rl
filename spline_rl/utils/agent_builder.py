@@ -9,6 +9,7 @@ from policy.bsmp_unstructured_policy import BSMPUnstructuredPolicy
 from policy.prodmp_policy import ProDMPPolicy
 from policy.promp_policy import ProMPPolicy
 from algorithm.bsmp_eppo import BSMPePPO
+from spline_rl.policy.bsmp_policy_stop import BSMPPolicyStop
 from utils.context_builder import IdentityContextBuilder
 from utils.network import ConfigurationNetworkWrapper, ConfigurationTimeNetworkWrapper, LogSigmaNetworkWrapper
 from utils.value_network import ValueNetwork
@@ -36,6 +37,8 @@ def agent_builder(env_info, agent_params):
         agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
     elif alg == "bsmp_eppo_unstructured":
         agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
+    elif alg == "bsmp_eppo_stop":
+        agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
     elif alg.startswith("pro"):
         agent = build_agent_ProMPePPO(env_info, eppo_params, agent_params)
     else:
@@ -50,6 +53,11 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
     n_dim = agent_params["n_dim"]
     n_trainable_q_pts = n_q_pts - (n_pts_fixed_begin + n_pts_fixed_end)
     n_trainable_t_pts = n_t_pts
+
+    if "stop" in agent_params["alg"]:
+        n_trainable_q_pts += n_q_pts - 5
+        n_trainable_t_pts += n_t_pts
+
 
     mdp_info = env_info['rl_info']
 
@@ -79,6 +87,8 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
 
     if agent_params["alg"] == "bsmp_eppo_unstructured":
         policy = BSMPUnstructuredPolicy(env_info, env_info["dt"], n_q_pts, n_dim, n_t_pts, n_pts_fixed_begin, n_pts_fixed_end)
+    elif agent_params["alg"] == "bsmp_eppo_stop":
+        policy = BSMPPolicyStop(env_info, env_info["dt"], n_q_pts, n_dim, n_t_pts, n_pts_fixed_begin, n_pts_fixed_end)
     else:
         policy = BSMPPolicy(env_info, env_info["dt"], n_q_pts, n_dim, n_t_pts, n_pts_fixed_begin, n_pts_fixed_end)
 
