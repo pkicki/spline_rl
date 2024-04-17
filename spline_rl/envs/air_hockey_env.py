@@ -139,13 +139,13 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         goal_dist = np.linalg.norm(goal - puck_pos[:2])
         r = np.exp(-2. * goal_dist**2)
 
-        factor = 1.
         if absorbing:
             t = self._data.time
             it = int(t / self.info.dt)
             horizon = self.info.horizon
             gamma = self.info.gamma 
             factor = (1 - gamma ** (horizon - it + 1)) / (1 - gamma)
+            return r * factor
 
         ee_pos = self.get_ee()[0][:2]
         ee_puck_dist = np.linalg.norm(ee_pos - puck_pos[:2])
@@ -154,7 +154,7 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         elif ee_puck_dist < self.ee_puck_dist:
             r += (self.ee_puck_dist - ee_puck_dist) * 10
             self.ee_puck_dist = ee_puck_dist
-        return r * factor
+        return r
 
     def is_absorbing(self, obs):
         puck_pos = obs[:2].copy()
