@@ -22,7 +22,8 @@ class AirHockeyConstraints(Constraint):
         self.ee_y_lb = ee_y_lb
         self.ee_y_ub = ee_y_ub
         self.ee_z_eb = ee_z_eb
-        self.constraints_num = 17
+        self.violation_limits = np.array([1e-4] * 7 + [1e-5] * 7 + [5e-6] * 4)
+        self.constraints_num = 18
         self.urdf_path = os.path.join(os.path.dirname(__file__), "../urdf/iiwa_striker.urdf")
         self.robot = DifferentiableRobotModel(urdf_path=self.urdf_path, name="iiwa")
 

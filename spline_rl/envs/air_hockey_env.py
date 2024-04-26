@@ -17,23 +17,6 @@ class AbsorbType(Enum):
     BOTTOM = 5
 
 
-#class AccelerationControl:
-#    # TODO: use PID + FF control or something already used by Puze
-#    def _compute_action(self, obs, action):
-#        q, dq = self.get_joints(obs)
-#        acc_high = np.minimum(self.env_info['robot']['joint_acc_limit'][1],
-#                              5 * (self.env_info['robot']['joint_vel_limit'][1] - dq))
-#        acc_low = np.maximum(self.env_info['robot']['joint_acc_limit'][0],
-#                             5 * (self.env_info['robot']['joint_vel_limit'][0] - dq))
-#        acc = np.clip(action, acc_low, acc_high)
-#        self.env_info['robot']['robot_data'].qpos[:] = q
-#        self.env_info['robot']['robot_data'].qvel[:] = dq
-#        self.env_info['robot']['robot_data'].qacc[:] = acc
-#        torque = np.zeros(7)
-#        mujoco.mj_rne(self.env_info['robot']['robot_model'], self.env_info['robot']['robot_data'], 1, torque)
-#        return torque
-
-
 class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
     def __init__(self, gamma, horizon, moving_init, interpolation_order):
         super().__init__(gamma=gamma, horizon=horizon, interpolation_order=interpolation_order)

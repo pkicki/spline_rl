@@ -27,9 +27,6 @@ def agent_builder(env_info, agent_params):
     eppo_params = dict(n_epochs_policy=agent_params["n_epochs_policy"],
                        batch_size=agent_params["batch_size"],
                        eps_ppo=agent_params["eps_ppo"],
-                       target_entropy=agent_params["target_entropy"],
-                       entropy_lr=agent_params["entropy_lr"],
-                       initial_entropy_bonus=agent_params["initial_entropy_bonus"],
                        context_builder=IdentityContextBuilder(),
                        )
 
@@ -53,6 +50,11 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
     n_dim = agent_params["n_dim"]
     n_trainable_q_pts = n_q_pts - (n_pts_fixed_begin + n_pts_fixed_end)
     n_trainable_t_pts = n_t_pts
+    t_scale = agent_params["t_scale"]
+    q_scale = agent_params["q_scale"]
+    q_d_scale = agent_params["q_d_scale"]
+    q_dot_d_scale = agent_params["q_dot_d_scale"]
+    q_ddot_d_scale = agent_params["q_ddot_d_scale"]
 
     if "stop" in agent_params["alg"]:
         n_trainable_q_pts += n_q_pts - 5
@@ -85,12 +87,27 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
 
     value_function_approximator = ValueNetwork(mdp_info.observation_space)
 
+    policy_args = dict(
+        env_info=env_info,
+        dt=env_info["dt"],
+        n_q_pts=n_q_pts,
+        n_dim=n_dim,
+        n_t_pts=n_t_pts,
+        n_pts_fixed_begin=n_pts_fixed_begin,
+        n_pts_fixed_end=n_pts_fixed_end,
+        t_scale=t_scale,
+        q_scale=q_scale,
+        q_d_scale=q_d_scale,
+        q_dot_d_scale=q_dot_d_scale,
+        q_ddot_d_scale=q_ddot_d_scale,
+    )
+
     if agent_params["alg"] == "bsmp_eppo_unstructured":
-        policy = BSMPUnstructuredPolicy(env_info, env_info["dt"], n_q_pts, n_dim, n_t_pts, n_pts_fixed_begin, n_pts_fixed_end)
+        policy = BSMPUnstructuredPolicy(**policy_args)
     elif agent_params["alg"] == "bsmp_eppo_stop":
-        policy = BSMPPolicyStop(env_info, env_info["dt"], n_q_pts, n_dim, n_t_pts, n_pts_fixed_begin, n_pts_fixed_end)
+        policy = BSMPPolicyStop(**policy_args)
     else:
-        policy = BSMPPolicy(env_info, env_info["dt"], n_q_pts, n_dim, n_t_pts, n_pts_fixed_begin, n_pts_fixed_end)
+        policy = BSMPPolicy(**policy_args)
 
     dist = DiagonalGaussianBSMPSigmaDistribution(mu_approximator, log_sigma_approximator, agent_params["entropy_lb"])
 
@@ -128,9 +145,9 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
     value_function_approximator = ValueNetwork(mdp_info.observation_space)
 
 
-    if agent_params["alg"] == "promp_eppo":
+    if agent_params["alg"] == "promp_eppo_unstructured":
         policy = ProMPPolicy(env_info, agent_params["n_q_cps"], agent_params["n_dim"])
-    elif agent_params["alg"] == "prodmp_eppo":
+    elif agent_params["alg"] == "prodmp_eppo_unstructured":
         policy = ProDMPPolicy(env_info, agent_params["n_q_cps"], agent_params["n_dim"])
     else:
         raise ValueError(f"Unknown algorithm: {agent_params['alg']}")

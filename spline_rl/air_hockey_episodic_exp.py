@@ -1,12 +1,10 @@
+from mushroom_rl.core.agent import Agent
 import wandb
 import os, sys
 import numpy as np
 import torch.random
 
-#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', )))
-#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
-
+from experiment_launcher import single_experiment, run_experiment
 from mushroom_rl.core import Logger, Core, VectorCore
 from mushroom_rl.utils.torch import TorchUtils
 from mushroom_rl.utils.callbacks import CollectDataset
@@ -20,34 +18,48 @@ def custom_repr(self):
 original_repr = torch.Tensor.__repr__
 torch.Tensor.__repr__ = custom_repr
 
-def experiment(env: str = 'air_hockey',
-               n_envs: int = 1,
-               #alg: str = "promp_eppo",
-               #alg: str = "prodmp_eppo",
-               #alg: str = "bsmp_eppo_unstructured",
-               #alg: str = "bsmp_eppo",
-               alg: str = "bsmp_eppo_stop",
-               n_epochs: int = 100000,
-               n_steps: int = None,
-               n_steps_per_fit: int = None,
-               n_episodes: int = 64,
-               n_episodes_per_fit: int = 64,
-               n_eval_episodes: int = 10,
+os.environ["WANDB_START_METHOD"] = "thread"
 
+@single_experiment
+def experiment(env: str = 'air_hockey',
+               group_name: str = "dummy",
+               n_envs: int = 1,
+               alg: str = "bsmp_eppo_stop",
+               n_epochs: int = 2000,
+               n_episodes: int = 256,
+               n_episodes_per_fit: int = 64,
+               n_eval_episodes: int = 25,
                batch_size: int = 64,
                use_cuda: bool = False,
 
+               # agent params
+               n_q_cps: int = 11,
+               n_t_cps: int = 10,
+               sigma_init_q: float = 1.0,
+               sigma_init_t: float = 1.0,
+               constraint_lr: float = 1e-2,
+               mu_lr: float = 5e-5,
+               value_lr: float = 5e-4,
+               n_epochs_policy: int = 32,
+               eps_ppo: float = 5e-2,
+               initial_entropy_lb: float = 118,
+               entropy_lb: float = -118,
+               entropy_lb_ep: int = 500,
+               t_scale: float = 1.0,
+               q_scale: float = 1. / 50.,
+               q_d_scale: float = 1. / 150.,
+               q_dot_d_scale: float = 1. / 50.,
+               q_ddot_d_scale: float = 1.0,
+
+               # env params
                horizon: int = 150,
                gamma: float = 0.99,
                moving_init: bool = True,
                interpolation_order: int = -1,
 
                mode: str = "online",
-               #mode: str = "disabled",
-
                seed: int = 444,
                quiet: bool = True,
-               #render: bool = True,
                render: bool = False,
                results_dir: str = './logs',
                **kwargs):
@@ -61,26 +73,26 @@ def experiment(env: str = 'air_hockey',
         alg=alg,
         seed=seed,
         n_dim=7,
-        n_q_cps=kwargs['n_q_cps'] if 'n_q_cps' in kwargs.keys() else 11,
-        n_t_cps=kwargs['n_t_cps'] if 'n_t_cps' in kwargs.keys() else 10,
+        n_q_cps=n_q_cps,
+        n_t_cps=n_t_cps,
         n_pts_fixed_begin=3,
-        n_pts_fixed_end=0,
-        sigma_init_q=['sigma_init_q'] if 'sigma_init_q' in kwargs.keys() else 1.0,
-        sigma_init_t=['sigma_init_t'] if 'sigma_init_t' in kwargs.keys() else 1.0,
-        sigma_eps=['sigma_eps'] if 'sigma_eps' in kwargs.keys() else 1e-2,
-        constraint_lr=kwargs['constraint_lr'] if 'constraint_lr' in kwargs.keys() else 1e-2,
-        mu_lr=kwargs['mu_lr'] if 'mu_lr' in kwargs.keys() else 5e-5,
-        value_lr=kwargs['value_lr'] if 'value_lr' in kwargs.keys() else 5e-4,
-        n_epochs_policy=kwargs['n_epochs_policy'] if 'n_epochs_policy' in kwargs.keys() else 32,
+        n_pts_fixed_end=2 if "unstructured" in alg else 0,
+        sigma_init_q=sigma_init_q,
+        sigma_init_t=sigma_init_t,
+        constraint_lr=constraint_lr,
+        mu_lr=mu_lr,
+        value_lr=value_lr,
+        n_epochs_policy=n_epochs_policy,
         batch_size=batch_size,
-        eps_ppo=kwargs['eps_ppo'] if 'eps_ppo' in kwargs.keys() else 5e-2,
-        ent_coeff=kwargs['ent_coeff'] if 'ent_coeff' in kwargs.keys() else 0e-3,
-        target_entropy=kwargs["target_entropy"] if 'target_entropy' in kwargs.keys() else -99.,
-        entropy_lr=kwargs["entropy_lr"] if 'entropy_lr' in kwargs.keys() else 1e-4,
-        initial_entropy_bonus=kwargs["initial_entropy_bonus"] if 'initial_entropy_bonus' in kwargs.keys() else 3e-3,
-        entropy_lb=kwargs["entropy_lb"] if 'entropy_lb' in kwargs.keys() else -52,
-        initial_entropy_lb=kwargs["initial_entropy_lb"] if 'initial_entropy_lb' in kwargs.keys() else 52,
-        entropy_lb_ep=kwargs["entropy_lb_ep"] if 'entropy_lb_ep' in kwargs.keys() else 2000,
+        eps_ppo=eps_ppo,
+        entropy_lb=entropy_lb,
+        initial_entropy_lb=initial_entropy_lb,
+        entropy_lb_ep=entropy_lb_ep,
+        t_scale=t_scale,
+        q_scale=q_scale,
+        q_d_scale=q_d_scale,
+        q_dot_d_scale=q_dot_d_scale,
+        q_ddot_d_scale=q_ddot_d_scale,
     )
 
     name = (f"ePPO_gamma2_tdiv1qdiv50_150_10qdotscaled_50_"
@@ -116,8 +128,8 @@ def experiment(env: str = 'air_hockey',
 
     config = {**agent_params, **run_params, **env_params}
 
-    wandb_run = wandb.init(project="air_hockey_moving", config=config, dir=results_dir, name=name,
-              group=f'{env}_{alg}', tags=[env, alg], mode=mode)
+    wandb_run = wandb.init(project="corl24_experiments", config=config, dir=results_dir, name=name, entity="kicai",
+              group=f'{group_name}', mode=mode)
 
     eval_params = dict(
         n_episodes=n_eval_episodes,
@@ -262,6 +274,7 @@ def experiment(env: str = 'air_hockey',
         if epoch % 100 == 0:
             logger.log_agent(agent, epoch=epoch)
 
+    wandb_run.log_model(logger.path, name=f"{group_name}_{seed}")
     wandb_run.finish()
 
 
@@ -305,4 +318,4 @@ def compute_metrics(core, eval_params):
 
 
 if __name__ == "__main__":
-    experiment()
+    run_experiment(experiment)
