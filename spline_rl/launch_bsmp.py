@@ -43,5 +43,6 @@ launcher = Launcher(
 launcher.add_experiment(
     alg="bsmp_eppo_stop",
     group_name=experiment_name,
+    reward_type="new", # available options are "new", "puze", "mixed"
 )
 launcher.run(LOCAL, TEST)

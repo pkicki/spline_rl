@@ -16,10 +16,19 @@ class AbsorbType(Enum):
     LEFT = 4
     BOTTOM = 5
 
-
 class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
-    def __init__(self, gamma, horizon, moving_init, interpolation_order):
+    def __init__(self, gamma, horizon, moving_init, interpolation_order, reward_type="new"):
         super().__init__(gamma=gamma, horizon=horizon, interpolation_order=interpolation_order)
+
+        assert reward_type in ["new", "mixed", "puze"]
+        if reward_type == "new":
+            self.reward = self.reward_new
+        elif reward_type == "mixed":
+            self.reward = self.mixed_reward
+        elif reward_type == "puze":
+            self.reward = self.puze_reward
+        else:
+            raise ValueError("Unknown reward type")
 
         self.ee_z_eb = self.env_info['robot']['ee_desired_height']
         self.ee_x_lb = - self.env_info['robot']['base_frame'][0][0, 3] \
@@ -109,8 +118,37 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         # Update body positions, needed for _compute_universal_joint
         mujoco.mj_fwdPosition(self._model, self._data)
 
+    def mixed_reward(self, state, action, next_state, absorbing):
+        r = 0
+        # Get puck's position and velocity (The position is in the world frame, i.e., center of the table)
+        puck_pos, puck_vel = self.get_puck(next_state)
+        self.puck_velocity = np.linalg.norm(puck_vel[:2])
 
-    def reward(self, state, action, next_state, absorbing):
+        # Define goal position
+        goal = np.array([0.98, 0])
+
+        goal_dist = np.linalg.norm(goal - puck_pos[:2])
+        if self.hit_time > 0:
+            r = np.exp(-2. * goal_dist**2)
+
+        if absorbing:
+            t = self._data.time
+            it = int(t / self.info.dt)
+            horizon = self.info.horizon
+            gamma = self.info.gamma 
+            factor = (1 - gamma ** (horizon - it + 1)) / (1 - gamma)
+            return r * factor
+
+        ee_pos = self.get_ee()[0][:2]
+        ee_puck_dist = np.linalg.norm(ee_pos - puck_pos[:2])
+        if self.ee_puck_dist == np.inf:
+            self.ee_puck_dist = ee_puck_dist
+        elif ee_puck_dist < self.ee_puck_dist:
+            r += (self.ee_puck_dist - ee_puck_dist) * 1#0
+            self.ee_puck_dist = ee_puck_dist
+        return r
+
+    def new_reward(self, state, action, next_state, absorbing):
         r = 0
         # Get puck's position and velocity (The position is in the world frame, i.e., center of the table)
         puck_pos, puck_vel = self.get_puck(next_state)
@@ -129,16 +167,41 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
             gamma = self.info.gamma 
             factor = (1 - gamma ** (horizon - it + 1)) / (1 - gamma)
             return r * factor
+        return r
 
-        ee_pos = self.get_ee()[0][:2]
-        ee_puck_dist = np.linalg.norm(ee_pos - puck_pos[:2])
+    def puze_reward(self, state, action, next_state, absorbing):
+        puck_pos = next_state[:2].copy()
+        puck_pos[0] += 1.51
+        puck_vel = next_state[3:5]
+
+        if absorbing:
+            r = 0
+            factor = (1 - self.info.gamma ** self.info.horizon) / (1 - self.info.gamma)
+            if self.absorb_type == AbsorbType.GOAL:
+                r = 1.5 - (np.clip(abs(puck_pos[1]), 0, 0.1) * 5)
+            elif self.absorb_type == AbsorbType.UP:
+                r = (1 - np.clip(abs(puck_pos[1]) - 0.1, 0, 0.35) * 2)
+            elif self.absorb_type == AbsorbType.LEFT:
+                r = (0.3 - np.clip(2.43 - puck_pos[0], 0, 1) * 0.3)
+            elif self.absorb_type == AbsorbType.RIGHT:
+                r = (0.3 - np.clip(2.43 - puck_pos[0], 0, 1) * 0.3)
+            r *= factor
+        else:
+            if puck_pos[0] > 1.51:
+                r = 1.5 * np.clip(puck_vel[0], 0, 3)
+            else:
+                r = 0
+
+        ee_pos = self.get_ee()[0][:2] + np.array([1.51, 0.])
+        ee_puck_dist = np.linalg.norm(ee_pos - puck_pos)
         if self.ee_puck_dist == np.inf:
             self.ee_puck_dist = ee_puck_dist
         elif ee_puck_dist < self.ee_puck_dist:
             r += (self.ee_puck_dist - ee_puck_dist) * 10
             self.ee_puck_dist = ee_puck_dist
-        return r
 
+        return r
+    
     def is_absorbing(self, obs):
         puck_pos = obs[:2].copy()
         puck_pos[0] += 1.51

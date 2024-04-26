@@ -56,6 +56,7 @@ def experiment(env: str = 'air_hockey',
                gamma: float = 0.99,
                moving_init: bool = True,
                interpolation_order: int = -1,
+               reward_type: str = "new",
 
                mode: str = "online",
                seed: int = 444,
@@ -124,6 +125,7 @@ def experiment(env: str = 'air_hockey',
         horizon=horizon,
         gamma=gamma,
         interpolation_order=interpolation_order,
+        reward_type=reward_type,
     )
 
     config = {**agent_params, **run_params, **env_params}
@@ -141,11 +143,15 @@ def experiment(env: str = 'air_hockey',
 
     agent = agent_builder(env_info_, agent_params)
 
+    # TRO hit moving with stop
+    #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_stop_verynewreward_gamma2_interpm1_tdiv1qdiv50_150_10qdotscaled_50_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep256_neppf64_neppol32_epsppo0.05_sigmainit1.0q_1.0t_entlb-118_entlbinit118_entlbep500_nqcps11_ntcps10_seed1/agent-1-571.msh")
+
     # unstructured moving
     #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_unstructured_gauss2_end131_yrangem035moving_qdiv50tdiv5_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep64_neppf64_neppol32_epsppo0.05_sigmainit1.0q_1.0t_entlb-52_entlbinit52_entlbep6000_nqcps11_ntcps10_seed444/agent-444-3856.msh")
     #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_unstructured_gauss1_yrangem035moving_end131_qdiv50t5_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep64_neppf64_neppol32_epsppo0.02_entlb-52_entlbinit52_entlbep6000_nqcps11_ntcps10_seed444/agent-444-3156.msh")
     
     # TRO hit moving
+    #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_gamma2_interpm1_tdiv1qdiv50_150_10qdotscaled_50_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep64_neppf64_neppol32_epsppo0.05_sigmainit1.0q_1.0t_entlb-52_entlbinit52_entlbep2000_nqcps11_ntcps10_seed444/agent-444-1207.msh")
     #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_TROhitmoving_gauss2_yrangem035_tdiv1qdiv50_150_10qdotscaled_50_goodduration_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep64_neppf64_neppol32_epsppo0.05_sigmainit1.0q_1.0t_entlb-52_entlbinit52_entlbep2000_nqcps11_ntcps10_seed444/agent-444-2864.msh")
     
     #unstructured
@@ -157,10 +163,10 @@ def experiment(env: str = 'air_hockey',
     #print("Load agent from: ", agent_path)
     #agent_ = agent_builder(env_info_, agent_params)
     #agent = Agent.load(agent_path)
-    #agent.load_robot()
+    ##agent.load_robot()
     #agent._optimizer = torch.optim.Adam(agent.distribution.parameters(), lr=agent_params["mu_lr"])
+    #agent.mdp_info = env_info_['rl_info']
     ##agent._epoch_no = 0
-    ###agent.policy.env_info = env_info_
     ##agent.policy.optimizer = TrajectoryOptimizer(env_info_)
     #agent.policy.load_policy(env_info_)
     ##agent.policy.desired_ee_z = env_info_["robot"]["ee_desired_height"]

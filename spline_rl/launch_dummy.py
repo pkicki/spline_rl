@@ -40,14 +40,16 @@ launcher = Launcher(
     compact_dirs=False
 )
 
-launcher.add_experiment(
-    alg="bsmp_eppo_stop",
-    group_name=experiment_name,
-    n_epochs=5,
-    n_episodes=2,
-    n_episodes_per_fit = 2,
-    n_eval_episodes = 2,
-    batch_size= 2,
-    #mode="disabled",
-)
+for reward_type in ["new", "puze", "mixed"]:
+    launcher.add_experiment(
+        alg="bsmp_eppo_stop",
+        reward_type__=reward_type,
+        group_name__=f"{experiment_name}_{reward_type}",
+        n_epochs=5,
+        n_episodes=2,
+        n_episodes_per_fit = 2,
+        n_eval_episodes = 2,
+        batch_size= 2,
+        #mode="disabled",
+    )
 launcher.run(LOCAL, TEST)
