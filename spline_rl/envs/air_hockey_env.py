@@ -22,7 +22,7 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
 
         assert reward_type in ["new", "mixed", "puze"]
         if reward_type == "new":
-            self.reward = self.reward_new
+            self.reward = self.new_reward
         elif reward_type == "mixed":
             self.reward = self.mixed_reward
         elif reward_type == "puze":
