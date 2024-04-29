@@ -4,7 +4,7 @@ import numpy as np
 
 from storm_kit.differentiable_robot_model.differentiable_robot_model import DifferentiableRobotModel
 
-from utils.utils import equality_loss, limit_loss
+from spline_rl.utils.utils import equality_loss, limit_loss
 
 
 class Constraint:

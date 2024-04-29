@@ -3,7 +3,7 @@ import numpy as np
 
 from mushroom_rl.distributions import AbstractGaussianTorchDistribution
 
-from utils.utils import project_entropy, project_entropy_independently
+from spline_rl.utils.utils import project_entropy, project_entropy_independently
 
 
 class DiagonalGaussianBSMPDistribution(AbstractGaussianTorchDistribution):

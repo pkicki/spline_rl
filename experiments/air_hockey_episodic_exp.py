@@ -9,8 +9,8 @@ from mushroom_rl.core import Logger, Core, VectorCore
 from mushroom_rl.utils.torch import TorchUtils
 from mushroom_rl.utils.callbacks import CollectDataset
 
-from utils.agent_builder import agent_builder
-from utils.env_builder import env_builder
+from spline_rl.utils.agent_builder import agent_builder
+from spline_rl.utils.env_builder import env_builder
 
 def custom_repr(self):
     return f'{{Tensor:{tuple(self.shape)}}} {original_repr(self)}'

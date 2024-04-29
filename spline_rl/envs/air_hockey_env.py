@@ -5,7 +5,7 @@ from enum import Enum
 from air_hockey_challenge.environments.iiwas import AirHockeySingle
 from air_hockey_challenge.environments.position_control_wrapper import PositionControlIIWA
 from air_hockey_challenge.constraints import *
-from utils.constraints import AirHockeyConstraints
+from spline_rl.utils.constraints import AirHockeyConstraints
 
 
 class AbsorbType(Enum):

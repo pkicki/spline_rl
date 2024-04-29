@@ -7,7 +7,7 @@ from baseline.baseline_agent.optimizer import TrajectoryOptimizer
 
 from mushroom_rl.features._implementations.basis_features import BasisFeatures
 from mushroom_rl.features.basis import GaussianRBF, dGaussianRBF
-from utils.utils import unpack_data_airhockey
+from spline_rl.utils.utils import unpack_data_airhockey
 
 
 class ProMPPolicy(Policy):
