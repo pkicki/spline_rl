@@ -118,6 +118,13 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         # Update body positions, needed for _compute_universal_joint
         mujoco.mj_fwdPosition(self._model, self._data)
 
+    def _controller(self, desired_pos, desired_vel, desired_acc, current_pos, current_vel):
+        torque = super()._controller(desired_pos, desired_vel, desired_acc, current_pos, current_vel)
+        low = self.robot_model.actuator_ctrlrange[:, 0]
+        high = self.robot_model.actuator_ctrlrange[:, 1]
+        torque = np.clip(torque, low, high)
+        return torque
+
     def mixed_reward(self, state, action, next_state, absorbing):
         r = 0
         # Get puck's position and velocity (The position is in the world frame, i.e., center of the table)
