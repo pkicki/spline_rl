@@ -1,0 +1,4 @@
+include setup.py
+prune tests*
+prune .github*
+prune examples*

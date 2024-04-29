@@ -3,16 +3,16 @@ import torch
 from mushroom_rl.approximators import Regressor
 from mushroom_rl.approximators.parametric import TorchApproximator
 
-from distribution.bsmp_distribution import DiagonalGaussianBSMPSigmaDistribution
-from policy.bsmp_policy import BSMPPolicy
-from policy.bsmp_unstructured_policy import BSMPUnstructuredPolicy
-from policy.prodmp_policy import ProDMPPolicy
-from policy.promp_policy import ProMPPolicy
-from algorithm.bsmp_eppo import BSMPePPO
+from spline_rl.distribution.bsmp_distribution import DiagonalGaussianBSMPSigmaDistribution
+from spline_rl.policy.bsmp_policy import BSMPPolicy
+from spline_rl.policy.bsmp_unstructured_policy import BSMPUnstructuredPolicy
+from spline_rl.policy.prodmp_policy import ProDMPPolicy
+from spline_rl.policy.promp_policy import ProMPPolicy
+from spline_rl.algorithm.bsmp_eppo import BSMPePPO
 from spline_rl.policy.bsmp_policy_stop import BSMPPolicyStop
-from utils.context_builder import IdentityContextBuilder
-from utils.network import ConfigurationNetworkWrapper, ConfigurationTimeNetworkWrapper, LogSigmaNetworkWrapper
-from utils.value_network import ValueNetwork
+from spline_rl.utils.context_builder import IdentityContextBuilder
+from spline_rl.utils.network import ConfigurationNetworkWrapper, ConfigurationTimeNetworkWrapper, LogSigmaNetworkWrapper
+from spline_rl.utils.value_network import ValueNetwork
 
 
 

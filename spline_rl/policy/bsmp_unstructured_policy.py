@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-from policy.bsmp_policy import BSMPPolicy
+from spline_rl.policy.bsmp_policy import BSMPPolicy
 
 
 class BSMPUnstructuredPolicy(BSMPPolicy):

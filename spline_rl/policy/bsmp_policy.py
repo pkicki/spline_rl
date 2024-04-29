@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from mushroom_rl.policy import Policy
 
-from utils.bspline import BSpline
-from utils.utils import unpack_data_airhockey
+from spline_rl.utils.bspline import BSpline
+from spline_rl.utils.utils import unpack_data_airhockey
 
 
 class BSMPPolicy(Policy):

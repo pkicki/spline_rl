@@ -5,7 +5,7 @@ from scipy.interpolate import interp1d
 from mp_pytorch.mp import ExpDecayPhaseGenerator, ProDMPBasisGenerator
 from mushroom_rl.policy import Policy
 from baseline.baseline_agent.optimizer import TrajectoryOptimizer
-from utils.utils import unpack_data_airhockey
+from spline_rl.utils.utils import unpack_data_airhockey
 
 
 
