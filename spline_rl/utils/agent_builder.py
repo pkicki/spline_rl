@@ -131,7 +131,7 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
                                         "input_space": mdp_info.observation_space,
                                         },
                                 input_shape=(mdp_info.observation_space.shape[0],),
-                                output_shape=(n_trainable_pts,))
+                                output_shape=(n_trainable_pts + 1,))
     log_sigma_approximator = Regressor(TorchApproximator,
                                 network=LogSigmaNetworkWrapper,
                                 batch_size=1,
@@ -140,7 +140,7 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
                                         "init_sigma": sigma,
                                         },
                                 input_shape=(mdp_info.observation_space.shape[0],),
-                                output_shape=(n_trainable_pts,))
+                                output_shape=(n_trainable_pts + 1,))
 
     value_function_approximator = ValueNetwork(mdp_info.observation_space)
 
