@@ -6,7 +6,8 @@ from mushroom_rl.policy import Policy
 from baseline.baseline_agent.optimizer import TrajectoryOptimizer
 
 from mushroom_rl.features._implementations.basis_features import BasisFeatures
-from mushroom_rl.features.basis import GaussianRBF, dGaussianRBF
+from mushroom_rl.features.basis import GaussianRBF
+from spline_rl.utils.gaussian_derivative import dGaussianRBF
 from spline_rl.utils.utils import unpack_data_airhockey
 
 
