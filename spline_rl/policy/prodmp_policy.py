@@ -30,18 +30,9 @@ class ProDMPPolicy(Policy):
             phase_generator=phase_gn,
             num_basis=11 - 1,
             dt=1./1024)
-        t = torch.linspace(0, self.dt * self.horizon, self.horizon).to(torch.float32)
+        t = torch.linspace(0., 1., 1024).to(torch.float32)
         b = basis_gn.basis(t)
         db = basis_gn.vel_basis(t)
-
-        #plt.subplot(121)
-        #for i in range(11):
-        #    plt.plot(t, b[:, i])
-        #plt.plot(t, b.sum(-1), "--")
-        #plt.subplot(122)
-        #for i in range(11):
-        #    plt.plot(t, db[:, i])
-        #plt.show()
 
         self.N = b.detach().numpy()[None].astype(np.float64)
         self.dN = db.detach().numpy()[None].astype(np.float64)
