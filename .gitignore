@@ -1,5 +1,6 @@
 *.pyc
 *.npy
 spline_rl/logs
+experiments/logs
 spline_rl.egg-info/
 __pycache__

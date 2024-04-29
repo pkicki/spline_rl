@@ -4,7 +4,6 @@ requires = ["setuptools", "wheel"]
 [project]
 name = "spline_rl"
 dependencies = [
-    "storm",
     "nlopt",
     "osqp",
     "mp-pytorch",
