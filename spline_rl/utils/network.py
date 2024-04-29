@@ -1,5 +1,6 @@
 import torch
-from utils.utils import unpack_data_airhockey
+
+from spline_rl.utils.utils import unpack_data_airhockey
 
 
 class AirHockeyNetwork(torch.nn.Module):

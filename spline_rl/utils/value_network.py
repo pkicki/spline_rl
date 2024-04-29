@@ -1,5 +1,6 @@
 import torch
-from utils.network import AirHockeyNetwork
+
+from spline_rl.utils.network import AirHockeyNetwork
 
 
 class ValueNetwork(AirHockeyNetwork):

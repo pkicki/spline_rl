@@ -1,6 +1,6 @@
 from mushroom_rl.core import Logger, MultiprocessEnvironment
 
-from envs.air_hockey_env import AirHockeyEnv
+from spline_rl.envs.air_hockey_env import AirHockeyEnv
 
 
 def env_builder(env_name, n_envs, env_params):
