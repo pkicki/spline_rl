@@ -69,8 +69,10 @@ class ProDMPPolicy(Policy):
     def compute_trajectory_from_theta(self, theta, context):
         q_0, q_d, q_dot_0, q_dot_d, q_ddot_0, q_ddot_d, puck = self.unpack_context(context)
 
-        trainable_q_cps = theta.reshape(-1, self._n_trainable_q_pts, self.n_dim)
+        trainable_q_cps = theta[..., :-1].reshape(-1, self._n_trainable_q_pts, self.n_dim)
+        trainable_t_scale = theta[..., -1:].reshape(-1)
         trainable_q_cps = trainable_q_cps / 50.
+        trainable_t_scale = torch.exp(trainable_t_scale)
         middle_trainable_q_pts = torch.tanh(trainable_q_cps[:, :-1]) * np.pi
         trainable_q_d = torch.tanh(trainable_q_cps[:, -1:]) * np.pi
 
@@ -90,7 +92,7 @@ class ProDMPPolicy(Policy):
         #    #plt.plot([150], q_d[0, :, i], 'rx')
         #plt.show()
 
-        q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_cps, differentiable=True)
+        q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_cps, trainable_t_scale, differentiable=True)
         #q_dot_scale = (torch.abs(q_dot) / torch.tensor(self.joint_vel_limit))
         #q_ddot_scale = (torch.abs(q_ddot) / torch.tensor(self.joint_acc_limit))
         #q_dot_scale_max = torch.amax(q_dot_scale, (-2, -1), keepdim=True)
@@ -148,8 +150,7 @@ class ProDMPPolicy(Policy):
             self.q = interp1d(t[0], q[0], axis=0)
             self.q_dot = interp1d(t[0], q_dot[0], axis=0)
             #self.q_ddot = interp1d(t[0], q_ddot[0], axis=0)
-            #self.duration = duration[0]
-            self.duration = duration
+            self.duration = duration[0]
             return torch.tensor([0], dtype=torch.int32)
         
 
@@ -177,15 +178,15 @@ class ProDMPPolicy(Policy):
             #q_ddot = np.zeros_like(q)
         policy_state[0] += 1
         #action = np.stack([q, q_dot, q_ddot], axis=-2) 
-        q_dot = np.clip(q_dot, -self.joint_vel_limit, self.joint_vel_limit)
+        #q_dot = np.clip(q_dot, -self.joint_vel_limit, self.joint_vel_limit)
         action = np.stack([q, q_dot], axis=-2) 
         action = torch.tensor(action, dtype=torch.float32)
-        return action, torch.tensor(policy_state)
+        return action, policy_state
 
     def set_weights(self, weights):
         self._weights = weights
 
-    def compute_trajectory(self, q_cps, differentiable=False):
+    def compute_trajectory(self, q_cps, t_scale, differentiable=False):
         N = self.N
         dN = self.dN
         if differentiable:
@@ -196,9 +197,12 @@ class ProDMPPolicy(Policy):
         q_dot = dN @ q_cps
         q_ddot = torch.zeros_like(q_dot)
 
-        duration_ = self.dt * self.horizon
-        duration = duration_ * torch.ones((q_cps.shape[0], 1))
-        t = torch.linspace(0., duration_, N.shape[1])[None].repeat((q_cps.shape[0], 1))#[..., None]
-        dt = self.dt * torch.ones_like(t)
+        q_dot /= t_scale[:, None, None]
+        q_ddot /= t_scale[:, None, None]**2
+
+        duration = t_scale
+        s = torch.linspace(0., 1., N.shape[1])[None, :]
+        t = (1 - s) * torch.zeros_like(duration[:, None]) + s * duration[:, None]
+        dt = (duration / N.shape[1])[:, None].repeat(1, N.shape[1])
 
         return q, q_dot, q_ddot, t, dt, duration
