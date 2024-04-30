@@ -122,7 +122,7 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
     n_trainable_pts = agent_params["n_dim"] * (agent_params["n_q_cps"] - 1)
     mdp_info = env_info['rl_info']
 
-    sigma = agent_params["sigma_init_q"] * torch.ones(n_trainable_pts)
+    sigma = agent_params["sigma_init_q"] * torch.ones(n_trainable_pts + 1)
 
     mu_approximator = Regressor(TorchApproximator,
                                 network=ConfigurationNetworkWrapper,
