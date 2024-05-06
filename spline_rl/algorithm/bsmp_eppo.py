@@ -42,7 +42,7 @@ class BSMPePPO(ePPO):
         self._t = None
         self._ee_pos = None
 
-        self.constraints = mdp_info.constraints
+        self.load_constraints(mdp_info)
 
         super().__init__(mdp_info, distribution, policy, optimizer, n_epochs_policy,
                          batch_size, eps_ppo, ent_coeff, context_builder)
@@ -55,11 +55,13 @@ class BSMPePPO(ePPO):
             mu_optimizer='torch',
             value_function='torch',
             value_function_optimizer='torch',
-            constraints='pickle',
             constraint_losses='pickle',
             constraint_losses_log='pickle',
             _epoch_no='primitive',
         )
+
+    def load_constraints(self, mdp_info):
+        self.constraints = mdp_info.constraints
 
     def episode_start(self, initial_state, episode_info):
         _, theta = super().episode_start(initial_state, episode_info)
