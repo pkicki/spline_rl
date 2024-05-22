@@ -1,0 +1,31 @@
+<mujoco model="AirHockeySingle">
+
+    <include file="iiwa_cup.xml"/>
+    <!-- <include file="iiwa_cup_nofd.xml"/> -->
+    <include file="boxes.xml"/>
+
+    <!-- <contact>
+        <exclude body1="box_1" body2="iiwa_cup/base"/>
+        <exclude body1="box_1" body2="iiwa_cup/link_1"/>
+        <exclude body1="box_1" body2="iiwa_cup/link_2"/>
+        <exclude body1="box_1" body2="iiwa_cup/link_3"/>
+        <exclude body1="box_1" body2="iiwa_cup/link_4"/>
+        <exclude body1="box_1" body2="iiwa_cup/link_5"/>
+        <exclude body1="box_1" body2="iiwa_cup/link_6"/>
+        <exclude body1="box_1" body2="iiwa_cup/link_7"/>
+        <exclude body1="box_1" body2="iiwa_cup/cup"/>
+
+        <exclude body1="box_2" body2="iiwa_cup/base"/>
+        <exclude body1="box_2" body2="iiwa_cup/link_1"/>
+        <exclude body1="box_2" body2="iiwa_cup/link_2"/>
+        <exclude body1="box_2" body2="iiwa_cup/link_3"/>
+        <exclude body1="box_2" body2="iiwa_cup/link_4"/>
+        <exclude body1="box_2" body2="iiwa_cup/link_5"/>
+        <exclude body1="box_2" body2="iiwa_cup/link_6"/>
+        <exclude body1="box_2" body2="iiwa_cup/link_7"/>
+        <exclude body1="box_2" body2="iiwa_cup/cup"/>
+
+        <exclude body1="world" body2="iiwa_cup/cup"/>
+    </contact> -->
+
+</mujoco>
