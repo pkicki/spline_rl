@@ -19,7 +19,7 @@ class BSMPePPO(ePPO):
 
     def __init__(self, mdp_info, distribution, policy, optimizer, value_function, value_function_optimizer,
                  constraint_lr, n_epochs_policy, batch_size, eps_ppo, ent_coeff=0., context_builder=None): 
-        self.alphas = np.array([0.] * 18)
+        self.alphas = np.array([0.] * mdp_info.constraints.constraints_num)
         self.constraint_lr = constraint_lr
         self.constraint_losses = []
         self.scaled_constraint_losses = []
@@ -86,9 +86,12 @@ class BSMPePPO(ePPO):
         alphas_update = self.constraint_lr * np.log(
             (constraint_losses + self.constraints.violation_limits * 1e-1) / self.constraints.violation_limits)
         self.alphas += alphas_update
-        self.alphas = np.clip(self.alphas, -7., None)
+        self.alphas = np.clip(self.alphas, -7., 37.)
         self.constraint_losses_log = constraint_losses
         self.constraint_losses = []
+
+    def get_alphas(self):
+        return self.alphas
 
     # All constraint losses computation organized in a single function
     def compute_constraint_losses(self, theta, context):

@@ -1,3 +1,5 @@
+from spline_rl.policy.bsmp_policy_kino import BSMPPolicyKino
+from spline_rl.utils.kino_network import KinoConfigurationTimeNetworkWrapper, KinoLogSigmaNetworkWrapper
 import torch
 
 from mushroom_rl.approximators import Regressor
@@ -36,6 +38,8 @@ def agent_builder(env_info, agent_params):
         agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
     elif alg == "bsmp_eppo_stop":
         agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
+    elif alg == "bsmp_eppo_kinodynamic":
+        agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
     elif alg.startswith("pro"):
         agent = build_agent_ProMPePPO(env_info, eppo_params, agent_params)
     else:
@@ -67,8 +71,15 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
     sigma_t = agent_params["sigma_init_t"] * torch.ones((n_trainable_t_pts))
     sigma = torch.cat([sigma_q.reshape(-1), sigma_t]).type(torch.FloatTensor)
 
+    if "kinodynamic" in agent_params["alg"]:
+        mu_network = KinoConfigurationTimeNetworkWrapper
+        logsigma_network = KinoLogSigmaNetworkWrapper
+    else:
+        mu_network = ConfigurationTimeNetworkWrapper
+        logsigma_network = LogSigmaNetworkWrapper
+
     mu_approximator = Regressor(TorchApproximator,
-                                network=ConfigurationTimeNetworkWrapper,
+                                network=mu_network,
                                 batch_size=1,
                                 params={
                                         "input_space": mdp_info.observation_space,
@@ -76,7 +87,7 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
                                 input_shape=(mdp_info.observation_space.shape[0],),
                                 output_shape=(n_dim * n_trainable_q_pts, n_trainable_t_pts))
     log_sigma_approximator = Regressor(TorchApproximator,
-                                network=LogSigmaNetworkWrapper,
+                                network=logsigma_network,
                                 batch_size=1,
                                 params={
                                         "input_space": mdp_info.observation_space,
@@ -106,6 +117,8 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
         policy = BSMPUnstructuredPolicy(**policy_args)
     elif agent_params["alg"] == "bsmp_eppo_stop":
         policy = BSMPPolicyStop(**policy_args)
+    elif agent_params["alg"] == "bsmp_eppo_kinodynamic":
+        policy = BSMPPolicyKino(**policy_args)
     else:
         policy = BSMPPolicy(**policy_args)
 

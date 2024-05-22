@@ -46,6 +46,17 @@ def unpack_data_obstacles2D(x):
     dxyk = x[..., 6:8]
     obstacles = x[..., 8:38]
     return xy0, xyk, dxy0, dxyk, obstacles
+
+def unpack_data_kinodynamic(x):
+    n = 7
+    q0 = x[..., :n]
+    qk = x[..., 2*n:3*n]
+    z = torch.zeros_like(q0) if isinstance(q0, torch.Tensor) else np.zeros_like(q0)
+    dq0 = z
+    ddq0 = z
+    dqk = z
+    ddqk = z
+    return q0, qk, dq0, dqk, ddq0, ddqk
     
 def project_entropy(chol, e_lb):
     a_dim = chol.size()[-1]
@@ -62,3 +73,11 @@ def project_entropy_independently(chol, e_lb):
     chol_diag = torch.maximum(chol.diagonal(dim1=-2, dim2=-1).log(), torch.tensor(avg_log_diag)).exp()
     chol_ = torch.diag_embed(chol_diag, dim1=-2, dim2=-1)
     return chol_
+
+def huber(x, delta=1.0):
+    abs_x = torch.abs(x)
+    return torch.where(abs_x <= delta, 0.5 * torch.square(x), delta * abs_x - 0.5 * delta**2)
+
+def np_huber(x, delta=1.0):
+    abs_x = np.abs(x)
+    return np.where(abs_x <= delta, 0.5 * np.square(x), delta * abs_x - 0.5 * delta**2)
