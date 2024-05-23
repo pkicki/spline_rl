@@ -62,7 +62,7 @@ def experiment(env: str = 'kinodynamic_cup',
                q_ddot_d_scale: float = 1.0,
 
                # env params
-               horizon: int = 150,
+               horizon: int = 100,
                gamma: float = 0.99,
 
                mode: str = "online",
