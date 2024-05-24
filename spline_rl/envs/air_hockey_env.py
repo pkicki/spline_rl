@@ -17,7 +17,7 @@ class AbsorbType(Enum):
     BOTTOM = 5
 
 class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
-    def __init__(self, gamma, horizon, moving_init, interpolation_order, reward_type="new"):
+    def __init__(self, gamma=0.99, horizon=150, moving_init=True, interpolation_order=-1, reward_type="new", return_cost=False):
         super().__init__(gamma=gamma, horizon=horizon, interpolation_order=interpolation_order)
 
         assert reward_type in ["new", "mixed", "puze"]
@@ -29,6 +29,9 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
             self.reward = self.puze_reward
         else:
             raise ValueError("Unknown reward type")
+
+        if return_cost:
+            self.step = self._step_with_cost
 
         self.ee_z_eb = self.env_info['robot']['ee_desired_height']
         self.ee_x_lb = - self.env_info['robot']['base_frame'][0][0, 3] \
@@ -45,10 +48,10 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         )
         self.env_info['rl_info'].constraints = self.constraints
 
-        self.hit_range = np.array([[-0.7, -0.2], [-0.35, 0.35]])
+        self.hit_range = np.array([[-0.7, -0.2], [-0.35, 0.35]], dtype=np.float32)
         self.moving_init = moving_init
         self.init_velocity_range = (0, 0.3)
-        self.init_state = np.array([-7.16000830e-06, 6.97494070e-01, 7.26955352e-06, -5.04898567e-01, 6.60813111e-07, 1.92857916e+00, 0.])
+        self.init_state = np.array([-7.16000830e-06, 6.97494070e-01, 7.26955352e-06, -5.04898567e-01, 6.60813111e-07, 1.92857916e+00, 0.], dtype=np.float32)
         self.ee_puck_dist = np.inf
         self.hit_time = -1
 
@@ -118,12 +121,12 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         # Update body positions, needed for _compute_universal_joint
         mujoco.mj_fwdPosition(self._model, self._data)
 
-    def _controller(self, desired_pos, desired_vel, desired_acc, current_pos, current_vel):
-        torque = super()._controller(desired_pos, desired_vel, desired_acc, current_pos, current_vel)
-        low = self.robot_model.actuator_ctrlrange[:, 0]
-        high = self.robot_model.actuator_ctrlrange[:, 1]
-        torque = np.clip(torque, low, high)
-        return torque
+    #def _controller(self, desired_pos, desired_vel, desired_acc, current_pos, current_vel):
+    #    torque = super()._controller(desired_pos, desired_vel, desired_acc, current_pos, current_vel)
+    #    low = self.robot_model.actuator_ctrlrange[:, 0]
+    #    high = self.robot_model.actuator_ctrlrange[:, 1]
+    #    torque = np.clip(torque, low, high)
+    #    return torque
 
     def mixed_reward(self, state, action, next_state, absorbing):
         r = 0
@@ -259,6 +262,13 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         task_info["puck_velocity"] = np.linalg.norm(puck_vel[:2])
 
         return task_info
+
+    def _step_with_cost(self, action):
+        obs, reward, absorbing, info = super().step(action)
+        cost = 0.
+        cost = np.max(np.stack([info['joint_pos_constraint'], info['joint_vel_constraint'], info['ee_xlb_constraint'], info['ee_ylb_constraint'],
+                                info['ee_yub_constraint'], info['ee_zlb_constraint'], info['ee_zub_constraint']]))
+        return obs, reward, cost, absorbing, info
 
 
 if __name__ == '__main__':

@@ -20,6 +20,8 @@ torch.Tensor.__repr__ = custom_repr
 
 os.environ["WANDB_START_METHOD"] = "thread"
 
+torch.set_default_dtype(torch.float32)
+
 @single_experiment
 def experiment(env: str = 'air_hockey',
                group_name: str = "dummy",
@@ -76,7 +78,7 @@ def experiment(env: str = 'air_hockey',
         n_dim=7,
         n_q_cps=n_q_cps,
         n_t_cps=n_t_cps,
-        n_pts_fixed_begin=3,
+        n_pts_fixed_begin=1 if alg.endswith("mp_eppo_unstructured") else 3,
         n_pts_fixed_end=2 if "unstructured" in alg else 0,
         sigma_init_q=sigma_init_q,
         sigma_init_t=sigma_init_t,

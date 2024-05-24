@@ -159,9 +159,9 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
 
 
     if agent_params["alg"] == "promp_eppo_unstructured":
-        policy = ProMPPolicy(env_info, agent_params["n_q_cps"], agent_params["n_dim"])
+        policy = ProMPPolicy(env_info, **agent_params)
     elif agent_params["alg"] == "prodmp_eppo_unstructured":
-        policy = ProDMPPolicy(env_info, agent_params["n_q_cps"], agent_params["n_dim"])
+         policy = ProDMPPolicy(env_info, **agent_params)
     else:
         raise ValueError(f"Unknown algorithm: {agent_params['alg']}")
 
