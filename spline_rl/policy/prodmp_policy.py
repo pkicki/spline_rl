@@ -39,7 +39,7 @@ class ProDMPPolicy(MPPolicy):
     def compute_trajectory_from_theta(self, theta, context):
         q_0, q_d, q_dot_0, q_dot_d, q_ddot_0, q_ddot_d, puck = self.unpack_context(context)
 
-        theta = torch.randn(100, 71)
+        #theta = torch.randn(100, 71)
         trainable_q_cps = theta[..., :-1].reshape(-1, self._n_trainable_q_pts, self.n_dim)
         trainable_t_scale = theta[..., -1:].reshape(-1)
         trainable_q_cps = trainable_q_cps * self.q_scale
@@ -57,11 +57,11 @@ class ProDMPPolicy(MPPolicy):
 
         q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_0, q_cps, trainable_t_scale, differentiable=True)
 
-        for i in range(self.n_dim):
-            plt.subplot(3, 3, 1 + i)
-            for k in range(t.shape[0]):
-                plt.plot(t.detach().numpy()[k], q.detach().numpy()[k, :, i])
-        plt.show()
+        #for i in range(self.n_dim):
+        #    plt.subplot(3, 3, 1 + i)
+        #    for k in range(t.shape[0]):
+        #        plt.plot(t.detach().numpy()[k], q.detach().numpy()[k, :, i])
+        #plt.show()
 
         self._traj_no += 1
         return q, q_dot, q_ddot, t, dt, duration
