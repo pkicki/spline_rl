@@ -327,18 +327,19 @@ def compute_metrics(core, eval_params):
     current_idx = 0
     scored = []
     for episode_len in eps_length:
-        success += dataset.info["success"][current_idx + episode_len - 1]
-        success_position += dataset.info["success_position"][current_idx + episode_len - 1]
-        success_orientation += dataset.info["success_orientation"][current_idx + episode_len - 1]
-        success_velocity += dataset.info["success_velocity"][current_idx + episode_len - 1]
-        scored.append(dataset.info["success"][current_idx + episode_len - 1])
+        #success += dataset.info["success"][current_idx + episode_len - 1]
+        #success_position += dataset.info["success_position"][current_idx + episode_len - 1]
+        #success_orientation += dataset.info["success_orientation"][current_idx + episode_len - 1]
+        #success_velocity += dataset.info["success_velocity"][current_idx + episode_len - 1]
+        success += np.mean(dataset.info["success"][current_idx:current_idx + episode_len])
+        success_position += np.mean(dataset.info["success_position"][current_idx:current_idx + episode_len - 1])
+        success_orientation += np.mean(dataset.info["success_orientation"][current_idx:current_idx + episode_len - 1])
+        success_velocity += np.mean(dataset.info["success_velocity"][current_idx:current_idx + episode_len - 1])
         current_idx += episode_len
     success /= len(eps_length)
     success_position /= len(eps_length)
     success_orientation /= len(eps_length)
     success_velocity /= len(eps_length)
-
-    scored = np.array(scored).astype(bool)
 
     state = dataset.state
     action = dataset.action

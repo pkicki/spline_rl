@@ -325,6 +325,8 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
         j_pos, j_vel = self.get_joints(state)
         goal_dist = np.linalg.norm(self.xyzd - xyz)
         r = np.exp(-10. * goal_dist**2)
+        if goal_dist < 1e-2:
+            r += 1e-2 / (np.linalg.norm(j_vel) + 1e-2)
 
         #self.qs.append(state[:7])
         #self.qds.append(action[0])
@@ -343,8 +345,8 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
         return r
 
     def is_absorbing(self, obs):
-        j_pos, j_vel = self.get_joints(obs)
-        xyz, R = self.cup_pose()
+        #j_pos, j_vel = self.get_joints(obs)
+        #xyz, R = self.cup_pose()
         #collision = self._check_collision("robot_body", "environment")
         #if collision and np.linalg.norm(j_vel) > 1e-1:
         #    self.absorb_type = AbsorbType.COLLISION
@@ -356,11 +358,10 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
         ##b = np.linalg.norm(R[0, 0] - 1.0) < 1e-2
         ##c = np.linalg.norm(j_vel)# < 1e-2
         ##print(a, b, c)
-        if np.linalg.norm(self.xyzd - xyz) < 1e-2 and \
-           np.linalg.norm(R[0, 0] - 1.0) < 1e-3 and \
-           np.linalg.norm(j_vel) < 1e-2:
-            self.absorb_type = AbsorbType.GOAL
-            return True
+        #if np.linalg.norm(self.xyzd - xyz) < 1e-2 and \
+        #   np.linalg.norm(j_vel) < 1e-2:
+        #    self.absorb_type = AbsorbType.GOAL
+        #    return True
         return False
 
     def _create_info_dictionary(self, state):
@@ -377,7 +378,8 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
         task_info["success_position"] = np.linalg.norm(self.xyzd - cup_pos) < 1e-2
         task_info["success_orientation"] = np.linalg.norm(cup_rot[0, 0] - 1.0) < 1e-3 
         task_info["success_velocity"] = np.linalg.norm(j_vel) < 1e-2
-        task_info["success"] = self.absorb_type == AbsorbType.GOAL
+        task_info["success"] = np.all([task_info["success_position"], task_info["success_orientation"], task_info["success_velocity"]])
+        #task_info["success"] = self.absorb_type == AbsorbType.GOAL
         #self.dists.append(np.linalg.norm(cup_pos - self.xyzd))
         return task_info
 
