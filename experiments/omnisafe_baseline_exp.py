@@ -32,6 +32,7 @@ custom_cfgs = {
     "logger_cfgs": {
         "use_wandb": True,
         "wandb_project": "omnisafe",
+        "wandb_group": "PPOLag_cl1em3",
         "use_tensorboard": False,
         "save_model_freq": 100,
     },
