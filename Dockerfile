@@ -16,7 +16,11 @@ RUN apt-get update && \
     python3-pip python-is-python3 vim git \
     ffmpeg libsm6 libxext6 vim git \
     xauth tzdata libgl1-mesa-glx libgl1-mesa-dri \
-    libeigen3-dev lsb-release curl coinor-libclp-dev cmake freeglut3-dev python3-tk
+    lsb-release curl cmake freeglut3-dev python3-tk
+     
+RUN pip install hiyapyco imageio mujoco dm_control wandb hydra urdf_parser_py mp-pytorch \
+                protobuf==4.23.0 torch opencv-python scikit-learn pygame matplotlib experiment_launcher \
+		        osqp nlopt PyYAML
 
 RUN groupadd --gid $USER_GID $USERNAME && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
 USER $USERNAME
@@ -32,12 +36,12 @@ RUN git clone https://github.com/pkicki/air_hockey_challenge.git && \
     cd air_hockey_challenge && \
     git checkout piotr_exp && \
     pip install -e .
-RUN pip install mujoco osqp nlopt PyYAML
 
-RUN git clone https://github.com/pkicki/mushroom-rl.git && \
+RUN git clone https://github.com/MushroomRL/mushroom-rl.git && \
     cd mushroom-rl && \
     git checkout ePPO && \
     pip install --no-use-pep517 -e .
-     
-RUN pip install hiyapyco imageio mujoco dm_control wandb hydra urdf_parser_py mp-pytorch \
-                protobuf==4.23.0 torch opencv-python scikit-learn pygame matplotlib experiment_launcher
+
+RUN git clone https://github.com/cube1324/omnisafe.git && \
+    cd omnisafe && \
+    pip install -e .
