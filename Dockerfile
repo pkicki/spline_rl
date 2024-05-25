@@ -42,6 +42,6 @@ RUN git clone https://github.com/MushroomRL/mushroom-rl.git && \
     git checkout ePPO && \
     pip install --no-use-pep517 -e .
 
-RUN git clone https://github.com/cube1324/omnisafe.git && \
+RUN git clone https://github.com/pkicki/omnisafe.git && \
     cd omnisafe && \
     pip install -e .
