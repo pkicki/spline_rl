@@ -321,8 +321,10 @@
   <link name="F_link_cup">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0.0"/>
-      <mass value="12.0"/>
-      <inertia ixx="0.13" ixy="0.0" ixz="0.0" iyy="0.13" iyz="0.0" izz="0.08"/>
+      <!-- <mass value="12.0"/> -->
+      <!-- <inertia ixx="0.13" ixy="0.0" ixz="0.0" iyy="0.13" iyz="0.0" izz="0.08"/> -->
+      <mass value="14.0"/>
+      <inertia ixx="0.1516" ixy="0.0" ixz="0.0" iyy="0.1516" iyz="0.0" izz="0.0933"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0.0"/>
