@@ -324,9 +324,14 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
         xyz, R = self.cup_pose()
         j_pos, j_vel = self.get_joints(state)
         goal_dist = np.linalg.norm(self.xyzd - xyz)
-        r = np.exp(-10. * goal_dist**2)
+        #r = np.exp(-10. * goal_dist**2)
+        r = 1. / (10. * goal_dist + 1.)
         if goal_dist < 1e-2:
             r += 1e-2 / (np.linalg.norm(j_vel) + 1e-2)
+
+        torque = self._controller(action[0], action[1], action[2], j_pos, j_vel)
+        torque_sq_norm = np.sum(torque**2)
+        r -= 1e-6 * torque_sq_norm
 
         #self.qs.append(state[:7])
         #self.qds.append(action[0])
