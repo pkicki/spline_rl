@@ -84,8 +84,8 @@ def experiment(env: str = 'kinodynamic_cup',
         n_dim=7,
         n_q_cps=n_q_cps,
         n_t_cps=n_t_cps,
-        n_pts_fixed_begin=3,
-        n_pts_fixed_end=3,
+        n_pts_fixed_begin=3 if "bsmp_eppo" in alg else 1,
+        n_pts_fixed_end=3 if "bsmp_eppo" in alg else 0,
         sigma_init_q=sigma_init_q,
         sigma_init_t=sigma_init_t,
         constraint_lr=constraint_lr,
@@ -131,6 +131,7 @@ def experiment(env: str = 'kinodynamic_cup',
     env_params = dict(
         horizon=horizon,
         gamma=gamma,
+        interpolation_order=3 if "prodmp" in alg else 5,
     )
 
     config = {**agent_params, **run_params, **env_params}

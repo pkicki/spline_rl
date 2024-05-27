@@ -79,12 +79,12 @@ class MPPolicy(Policy):
             q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory_from_theta(self._weights, initial_state)
             q = q.detach().numpy()
             q_dot = q_dot.detach().numpy()
-            #q_ddot = q_ddot.detach().numpy()
+            q_ddot = q_ddot.detach().numpy()
             t = t.detach().numpy()
             #duration = duration.detach().numpy()
             self.q = interp1d(t[0], q[0], axis=0)
             self.q_dot = interp1d(t[0], q_dot[0], axis=0)
-            #self.q_ddot = interp1d(t[0], q_ddot[0], axis=0)
+            self.q_ddot = interp1d(t[0], q_ddot[0], axis=0)
             self.duration = duration[0]
             return torch.tensor([0], dtype=torch.int32)
         
@@ -106,15 +106,15 @@ class MPPolicy(Policy):
         if t <= self.duration:
             q = self.q(t)
             q_dot = self.q_dot(t)
-            #q_ddot = self.q_ddot(t)
+            q_ddot = self.q_ddot(t)
         else:
             q = self.q(self.duration)
             q_dot = np.zeros_like(q)
-            #q_ddot = np.zeros_like(q)
+            q_ddot = np.zeros_like(q)
         policy_state[0] += 1
-        #action = np.stack([q, q_dot, q_ddot], axis=-2) 
-        q_dot = np.clip(q_dot, -self.joint_vel_limit, self.joint_vel_limit)
-        action = np.stack([q, q_dot], axis=-2) 
+        #q_dot = np.clip(q_dot, -self.joint_vel_limit, self.joint_vel_limit)
+        #action = np.stack([q, q_dot], axis=-2) 
+        action = np.stack([q, q_dot, q_ddot], axis=-2) 
         action = torch.tensor(action, dtype=torch.float32)
         return action, torch.tensor(policy_state)
 

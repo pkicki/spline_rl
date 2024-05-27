@@ -24,7 +24,7 @@ class AbsorbType(Enum):
     SPILL = 3
 
 class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
-    def __init__(self, gamma=0.99, horizon=150, timestep=1 / 1000., n_intermediate_steps=20, n_substeps=1,
+    def __init__(self, gamma=0.99, horizon=150, interpolation_order=5, timestep=1 / 1000., n_intermediate_steps=20, n_substeps=1,
                  viewer_params={}):
 
         self.n_agents = 1
@@ -92,11 +92,11 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
         robot_data = mujoco.MjData(robot_model)
         self.env_info["robot"]["robot_model"] = robot_model
         self.env_info["robot"]["robot_data"] = robot_data
+        self.env_info["robot"]["ee_desired_height"] = -1. # TODO: needed just for backward compatibility
 
         # Ids of the joint, which are controller by the action space
         self.actuator_joint_ids = [robot_model.joint(name).id for name in action_spec]
 
-        interpolation_order = 5
         #self.init_range = np.array([[-0.7, -0.3], [0.3, 0.5], [0.55, 0.55]])
         #self.end_range = np.array([[0.7, 0.3], [0.3, 0.5], [0.55, 0.55]])
         #self.init_range = np.array([[-0.65, -0.35], [0.35, 0.65], [0.55, 0.55]])
@@ -155,6 +155,7 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
         self.velds = []
         self.vels = []
         self.absorb_type = AbsorbType.NONE
+        self.last_torque = np.zeros(7)
 
 
     def _modify_mdp_info(self, mdp_info):
@@ -170,6 +171,10 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
     def _modify_observation(self, observation):
         observation = np.concatenate([observation, self.qd], axis=-1)
         return observation
+
+    def _controller(self, desired_pos, desired_vel, desired_acc, current_pos, current_vel):
+        self.last_torque = super()._controller(desired_pos, desired_vel, desired_acc, current_pos, current_vel)
+        return self.last_torque
     
     def get_joints(self, obs):
         """
@@ -329,7 +334,8 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
         if goal_dist < 1e-2:
             r += 1e-2 / (np.linalg.norm(j_vel) + 1e-2)
 
-        torque = self._controller(action[0], action[1], action[2], j_pos, j_vel)
+        #torque = self._controller(action[0], action[1], action[2], j_pos, j_vel)
+        torque = self.last_torque
         torque_sq_norm = np.sum(torque**2)
         r -= 1e-6 * torque_sq_norm
 

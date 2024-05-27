@@ -1,4 +1,5 @@
 from spline_rl.policy.bsmp_policy_kino import BSMPPolicyKino
+from spline_rl.policy.promp_policy_kino import ProMPPolicyKino
 from spline_rl.utils.kino_network import KinoConfigurationTimeNetworkWrapper, KinoLogSigmaNetworkWrapper
 import torch
 
@@ -160,7 +161,11 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
 
     if agent_params["alg"] == "promp_eppo_unstructured":
         policy = ProMPPolicy(env_info, **agent_params)
+    elif agent_params["alg"] == "promp_eppo_kinodynamic":
+        policy = ProMPPolicyKino(env_info, **agent_params)
     elif agent_params["alg"] == "prodmp_eppo_unstructured":
+         policy = ProDMPPolicy(env_info, **agent_params)
+    elif agent_params["alg"] == "prodmp_eppo_kinodynamic":
          policy = ProDMPPolicy(env_info, **agent_params)
     else:
         raise ValueError(f"Unknown algorithm: {agent_params['alg']}")

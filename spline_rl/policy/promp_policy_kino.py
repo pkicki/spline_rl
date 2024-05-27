@@ -1,5 +1,6 @@
 import numpy as np
 from spline_rl.policy.mp_policy import MPPolicy
+from spline_rl.policy.promp_policy import ProMPPolicy
 import torch
 from scipy.interpolate import interp1d
 
@@ -8,21 +9,17 @@ from baseline.baseline_agent.optimizer import TrajectoryOptimizer
 
 from mushroom_rl.features._implementations.basis_features import BasisFeatures
 from mushroom_rl.features.basis import GaussianRBF
-from spline_rl.utils.gaussian_derivative import dGaussianRBF, ddGaussianRBF
+from spline_rl.utils.gaussian_derivative import dGaussianRBF
 from spline_rl.utils.utils import unpack_data_airhockey
 
-import matplotlib.pyplot as plt
 
-
-class ProMPPolicy(MPPolicy):
+class ProMPPolicyKino(ProMPPolicy):
     def __init__(self, env_info, n_q_cps, n_dim, n_pts_fixed_begin=1,
                  t_scale=1., q_scale=1., q_d_scale=1., q_dot_d_scale=1., q_ddot_d_scale=1., **kwargs):
         super().__init__(env_info, n_q_cps, n_dim, n_pts_fixed_begin,
                          t_scale, q_scale, q_d_scale, q_dot_d_scale, q_ddot_d_scale)
-        q_0 = np.array([-7.1600e-06,  6.9749e-01,  7.2696e-06, -5.0490e-01,  6.6081e-07,
-           1.9286e+00,  0.0000e+00])
-        q_d = np.array([-3.72483757e-06,  1.23533666e+00,  7.29216661e-06, -1.33108648e-01,
-        7.61155450e-07,  8.73456051e-01,  7.72071616e-20])
+        q_0 = np.array([0.3141, -0.6135, -0.8648,  1.5832, -1.3138, -1.0563,  0.4567])
+        q_d = np.array([-0.1178,  0.2472, -2.1531,  2.0209, -2.6691, -0.7095,  0.9851])
         s = np.linspace(0., 1., self._n_q_pts)
         #sh = np.linspace(0., 1., self.horizon)
         sh = np.linspace(0., 1., self.N.shape[1])
@@ -50,46 +47,6 @@ class ProMPPolicy(MPPolicy):
             q_bias='pickle',
         )
 
-    def generate_basis(self):
-        phi = BasisFeatures(GaussianRBF.generate([self._n_q_pts], [0.], [1.], eta=0.95))
-        dphi = BasisFeatures(dGaussianRBF.generate([self._n_q_pts], [0.], [1.], eta=0.95))
-        ddphi = BasisFeatures(ddGaussianRBF.generate([self._n_q_pts], [0.], [1.], eta=0.95))
-        self.N = np.stack([phi(i) for i in np.linspace(0, 1, self.horizon)], axis=0)[None]
-        self.dN = np.stack([dphi(i) for i in np.linspace(0, 1, self.horizon)], axis=0)[None]
-        self.ddN = np.stack([ddphi(i) for i in np.linspace(0, 1, self.horizon)], axis=0)[None]
-
-        sum = np.sum(self.N, axis=-1, keepdims=True)
-        dN = self.dN
-        dsum = np.sum(dN, axis=-1, keepdims=True)
-        ddN = self.ddN
-        ddsum = np.sum(ddN, axis=-1, keepdims=True)
-
-        self.ddN = (2 * self.N * dsum**2 + sum**2 * ddN - sum * (2 * dN * dsum + self.N * ddsum)) / sum**3
-        self.dN = (dN * sum - self.N * dsum) / sum**2
-        self.N = self.N / sum
-        dN_ = np.diff(self.N, axis=1)
-        ddN_ = np.diff(self.dN, axis=1)
-
-
-        #plt.subplot(231)
-        #for i in range(11):
-        #    plt.plot(self.N[0, :, i])
-        #plt.subplot(232)
-        #plt.plot(np.sum(self.N[0], axis=-1))
-        #plt.subplot(233)
-        #for i in range(11):
-        #    plt.plot(self.dN[0, :, i])
-        #for i in range(11):
-        #    plt.plot(dN_[0, :, i] * self.horizon, '--')
-        #plt.subplot(234)
-        #for i in range(11):
-        #    plt.plot(self.ddN[0, :, i])
-        #for i in range(11):
-        #    plt.plot(ddN_[0, :, i] * self.horizon, '--')
-        #plt.subplot(235)
-        #plt.plot(np.sum(self.dN[0], axis=-1))
-        #plt.show()
-    
     def compute_trajectory_from_theta(self, theta, context):
         q_0, q_d, q_dot_0, q_dot_d, q_ddot_0, q_ddot_d, puck = self.unpack_context(context)
 
@@ -155,27 +112,4 @@ class ProMPPolicy(MPPolicy):
         #plt.show()
 
         self._traj_no += 1
-        return q, q_dot, q_ddot, t, dt, duration
-
-    def compute_trajectory(self, q_cps, t_scale, differentiable=False):
-        N = self.N
-        dN = self.dN
-        ddN = self.ddN
-        if differentiable:
-            N = torch.tensor(N)
-            dN = torch.tensor(dN)
-            ddN = torch.tensor(ddN)
-
-        q = N @ q_cps
-        q_dot = dN @ q_cps
-        q_ddot = ddN @ q_cps
-
-        q_dot /= t_scale[:, None, None]
-        q_ddot /= t_scale[:, None, None]**2
-
-        duration = t_scale
-        s = torch.linspace(0., 1., N.shape[1])[None, :]
-        t = (1 - s) * torch.zeros_like(duration[:, None]) + s * duration[:, None]
-        dt = (duration / N.shape[1])[:, None].repeat(1, N.shape[1])
-
         return q, q_dot, q_ddot, t, dt, duration
