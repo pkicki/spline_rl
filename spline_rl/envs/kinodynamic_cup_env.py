@@ -99,10 +99,10 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
         interpolation_order = 5
         #self.init_range = np.array([[-0.7, -0.3], [0.3, 0.5], [0.55, 0.55]])
         #self.end_range = np.array([[0.7, 0.3], [0.3, 0.5], [0.55, 0.55]])
-        self.init_range = np.array([[-0.65, -0.35], [0.35, 0.65], [0.55, 0.55]])
-        self.end_range = np.array([[0.65, 0.35], [0.35, 0.65], [0.55, 0.55]])
-        #self.init_range = np.array([[-0.5, -0.5], [0.4, 0.4], [0.55, 0.55]])
-        #self.end_range = np.array([[0.5, 0.5], [0.4, 0.4], [0.55, 0.55]])
+        #self.init_range = np.array([[-0.65, -0.35], [0.35, 0.65], [0.55, 0.55]])
+        #self.end_range = np.array([[0.65, 0.35], [0.35, 0.65], [0.55, 0.55]])
+        self.init_range = np.array([[-0.5, -0.5], [0.4, 0.4], [0.55, 0.55]])
+        self.end_range = np.array([[0.5, 0.5], [0.4, 0.4], [0.55, 0.55]])
 
         super().__init__(xml_file=scene, actuation_spec=action_spec, observation_spec=observation_spec,
                          gamma=gamma, horizon=horizon, timestep=timestep, n_substeps=n_substeps,
