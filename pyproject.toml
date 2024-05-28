@@ -10,7 +10,8 @@ dependencies = [
     "hiyapyco",
     "imageio",
     "wandb",
-    "hydra",
+    "hydra-core",
+    "dm_control",
     "urdf_parser_py",
     "protobuf==4.23.0",
     "experiment_launcher"
