@@ -1,4 +1,5 @@
 from spline_rl.policy.bsmp_policy_kino import BSMPPolicyKino
+from spline_rl.policy.bsmp_unstructured_policy_kino import BSMPPolicyUnstructuredKino
 from spline_rl.policy.prodmp_policy_kino import ProDMPPolicyKino
 from spline_rl.policy.promp_policy_kino import ProMPPolicyKino
 from spline_rl.utils.kino_network import KinoConfigurationTimeNetworkWrapper, KinoLogSigmaNetworkWrapper
@@ -34,13 +35,15 @@ def agent_builder(env_info, agent_params):
                        context_builder=IdentityContextBuilder(),
                        )
 
-    if alg == "bsmp_eppo":
-        agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
-    elif alg == "bsmp_eppo_unstructured":
-        agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
-    elif alg == "bsmp_eppo_stop":
-        agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
-    elif alg == "bsmp_eppo_kinodynamic":
+    #if alg == "bsmp_eppo":
+    #    agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
+    #elif alg == "bsmp_eppo_unstructured":
+    #    agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
+    #elif alg == "bsmp_eppo_stop":
+    #    agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
+    #elif alg == "bsmp_eppo_kinodynamic":
+    #    agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
+    if alg.startswith("bsmp"):
         agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
     elif alg.startswith("pro"):
         agent = build_agent_ProMPePPO(env_info, eppo_params, agent_params)
@@ -121,6 +124,8 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
         policy = BSMPPolicyStop(**policy_args)
     elif agent_params["alg"] == "bsmp_eppo_kinodynamic":
         policy = BSMPPolicyKino(**policy_args)
+    elif agent_params["alg"] == "bsmp_eppo_kinodynamic_unstructured":
+        policy = BSMPPolicyUnstructuredKino(**policy_args)
     else:
         policy = BSMPPolicy(**policy_args)
 

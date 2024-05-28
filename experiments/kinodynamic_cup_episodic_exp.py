@@ -70,13 +70,22 @@ def experiment(env: str = 'kinodynamic_cup',
                #mode: str = "disabled",
                seed: int = 444,
                quiet: bool = True,
-               #render: bool = False,
-               render: bool = True,
+               render: bool = False,
+               #render: bool = True,
                results_dir: str = './logs',
                **kwargs):
     np.random.seed(seed)
     torch.manual_seed(seed)
 
+    n_pts_fixed_begin = 1
+    if "bsmp_eppo" in alg:
+        n_pts_fixed_begin = 3
+    n_pts_fixed_end = 0
+    if "bsmp_eppo_kinodynamic" == alg:
+        n_pts_fixed_end = 3
+    elif "bsmp_eppo_kinodynamic_unstructured" == alg:
+        n_pts_fixed_end = 2
+    
     # TODO: add parameter regarding the constraint loss stuff
     agent_params = dict(
         alg=alg,
@@ -84,8 +93,8 @@ def experiment(env: str = 'kinodynamic_cup',
         n_dim=7,
         n_q_cps=n_q_cps,
         n_t_cps=n_t_cps,
-        n_pts_fixed_begin=3 if "bsmp_eppo" in alg else 1,
-        n_pts_fixed_end=3 if "bsmp_eppo" in alg else 0,
+        n_pts_fixed_begin=n_pts_fixed_begin,
+        n_pts_fixed_end=n_pts_fixed_end,
         sigma_init_q=sigma_init_q,
         sigma_init_t=sigma_init_t,
         constraint_lr=constraint_lr,
