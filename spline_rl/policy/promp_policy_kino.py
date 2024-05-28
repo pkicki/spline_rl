@@ -10,7 +10,9 @@ from baseline.baseline_agent.optimizer import TrajectoryOptimizer
 from mushroom_rl.features._implementations.basis_features import BasisFeatures
 from mushroom_rl.features.basis import GaussianRBF
 from spline_rl.utils.gaussian_derivative import dGaussianRBF
-from spline_rl.utils.utils import unpack_data_airhockey
+from spline_rl.utils.utils import unpack_data_airhockey, unpack_data_kinodynamic
+
+import matplotlib.pyplot as plt
 
 
 class ProMPPolicyKino(ProMPPolicy):
@@ -47,8 +49,17 @@ class ProMPPolicyKino(ProMPPolicy):
             q_bias='pickle',
         )
 
+    def unpack_context(self, context):
+        if context is None:
+            raise NotImplementedError
+        else:
+            q_0, q_d, q_dot_0, q_dot_d, q_ddot_0, q_ddot_d = unpack_data_kinodynamic(torch.tensor(context))
+        return q_0[:, None], q_d[:, None], q_dot_0[:, None], q_dot_d[:, None], q_ddot_0[:, None], q_ddot_d[:, None]
+
     def compute_trajectory_from_theta(self, theta, context):
-        q_0, q_d, q_dot_0, q_dot_d, q_ddot_0, q_ddot_d, puck = self.unpack_context(context)
+        theta = theta.to(torch.float64) if type(theta) is torch.Tensor else theta.astype(np.float64)
+        context = context.to(torch.float64) if type(context) is torch.Tensor else context.astype(np.float64)
+        q_0, q_d, q_dot_0, q_dot_d, q_ddot_0, q_ddot_d = self.unpack_context(context)
 
         trainable_q_cps = theta[..., :-1].reshape(-1, self._n_trainable_q_pts, self.n_dim)
         trainable_t_scale = theta[..., -1:].reshape(-1)
@@ -59,6 +70,7 @@ class ProMPPolicyKino(ProMPPolicy):
 
         N0 = torch.tensor(self.N[:, 0])
         q_cps_n0 = trainable_q + self.q_bias[None, 1:]
+        #q_cps_n0 = trainable_q + q_0
         #q_cps_n0 = self.q_bias[None, 1:]
 
         q_cps_0 = (q_0 - N0[:, 1:] @ q_cps_n0) / N0[:, 0]
@@ -69,7 +81,7 @@ class ProMPPolicyKino(ProMPPolicy):
         #    plt.subplot(231+i)
         #    plt.plot(q[0, :, i])
         #    plt.plot([0], q_0[0, :, i], 'gx')
-        #    #plt.plot([150], q_d[0, :, i], 'rx')
+        #    plt.plot([100], q_d[0, :, i], 'rx')
         #plt.show()
 
         q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_cps, trainable_t_scale, differentiable=True)
