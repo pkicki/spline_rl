@@ -140,13 +140,22 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
         self.env_info['rl_info'].interpolation_order = interpolation_order
 
         
-        low = np.stack([self.env_info['robot']['joint_pos_limit'][0],
-                        self.env_info['robot']['joint_vel_limit'][0],
-                        self.env_info['robot']['joint_acc_limit'][0]])
-        high = np.stack([self.env_info['robot']['joint_pos_limit'][1],
-                         self.env_info['robot']['joint_vel_limit'][1],
-                         self.env_info['robot']['joint_acc_limit'][1]])
-        self.env_info['rl_info'].action_space = Box(low, high)
+        if interpolation_order == 5:
+            low = np.stack([self.env_info['robot']['joint_pos_limit'][0],
+                            self.env_info['robot']['joint_vel_limit'][0],
+                            self.env_info['robot']['joint_acc_limit'][0]])
+            high = np.stack([self.env_info['robot']['joint_pos_limit'][1],
+                            self.env_info['robot']['joint_vel_limit'][1],
+                            self.env_info['robot']['joint_acc_limit'][1]])
+            self.env_info['rl_info'].action_space = Box(low, high)
+        else:
+            low = np.stack([self.env_info['robot']['joint_pos_limit'][0],
+                            self.env_info['robot']['joint_vel_limit'][0],
+                           ])
+            high = np.stack([self.env_info['robot']['joint_pos_limit'][1],
+                            self.env_info['robot']['joint_vel_limit'][1],
+                            ])
+            self.env_info['rl_info'].action_space = Box(low, high)
         self.dists = []
         self.qs = []
         self.qds = []
