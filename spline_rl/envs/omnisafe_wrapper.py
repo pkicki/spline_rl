@@ -7,6 +7,7 @@ from typing import Any, ClassVar
 from spline_rl.envs.air_hockey_env import AirHockeyEnv
 from spline_rl.envs.air_hockey_env_acc import AirHockeyAccEnv
 from spline_rl.envs.kinodynamic_cup_env import KinodynamicCupEnv
+from spline_rl.envs.kinodynamic_cup_env_acc import KinodynamicCupAccEnv
 import torch
 import numpy as np
 
@@ -27,7 +28,7 @@ class OmnisafeWrapper(CMDP):
     # set `truncated=True` when the total steps exceed the time limit.
     need_time_limit_wrapper = False
 
-    env_id_dict = {"air_hockey": AirHockeyAccEnv, "kinodynamic": KinodynamicCupEnv}
+    env_id_dict = {"air_hockey": AirHockeyAccEnv, "kinodynamic": KinodynamicCupAccEnv}
 
     def __init__(self, env_id: str, **kwargs: dict[str, Any]) -> None:
         self._count = 0
