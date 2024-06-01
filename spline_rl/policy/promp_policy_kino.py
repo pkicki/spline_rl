@@ -57,24 +57,44 @@ class ProMPPolicyKino(ProMPPolicy):
         return q_0[:, None], q_d[:, None], q_dot_0[:, None], q_dot_d[:, None], q_ddot_0[:, None], q_ddot_d[:, None]
 
     def compute_trajectory_from_theta(self, theta, context):
-        theta = theta.to(torch.float64) if type(theta) is torch.Tensor else theta.astype(np.float64)
-        context = context.to(torch.float64) if type(context) is torch.Tensor else context.astype(np.float64)
+        #theta = theta.to(torch.float64) if type(theta) is torch.Tensor else theta.astype(np.float64)
+        #context = context.to(torch.float64) if type(context) is torch.Tensor else context.astype(np.float64)
         q_0, q_d, q_dot_0, q_dot_d, q_ddot_0, q_ddot_d = self.unpack_context(context)
 
         trainable_q_cps = theta[..., :-1].reshape(-1, self._n_trainable_q_pts, self.n_dim)
         trainable_t_scale = theta[..., -1:].reshape(-1)
-        trainable_q_cps = trainable_q_cps * self.q_scale
+        #trainable_q_cps = trainable_q_cps * self.q_scale
+        #trainable_t_scale = trainable_t_scale * self.t_scale
+        #trainable_t_scale = torch.exp(trainable_t_scale)
+        #trainable_q = torch.tanh(trainable_q_cps) * np.pi
+        trainable_q_middle_cps = trainable_q_cps[:, :-1] * self.q_scale
+        trainable_q_d = trainable_q_cps[:, -1:] * self.q_d_scale
         trainable_t_scale = trainable_t_scale * self.t_scale
         trainable_t_scale = torch.exp(trainable_t_scale)
-        trainable_q = torch.tanh(trainable_q_cps) * np.pi
+        trainable_q_middle = torch.tanh(trainable_q_middle_cps) * np.pi
+        trainable_q_d = torch.tanh(trainable_q_d) * 2 * np.pi
+
+
+        # unstructured
+        #N0 = torch.tensor(self.N[:, 0])
+        ##q_cps_n0 = trainable_q + self.q_bias[None, 1:]
+        #q_cps_n0 = trainable_q + q_0
+        ##q_cps_n0 = self.q_bias[None, 1:]
+
+        #q_cps_0 = (q_0 - N0[:, 1:] @ q_cps_n0) / N0[:, 0]
+        #q_cps = torch.cat([q_cps_0, q_cps_n0], axis=-2)
+
+        # structured
+        s = torch.linspace(0., 1., trainable_q_middle_cps.shape[1]+2)[None, 1:-1, None]
+        q_b = q_0 * (1 - s) + q_d * s
+        q_cps_middle = q_b + trainable_q_middle
 
         N0 = torch.tensor(self.N[:, 0])
-        q_cps_n0 = trainable_q + self.q_bias[None, 1:]
-        #q_cps_n0 = trainable_q + q_0
-        #q_cps_n0 = self.q_bias[None, 1:]
-
-        q_cps_0 = (q_0 - N0[:, 1:] @ q_cps_n0) / N0[:, 0]
-        q_cps = torch.cat([q_cps_0, q_cps_n0], axis=-2)
+        q_cps_0 = (q_0 - N0[:, 1:-1] @ q_cps_middle) / N0[:, 0]
+        Nm1 = torch.tensor(self.N[:, -1])
+        q_cps_d = (q_d - Nm1[:, 1:-1] @ q_cps_middle) / Nm1[:, -1]
+        q_cps_d = q_cps_d + trainable_q_d
+        q_cps = torch.cat([q_cps_0, q_cps_middle, q_cps_d], axis=-2)
 
         #q = self.N @ q_cps.detach().numpy()
         #for i in range(6):
