@@ -57,8 +57,8 @@ class ProMPPolicyKino(ProMPPolicy):
         return q_0[:, None], q_d[:, None], q_dot_0[:, None], q_dot_d[:, None], q_ddot_0[:, None], q_ddot_d[:, None]
 
     def compute_trajectory_from_theta(self, theta, context):
-        #theta = theta.to(torch.float64) if type(theta) is torch.Tensor else theta.astype(np.float64)
-        #context = context.to(torch.float64) if type(context) is torch.Tensor else context.astype(np.float64)
+        theta = theta.to(torch.float64) if type(theta) is torch.Tensor else theta.astype(np.float64)
+        context = context.to(torch.float64) if type(context) is torch.Tensor else context.astype(np.float64)
         q_0, q_d, q_dot_0, q_dot_d, q_ddot_0, q_ddot_d = self.unpack_context(context)
 
         trainable_q_cps = theta[..., :-1].reshape(-1, self._n_trainable_q_pts, self.n_dim)
