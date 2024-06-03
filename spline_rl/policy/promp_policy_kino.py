@@ -71,7 +71,7 @@ class ProMPPolicyKino(ProMPPolicy):
         trainable_q_d = trainable_q_cps[:, -1:] * self.q_d_scale
         trainable_t_scale = trainable_t_scale * self.t_scale
         trainable_t_scale = torch.exp(trainable_t_scale)
-        trainable_q_middle = torch.tanh(trainable_q_middle_cps) * np.pi
+        trainable_q_middle = torch.tanh(trainable_q_middle_cps) * 2. * np.pi
         trainable_q_d = torch.tanh(trainable_q_d) * 2 * np.pi
 
 

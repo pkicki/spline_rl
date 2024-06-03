@@ -25,10 +25,11 @@ class ProDMPPolicyKino(ProDMPPolicy):
         trainable_t_scale = trainable_t_scale * self.t_scale
         trainable_t_scale = torch.exp(trainable_t_scale)
         #middle_trainable_q_pts = torch.tanh(1000. * trainable_q_cps[:, :-1]) * np.pi
-        middle_trainable_q_pts = 1000. * trainable_q_cps[:, :-1]
-        trainable_q_d = torch.tanh(trainable_q_cps[:, -1:]) * np.pi
+        middle_trainable_q_pts = 1000. * torch.tanh(trainable_q_cps[:, :-1]) * 2 * np.pi
+        trainable_q_d = torch.tanh(trainable_q_cps[:, -1:]) * 2 * np.pi
 
-        q_d = trainable_q_d + q_d - q_0
+        #q_d = trainable_q_d + q_d - q_0
+        q_d = trainable_q_d
 
         q_cps = torch.cat([middle_trainable_q_pts, q_d], axis=-2)
 

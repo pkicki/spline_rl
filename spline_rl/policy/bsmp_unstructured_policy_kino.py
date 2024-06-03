@@ -19,10 +19,10 @@ class BSMPPolicyUnstructuredKino(BSMPPolicyKino):
         trainable_t_cps = trainable_t_cps * self.t_scale
         trainable_q_middle = trainable_q_cps[:, :-1] * self.q_scale
         trainable_q_d_ = trainable_q_cps[:, -1:] * self.q_d_scale
-        trainable_q_pts = torch.tanh(trainable_q_middle) * np.pi
-        trainable_q_d = torch.tanh(trainable_q_d_) * np.pi
+        trainable_q_pts = torch.tanh(trainable_q_middle) * 2. * np.pi
+        trainable_q_d = torch.tanh(trainable_q_d_) * 2. * np.pi
 
-        q_d_bias = torch.tensor([-0.1178,  0.2472, -2.1531,  2.0209, -2.6691, -0.7095,  0.9851])[None, None]
+        #q_d_bias = torch.tensor([-0.1178,  0.2472, -2.1531,  2.0209, -2.6691, -0.7095,  0.9851])[None, None]
         q_d = trainable_q_d + q_0#q_d_bias
 
         q1, q2, qm2, qm1 = self.compute_boundary_control_points_exp(trainable_t_cps, q_0, q_dot_0, q_ddot_0,

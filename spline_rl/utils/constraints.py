@@ -81,7 +81,7 @@ class KinodynamicCupConstraints(Constraint):
         self.box2_yl = box2_yl
         self.box2_yh = box2_yh
         self.box2_height = box2_height
-        self.violation_limits = np.array([1e-4] * 7 + [1e-4] * 7 + [1e-5] * 7 + [1e-5] * 7 + [1e-8] + [1e-8] * 4)
+        self.violation_limits = np.array([1e-4] * 7 + [1e-4] * 7 + [1e-5] * 7 + [1e-5] * 7 + [1e-7] + [1e-7] * 4)
         self.constraints_num = len(self.violation_limits)
         self.urdf_path = os.path.join(os.path.dirname(__file__), "../urdf/iiwa_cup.urdf")
         self.robot = DifferentiableRobotModel(urdf_path=self.urdf_path, name="iiwa_cup")
