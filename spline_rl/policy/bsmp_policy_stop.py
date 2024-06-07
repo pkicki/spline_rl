@@ -58,7 +58,7 @@ class BSMPPolicyStop(BSMPPolicy):
 
         x_des = puck_pos# - (self.env_info['mallet']['radius'] + self.env_info['puck']['radius'] - 0.01) * v_des
         x_des = np.concatenate([x_des, np.ones_like(x_des)[..., -1:] * self.desired_ee_z], axis=-1)
-        x_des = x_des.astype(np.float64)
+        #x_des = x_des.astype(np.float64)
 
         q_d_s = []
         for k in range(q_0.shape[0]):
@@ -85,7 +85,8 @@ class BSMPPolicyStop(BSMPPolicy):
         q_b = q_0 * (1 - s) + q_d * s
         q_cps = torch.cat(q_begin[:self._n_pts_fixed_begin] + [q_b + middle_trainable_q_pts] + q_end[::-1], axis=-2)
 
-        q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_cps.to(torch.float32), trainable_t_cps.to(torch.float32), differentiable=True)
+        q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_cps, trainable_t_cps, differentiable=True)
+        #q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_cps.to(torch.float32), trainable_t_cps.to(torch.float32), differentiable=True)
 
         # stopping trajectory
         q1, q2, qm2, qm1 = self.compute_boundary_control_points_exp(trainable_t_stop_cps, q_d, q_dot_d, q_ddot_d,
@@ -95,8 +96,11 @@ class BSMPPolicyStop(BSMPPolicy):
         q_stop_b = q_d * (1 - s) + q_stop_d * s
         q_stop_cps = torch.cat(q_begin + [q_stop_b + middle_trainable_q_stop_pts] + q_end[::-1], axis=-2)
 
-        q_stop, q_stop_dot, q_stop_ddot, t_stop, dt_stop, duration_stop = self.compute_trajectory(q_stop_cps.to(torch.float32),
-                                                                                                  trainable_t_stop_cps.to(torch.float32),
+        #q_stop, q_stop_dot, q_stop_ddot, t_stop, dt_stop, duration_stop = self.compute_trajectory(q_stop_cps.to(torch.float32),
+        #                                                                                          trainable_t_stop_cps.to(torch.float32),
+        #                                                                                          differentiable=True)
+        q_stop, q_stop_dot, q_stop_ddot, t_stop, dt_stop, duration_stop = self.compute_trajectory(q_stop_cps,
+                                                                                                  trainable_t_stop_cps,
                                                                                                   differentiable=True)
         q = torch.cat([q, q_stop[:, 1:]], axis=-2)
         q_dot = torch.cat([q_dot, q_stop_dot[:, 1:]], axis=-2)

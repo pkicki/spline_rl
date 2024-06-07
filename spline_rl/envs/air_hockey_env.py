@@ -33,7 +33,7 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         if return_cost:
             self.step = self._step_with_cost
 
-        self.ee_z_eb = self.env_info['robot']['ee_desired_height']
+        self.ee_z_eb = 0.16#self.env_info['robot']['ee_desired_height']
         self.ee_x_lb = - self.env_info['robot']['base_frame'][0][0, 3] \
                        - self.env_info['table']['length'] / 2 + self.env_info['mallet']['radius']
         self.ee_y_lb = - self.env_info['table']['width'] / 2 + self.env_info['mallet']['radius']
@@ -248,9 +248,10 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
         task_info['ee_xlb_constraint'] = np.maximum(-self.env_info['table']['length'] / 2 + self.env_info['mallet']['radius'] - ee_pos[0], 0)
         task_info['ee_ylb_constraint'] = np.maximum(-self.env_info['table']['width'] / 2 + self.env_info['mallet']['radius'] - ee_pos[1], 0)
         task_info['ee_yub_constraint'] = np.maximum(ee_pos[1] - self.env_info['table']['width'] / 2 + self.env_info['mallet']['radius'], 0)
-        task_info['ee_zeb_constraint'] = np.abs(ee_pos[2] - self.env_info['robot']['universal_height'])
-        task_info['ee_zlb_constraint'] = np.maximum(self.env_info['robot']['universal_height'] - 0.02 - ee_pos[2], 0)
-        task_info['ee_zub_constraint'] = np.maximum(ee_pos[2] - 0.02 - self.env_info['robot']['universal_height'], 0)
+        desired_z = 0.06
+        task_info['ee_zeb_constraint'] = np.abs(ee_pos[2] - desired_z)
+        task_info['ee_zlb_constraint'] = np.maximum(desired_z - 0.02 - ee_pos[2], 0)
+        task_info['ee_zub_constraint'] = np.maximum(ee_pos[2] - 0.02 - desired_z, 0)
 
         task_info["success"] = puck_pos[0] - (self.env_info['table']['length'] / 2 - self.env_info['puck']['radius']) > 0 and \
                                np.abs(puck_pos[1]) - self.env_info['table']['goal_width'] / 2 < 0

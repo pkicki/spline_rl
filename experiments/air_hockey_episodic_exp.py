@@ -132,7 +132,7 @@ def experiment(env: str = 'air_hockey',
 
     config = {**agent_params, **run_params, **env_params}
 
-    wandb_run = wandb.init(project="corl24_experiments", config=config, dir=results_dir, name=name, entity="kicai",
+    wandb_run = wandb.init(project="corl24_experiments_fixed", config=config, dir=results_dir, name=name, entity="kicai",
               group=f'{group_name}', mode=mode)
 
     eval_params = dict(

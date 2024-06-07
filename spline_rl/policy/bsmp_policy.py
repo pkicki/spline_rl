@@ -147,7 +147,8 @@ class BSMPPolicy(Policy):
         q_b = q_0 * (1 - s) + q_d * s
         q_cps = torch.cat(q_begin[:self._n_pts_fixed_begin] + [q_b + middle_trainable_q_pts] + q_end[::-1], axis=-2)
 
-        q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_cps.to(torch.float32), trainable_t_cps.to(torch.float32), differentiable=True)
+        q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_cps, trainable_t_cps, differentiable=True)
+        #q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_cps.to(torch.float32), trainable_t_cps.to(torch.float32), differentiable=True)
 
         self._traj_no += 1
         return q, q_dot, q_ddot, t, dt, duration
@@ -196,7 +197,8 @@ class BSMPPolicy(Policy):
             q_ddot = np.zeros_like(q)
         policy_state[0] += 1
         action = np.stack([q, q_dot, q_ddot], axis=-2) 
-        action = torch.tensor(action, dtype=torch.float32)
+        #action = torch.tensor(action, dtype=torch.float32)
+        action = torch.tensor(action)
         return action, policy_state
 
     def extract_qt(self, x):

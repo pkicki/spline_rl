@@ -131,6 +131,7 @@ class BSMPePPO(ePPO):
                 value_i = self.value_function(context_i)[:, 0]
                 A = Jep_i - value_i
                 A_unbiased = A - mean_advantage
+                A_unbiased = A_unbiased.detach()
                 task_loss = -torch.min(prob_ratio * A_unbiased, clipped_ratio * A_unbiased)
 
                 # constraint loss
@@ -142,7 +143,7 @@ class BSMPePPO(ePPO):
                 loss = torch.mean(task_loss) + torch.mean(constraint_loss)
 
                 value_loss = torch.mean(A**2)
-                loss.backward(retain_graph=True)
+                loss.backward()
                 self._optimizer.step()
                 self.value_function_optimizer.zero_grad()
                 value_loss.backward()
