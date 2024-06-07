@@ -58,10 +58,10 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
 
         low = np.stack([self.env_info['robot']['joint_pos_limit'][0],
                         self.env_info['robot']['joint_vel_limit'][0],
-                        self.env_info['robot']['joint_acc_limit'][0]])
+                        self.env_info['robot']['joint_acc_limit'][0]], dtype=np.float32)
         high = np.stack([self.env_info['robot']['joint_pos_limit'][1],
                          self.env_info['robot']['joint_vel_limit'][1],
-                         self.env_info['robot']['joint_acc_limit'][1]])
+                         self.env_info['robot']['joint_acc_limit'][1]], dtype=np.float32)
         if interpolation_order in [1, 2]:
             low = low[:1]
             high = high[:1]
