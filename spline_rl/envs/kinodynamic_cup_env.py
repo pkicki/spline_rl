@@ -393,7 +393,7 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
         task_info['joint_pos_constraint'] = np.sum(np.maximum(np.abs(j_pos) - self.env_info['robot']['joint_pos_limit'][-1], 0))
         task_info['joint_vel_constraint'] = np.sum(np.maximum(np.abs(j_vel) - self.env_info['robot']['joint_vel_limit'][-1], 0))
         task_info['orientation_constraint'] = 1.0 - cup_rot[0, 0]
-        task_info['collision_constriant'] = np.sum(self.collision())
+        task_info['collision_constraint'] = np.sum(self.collision())
 
         task_info["success_position"] = np.linalg.norm(self.xyzd - cup_pos) < 1e-2
         task_info["success_orientation"] = np.linalg.norm(cup_rot[0, 0] - 1.0) < 1e-3 

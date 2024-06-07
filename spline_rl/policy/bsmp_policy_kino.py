@@ -85,7 +85,7 @@ class BSMPPolicyKino(Policy):
         q_0, q_d, q_dot_0, q_dot_d, q_ddot_0, q_ddot_d = self.unpack_context(context)
         trainable_q_cps, trainable_t_cps = self.extract_qt(theta)
         trainable_t_cps = trainable_t_cps * self.t_scale
-        trainable_q_pts = torch.tanh(trainable_q_cps * self.q_scale) * np.pi
+        trainable_q_pts = torch.tanh(trainable_q_cps * self.q_scale) * 2. * np.pi
 
         #q_d = q_0
 
@@ -98,7 +98,7 @@ class BSMPPolicyKino(Policy):
         q_b = q_0 * (1 - s) + q_d * s
         q_cps = torch.cat(q_begin[:self._n_pts_fixed_begin] + [q_b + trainable_q_pts] + q_end[::-1], axis=-2)
 
-        q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_cps.to(torch.float32), trainable_t_cps.to(torch.float32), differentiable=True)
+        q, q_dot, q_ddot, t, dt, duration = self.compute_trajectory(q_cps, trainable_t_cps, differentiable=True)
 
         self._traj_no += 1
         return q, q_dot, q_ddot, t, dt, duration
@@ -147,7 +147,7 @@ class BSMPPolicyKino(Policy):
             q_ddot = np.zeros_like(q)
         policy_state[0] += 1
         action = np.stack([q, q_dot, q_ddot], axis=-2) 
-        action = torch.tensor(action, dtype=torch.float32)
+        action = torch.tensor(action)
         return action, policy_state
 
     def extract_qt(self, x):
