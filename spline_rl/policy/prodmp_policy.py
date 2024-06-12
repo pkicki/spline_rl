@@ -24,8 +24,8 @@ class ProDMPPolicy(MPPolicy):
         b = basis_gn.basis(t)
         db = basis_gn.vel_basis(t)
 
-        self.N = b.detach().numpy()[None].astype(np.float32)
-        self.dN = db.detach().numpy()[None].astype(np.float32)
+        self.N = b.detach().numpy()[None].astype(np.float64)
+        self.dN = db.detach().numpy()[None].astype(np.float64)
 
         #for i in range(self.N.shape[-1] - 1):
         #    plt.plot(self.N[0, :, i], label=f'{i}')

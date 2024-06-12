@@ -17,6 +17,7 @@ class ProDMPPolicyKino(ProDMPPolicy):
         return q_0[:, None], q_d[:, None], q_dot_0[:, None], q_dot_d[:, None], q_ddot_0[:, None], q_ddot_d[:, None]
 
     def compute_trajectory_from_theta(self, theta, context):
+        theta = theta.to(torch.float64) if type(theta) is torch.Tensor else theta.astype(np.float64)
         q_0, q_d, q_dot_0, q_dot_d, q_ddot_0, q_ddot_d = self.unpack_context(context)
 
         trainable_q_cps = theta[..., :-1].reshape(-1, self._n_trainable_q_pts, self.n_dim)
@@ -28,8 +29,10 @@ class ProDMPPolicyKino(ProDMPPolicy):
         middle_trainable_q_pts = 1000. * torch.tanh(trainable_q_cps[:, :-1]) * 2 * np.pi
         trainable_q_d = torch.tanh(trainable_q_cps[:, -1:]) * 2 * np.pi
 
-        #q_d = trainable_q_d + q_d - q_0
-        q_d = trainable_q_d
+        # w/ prior knowledge
+        q_d = trainable_q_d + q_d - q_0
+        # w/o prior knowledge
+        #q_d = trainable_q_d
 
         q_cps = torch.cat([middle_trainable_q_pts, q_d], axis=-2)
 
