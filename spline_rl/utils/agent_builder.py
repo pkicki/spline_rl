@@ -1,8 +1,10 @@
+from spline_rl.algorithm.bsmp_eppo_lcs import BSMPePPOLCS
 from spline_rl.policy.bsmp_policy_kino import BSMPPolicyKino
 from spline_rl.policy.bsmp_unstructured_policy_kino import BSMPPolicyUnstructuredKino
 from spline_rl.policy.prodmp_policy_kino import ProDMPPolicyKino
 from spline_rl.policy.promp_policy_kino import ProMPPolicyKino
 from spline_rl.utils.kino_network import KinoConfigurationTimeNetworkWrapper, KinoLogSigmaNetworkWrapper
+from spline_rl.utils.lcs_network import ConstraintsScaleNetwork
 import torch
 
 from mushroom_rl.approximators import Regressor
@@ -133,8 +135,14 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
 
     value_function_optimizer = torch.optim.Adam(value_function_approximator.parameters(), lr=agent_params["value_lr"])
 
-    agent = BSMPePPO(mdp_info, dist, policy, agent_params["optimizer"], value_function_approximator, value_function_optimizer,
-                     agent_params["constraint_lr"], **eppo_params)
+    if agent_params["lcs_lr"] > 0:
+        constraints_scale_approximator = ConstraintsScaleNetwork(mdp_info.observation_space, mdp_info.constraints.constraints_num)
+        constraints_scale_optimizer = torch.optim.Adam(constraints_scale_approximator.parameters(), lr=agent_params["lcs_lr"])
+        agent = BSMPePPOLCS(mdp_info, dist, policy, agent_params["optimizer"], value_function_approximator, value_function_optimizer,
+                        agent_params["constraint_lr"], constraints_scale_approximator, constraints_scale_optimizer, **eppo_params)
+    else:
+        agent = BSMPePPO(mdp_info, dist, policy, agent_params["optimizer"], value_function_approximator, value_function_optimizer,
+                        agent_params["constraint_lr"], **eppo_params)
     return agent
 
 

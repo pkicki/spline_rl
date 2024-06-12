@@ -39,6 +39,7 @@ def experiment(env: str = 'air_hockey',
                sigma_init_q: float = 1.0,
                sigma_init_t: float = 1.0,
                constraint_lr: float = 1e-2,
+               lcs_lr: float = 1e-3,
                mu_lr: float = 5e-5,
                value_lr: float = 5e-4,
                n_epochs_policy: int = 32,
@@ -82,6 +83,7 @@ def experiment(env: str = 'air_hockey',
         sigma_init_q=sigma_init_q,
         sigma_init_t=sigma_init_t,
         constraint_lr=constraint_lr,
+        lcs_lr=lcs_lr,
         mu_lr=mu_lr,
         value_lr=value_lr,
         n_epochs_policy=n_epochs_policy,
@@ -100,9 +102,11 @@ def experiment(env: str = 'air_hockey',
     name = (f"ePPO_gamma2_tdiv1qdiv50_150_10qdotscaled_50_"
             f"gamma099_hor150_"
             f"lr{agent_params['mu_lr']}_valuelr{agent_params['value_lr']}_bs{batch_size}_"
-            f"constrlr{agent_params['constraint_lr']}_nep{n_episodes}_neppf{n_episodes_per_fit}_"
+            #f"constrlr{agent_params['constraint_lr']}_nep{n_episodes}_neppf{n_episodes_per_fit}_"
+            f"constrlr{agent_params['constraint_lr']}_lcslr{lcs_lr}_nep{n_episodes}_neppf{n_episodes_per_fit}_"
             f"neppol{agent_params['n_epochs_policy']}_epsppo{agent_params['eps_ppo']}_"
-            f"sigmainit{agent_params['sigma_init_q']}q_{agent_params['sigma_init_t']}t_entlb{agent_params['entropy_lb']}_"
+            f"entlb{agent_params['entropy_lb']}_"
+            #f"sigmainit{agent_params['sigma_init_q']}q_{agent_params['sigma_init_t']}t_entlb{agent_params['entropy_lb']}_"
             f"entlbinit{agent_params['initial_entropy_lb']}_entlbep{agent_params['entropy_lb_ep']}_"
             f"nqcps{agent_params['n_q_cps']}_ntcps{agent_params['n_t_cps']}_seed{seed}")
 
@@ -201,6 +205,7 @@ def experiment(env: str = 'air_hockey',
             J_sto = np.mean(dataset_callback.get().discounted_return)
             init_states = dataset_callback.get().get_init_states()
             context = core.agent._context_builder(init_states)
+            alphas = core.agent.get_alphas(context).detach().numpy()
             V_sto = np.mean(core.agent.value_function(context).detach().numpy())
             E = np.mean(core.agent.distribution.entropy(context).detach().numpy())
             VJ_bias = V_sto - J_sto
@@ -269,10 +274,10 @@ def experiment(env: str = 'air_hockey',
         }, step=epoch)
         logger.info(f"BEST J_det: {best_J_det}")
         logger.info(f"BEST J_sto: {best_J_sto}")
-        if hasattr(agent, "get_alphas"):
-            wandb.log({
-            "alphas/": {str(i): a for i, a in enumerate(agent.get_alphas())}
-            }, step=epoch)
+        #if hasattr(agent, "get_alphas"):
+        wandb.log({
+        "alphas/": {str(i): a for i, a in enumerate(alphas)}
+        }, step=epoch)
 
         if best_J_det <= J_det:
             best_J_det = J_det
