@@ -6,12 +6,12 @@ from spline_rl.utils.env_builder import env_builder
 
 torch.set_default_dtype(torch.float32)
 
-def load_env_agent(agent_path):
+def load_env_agent(agent_path, interpolation_order=-1):
     env_params = dict(
         moving_init=True,
         horizon=150,
         gamma=0.99,
-        interpolation_order=-1,
+        interpolation_order=interpolation_order,
         reward_type="puze",
     )
 
