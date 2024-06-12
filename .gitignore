@@ -1,6 +1,10 @@
+*.pdf
+*.png
 *.pyc
 *.npy
 spline_rl/logs
 experiments/logs
+experiments/trained_models
 spline_rl.egg-info/
+paper/results
 __pycache__
