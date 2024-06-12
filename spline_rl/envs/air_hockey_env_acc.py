@@ -284,13 +284,3 @@ class AirHockeyAccEnv(AccelerationControl, AirHockeySingle):
 
     def _preprocess_action(self, action):
         return action * self.env_info['robot']['joint_acc_limit'][1]
-
-
-if __name__ == '__main__':
-    env = AirHockeyEnv()
-    env.reset()
-    env.render()
-    while True:
-        action = np.array([0, -3, 0, 5, 0, -3, 0])
-        s, r, c, done, info = env.step(action)
-        env.render()
