@@ -19,7 +19,7 @@ from spline_rl.algorithm.bsmp_eppo import BSMPePPO
 from spline_rl.policy.bsmp_policy_stop import BSMPPolicyStop
 from spline_rl.utils.context_builder import IdentityContextBuilder
 from spline_rl.utils.network import ConfigurationNetworkWrapper, ConfigurationTimeNetworkWrapper, LogSigmaNetworkWrapper
-from spline_rl.utils.value_network import ValueNetwork
+from spline_rl.utils.value_network import KinoValueNetwork, ValueNetwork
 
 
 
@@ -81,9 +81,11 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
     if "kinodynamic" in agent_params["alg"]:
         mu_network = KinoConfigurationTimeNetworkWrapper
         logsigma_network = KinoLogSigmaNetworkWrapper
+        value_network = KinoValueNetwork
     else:
         mu_network = ConfigurationTimeNetworkWrapper
         logsigma_network = LogSigmaNetworkWrapper
+        value_network = ValueNetwork
 
     mu_approximator = Regressor(TorchApproximator,
                                 network=mu_network,
@@ -103,7 +105,7 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
                                 input_shape=(mdp_info.observation_space.shape[0],),
                                 output_shape=(n_dim * n_trainable_q_pts + n_trainable_t_pts,))
 
-    value_function_approximator = ValueNetwork(mdp_info.observation_space)
+    value_function_approximator = value_network(mdp_info.observation_space)
 
     policy_args = dict(
         env_info=env_info,

@@ -90,7 +90,7 @@ class BSMPePPO(ePPO):
         self.constraint_losses_log = constraint_losses
         self.constraint_losses = []
 
-    def get_alphas(self):
+    def get_alphas(self, context):
         return self.alphas
 
     # All constraint losses computation organized in a single function
