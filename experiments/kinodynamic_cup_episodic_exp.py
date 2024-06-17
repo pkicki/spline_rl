@@ -22,7 +22,7 @@ torch.Tensor.__repr__ = custom_repr
 os.environ["WANDB_START_METHOD"] = "thread"
 
 #torch.autograd.set_detect_anomaly(True)
-torch.set_default_dtype(torch.float32)
+#torch.set_default_dtype(torch.float32)
 
 @single_experiment
 def experiment(env: str = 'kinodynamic_cup',
@@ -47,6 +47,7 @@ def experiment(env: str = 'kinodynamic_cup',
                sigma_init_q: float = 1.0,
                sigma_init_t: float = 1.0,
                constraint_lr: float = 1e-2,
+               lcs_lr: float = 1e-5,
                mu_lr: float = 5e-5,
                value_lr: float = 5e-4,
                n_epochs_policy: int = 32,
@@ -98,6 +99,7 @@ def experiment(env: str = 'kinodynamic_cup',
         sigma_init_q=sigma_init_q,
         sigma_init_t=sigma_init_t,
         constraint_lr=constraint_lr,
+        lcs_lr=lcs_lr,
         mu_lr=mu_lr,
         value_lr=value_lr,
         n_epochs_policy=n_epochs_policy,
