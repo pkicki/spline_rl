@@ -219,6 +219,8 @@ def experiment(env: str = 'kinodynamic_cup',
             J_sto = np.mean(dataset_callback.get().discounted_return)
             init_states = dataset_callback.get().get_init_states()
             context = core.agent._context_builder(init_states)
+            alphas = core.agent.get_alphas(context)
+            alphas = alphas.detach().numpy() if alphas is torch.Tensor else alphas
             V_sto = np.mean(core.agent.value_function(context).detach().numpy())
             E = np.mean(core.agent.distribution.entropy(context).detach().numpy())
             VJ_bias = V_sto - J_sto
@@ -302,10 +304,9 @@ def experiment(env: str = 'kinodynamic_cup',
         }, step=epoch)
         logger.info(f"BEST J_det: {best_J_det}")
         logger.info(f"BEST J_sto: {best_J_sto}")
-        if hasattr(agent, "get_alphas"):
-            wandb.log({
-            "alphas/": {str(i): a for i, a in enumerate(agent.get_alphas())}
-            }, step=epoch)
+        wandb.log({
+        "alphas/": {str(i): a for i, a in enumerate(alphas)}
+        }, step=epoch)
 
         if best_J_det <= J_det:
             best_J_det = J_det
