@@ -57,7 +57,7 @@ def experiment(env: str = 'air_hockey',
                gamma: float = 0.99,
                moving_init: bool = True,
                interpolation_order: int = -1,
-               reward_type: str = "new",
+               reward_type: str = "puze",
 
                mode: str = "online",
                seed: int = 444,

@@ -22,7 +22,6 @@ torch.Tensor.__repr__ = custom_repr
 os.environ["WANDB_START_METHOD"] = "thread"
 
 #torch.autograd.set_detect_anomaly(True)
-torch.set_default_dtype(torch.float32)
 
 @single_experiment
 def experiment(env: str = 'kinodynamic_cup',
@@ -113,7 +112,7 @@ def experiment(env: str = 'kinodynamic_cup',
         q_ddot_d_scale=q_ddot_d_scale,
     )
 
-    name = (f"ePPO_kino_tdiv1qdiv50_150_"
+    name = (f"ePPO_kino_{alg}_tdiv1qdiv50_150_"
             f"gamma099_hor150_"
             f"lr{agent_params['mu_lr']}_valuelr{agent_params['value_lr']}_bs{batch_size}_"
             f"constrlr{agent_params['constraint_lr']}_nep{n_episodes}_neppf{n_episodes_per_fit}_"
