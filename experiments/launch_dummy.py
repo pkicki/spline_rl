@@ -10,12 +10,12 @@ N_SEEDS = 2
 if LOCAL:
     N_EXPS_IN_PARALLEL = 1
 else:
-    N_EXPS_IN_PARALLEL = 10
+    N_EXPS_IN_PARALLEL = 1
 
-N_CORES = 4
+N_CORES = 1
 MEMORY_SINGLE_JOB = 1000
 MEMORY_PER_CORE = N_EXPS_IN_PARALLEL * MEMORY_SINGLE_JOB // N_CORES
-PARTITION = 'amd2,amd'  # 'amd', 'rtx'
+PARTITION = 'fast'  # 'amd', 'rtx'
 GRES = 'gpu:1' if USE_CUDA else None  # gpu:rtx2080:1, gpu:rtx3080:1
 CONDA_ENV = None
 
@@ -29,9 +29,9 @@ launcher = Launcher(
     n_exps_in_parallel=N_EXPS_IN_PARALLEL,
     n_cores=N_CORES,
     memory_per_core=MEMORY_PER_CORE,
-    days=3,
-    hours=23,
-    minutes=59,
+    days=0,
+    hours=0,
+    minutes=1,
     seconds=0,
     partition=PARTITION,
     gres=GRES,
@@ -40,7 +40,7 @@ launcher = Launcher(
     compact_dirs=False
 )
 
-for reward_type in ["new", "puze", "mixed"]:
+for reward_type in ["puze"]:
     launcher.add_experiment(
         alg="bsmp_eppo_stop",
         reward_type__=reward_type,
