@@ -9,10 +9,10 @@ avg_steps_per_episode = 65
 n_epochs = 5000
 n_eval_episodes = 25
 batch_size = 64
-actor_lr = 5e-4
+actor_lr = 5e-5
 critic_lr = 5e-4
 cost_limit =  1e-3
-lambda_lr = 0.001
+lambda_lr = 0.01
 seed = sys.argv[1] if len(sys.argv) > 1 else 444
 
 custom_cfgs = {
@@ -32,7 +32,7 @@ custom_cfgs = {
     "logger_cfgs": {
         "use_wandb": True,
         "wandb_project": "omnisafe",
-        "wandb_group": "PPOLag_cl1em3",
+        "wandb_group": "PPOLag_cl1em3_clr1em2",
         "use_tensorboard": False,
         "save_model_freq": 100,
     },
