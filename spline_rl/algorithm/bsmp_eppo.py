@@ -4,7 +4,7 @@ import numpy as np
 
 from mushroom_rl.algorithms.policy_search import ePPO
 from mushroom_rl.utils.minibatches import minibatch_generator
-from storm_kit.differentiable_robot_model import DifferentiableRobotModel
+
 
 
 class BSMPePPO(ePPO):

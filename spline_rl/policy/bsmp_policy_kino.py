@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from air_hockey_challenge.utils.kinematics import forward_kinematics, jacobian
 from baseline.baseline_agent.optimizer import TrajectoryOptimizer
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
