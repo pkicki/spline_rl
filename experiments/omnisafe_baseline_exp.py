@@ -12,7 +12,7 @@ batch_size = 64
 actor_lr = 5e-4
 critic_lr = 5e-4
 cost_limit =  1e-3
-lambda_lr = 0.01
+lambda_lr = 0.001
 seed = sys.argv[1] if len(sys.argv) > 1 else 444
 
 custom_cfgs = {
@@ -24,7 +24,7 @@ custom_cfgs = {
     },
     "algo_cfgs": {
         "steps_per_epoch": n_episodes * avg_steps_per_episode,
-        'update_iters': 32,
+        'update_iters': 64,
         "batch_size": batch_size,
         "kl_early_stop": False,
         "clip": 0.05,
