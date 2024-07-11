@@ -27,12 +27,13 @@ custom_cfgs = {
         'update_iters': 64,
         "batch_size": batch_size,
         "kl_early_stop": False,
-        "clip": 0.05,
+        # PPOLag
+        #"clip": 0.05,
     },
     "logger_cfgs": {
         "use_wandb": True,
         "wandb_project": "omnisafe",
-        "wandb_group": "PPOLag_cl1em3_clr1em2",
+        "wandb_group": "TRPOLag_cl1em3_clr1em2",
         "use_tensorboard": False,
         "save_model_freq": 100,
     },
@@ -55,7 +56,8 @@ custom_cfgs = {
     "seed": seed,
 }
 agent = omnisafe.Agent(
-    'PPOLag',
+    #'PPOLag',
+    'TRPOLag',
     'air_hockey',
     custom_cfgs=custom_cfgs,
 )
