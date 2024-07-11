@@ -29,6 +29,8 @@ custom_cfgs = {
         "kl_early_stop": False,
         # PPOLag
         #"clip": 0.05,
+        # PCPO
+        "cost_limit": cost_limit,
     },
     "logger_cfgs": {
         "use_wandb": True,
@@ -48,16 +50,17 @@ custom_cfgs = {
             "lr": critic_lr,
         },
     },
-    "lagrange_cfgs": {
-        "cost_limit": cost_limit,
-        "lagrangian_multiplier_init": 1.,
-        "lambda_lr": lambda_lr,
-    },
+    #"lagrange_cfgs": {
+    #    "cost_limit": cost_limit,
+    #    "lagrangian_multiplier_init": 1.,
+    #    "lambda_lr": lambda_lr,
+    #},
     "seed": seed,
 }
 agent = omnisafe.Agent(
     #'PPOLag',
-    'TRPOLag',
+    #'TRPOLag',
+    'PCPO',
     'air_hockey',
     custom_cfgs=custom_cfgs,
 )
