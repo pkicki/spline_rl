@@ -31,7 +31,7 @@ custom_cfgs = {
         #"use_wandb": False,
         "use_wandb": True,
         "wandb_project": "omnisafe",
-        "wandb_group": "PPOLag_cl1em3",
+        "wandb_group": "PPOLag_kino_cl1em3_clr1em2",
         "use_tensorboard": False,
         "save_model_freq": 50,
     },
