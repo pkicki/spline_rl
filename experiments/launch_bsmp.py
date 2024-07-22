@@ -12,24 +12,25 @@ if LOCAL:
 else:
     N_EXPS_IN_PARALLEL = 10
 
-N_CORES = 4
+N_CORES = 1
 MEMORY_SINGLE_JOB = 1000
 MEMORY_PER_CORE = N_EXPS_IN_PARALLEL * MEMORY_SINGLE_JOB // N_CORES
-PARTITION = 'amd2,amd'  # 'amd', 'rtx'
+PARTITION = 'standard'  # 'amd', 'rtx'
 GRES = 'gpu:1' if USE_CUDA else None  # gpu:rtx2080:1, gpu:rtx3080:1
 CONDA_ENV = None
 
-experiment_name = 'bsmp_eppo_structured'
+experiment_name = 'bsmp_eppo_kinodynamic'
 
 launcher = Launcher(
     exp_name=experiment_name,
-    exp_file='air_hockey_episodic_exp',
+    #exp_file='air_hockey_episodic_exp',
+    exp_file='kinodynamic_cup_episodic_exp',
     # project_name='project01234',  # for hrz cluster
     n_seeds=N_SEEDS,
     n_exps_in_parallel=N_EXPS_IN_PARALLEL,
     n_cores=N_CORES,
     memory_per_core=MEMORY_PER_CORE,
-    days=3,
+    days=6,
     hours=23,
     minutes=59,
     seconds=0,
@@ -41,9 +42,19 @@ launcher = Launcher(
 )
 
 launcher.add_experiment(
-    alg="bsmp_eppo_stop",
+    #alg="bsmp_eppo_stop",
+    alg="bsmp_eppo_kinodynamic",
     group_name=experiment_name,
-    reward_type="new", # available options are "new", "puze", "mixed"
-    #mode="disabled",
+
+    # kinodynamic
+    initial_entropy_lb = 45,
+    entropy_lb = -45 / 2.,
+    q_d_scale = 1. / 150., # structured
+    #q_d_scale = 1. / 50., # unstructured
+
+
+    # air hockey
+    #reward_type="puze", # available options are "new", "puze", "mixed"
+    mode="disabled",
 )
 launcher.run(LOCAL, TEST)
