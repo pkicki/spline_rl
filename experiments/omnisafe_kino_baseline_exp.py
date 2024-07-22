@@ -4,7 +4,7 @@ from spline_rl.envs.omnisafe_wrapper import OmnisafeWrapper
 
 n_episodes = 256
 avg_steps_per_episode = 100
-n_epochs = 2000
+n_epochs = 800
 n_eval_episodes = 25
 batch_size = 64
 actor_lr = 5e-4
@@ -31,7 +31,7 @@ custom_cfgs = {
         #"use_wandb": False,
         "use_wandb": True,
         "wandb_project": "omnisafe",
-        "wandb_group": "PPOLag_kino_cl1em3_clr1em2",
+        "wandb_group": "PPOLag_kino_cl1e1_clr1em2",
         "use_tensorboard": False,
         "save_model_freq": 50,
     },
