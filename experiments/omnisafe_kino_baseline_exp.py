@@ -34,14 +34,11 @@ def experiment(
             'update_iters': 32,
             "batch_size": batch_size,
             "kl_early_stop": False,
-            # PPOLag
-            #"clip": 0.05,
         },
         "logger_cfgs": {
             "use_wandb": False,
             #"use_wandb": True,
             "wandb_project": "omnisafe",
-            #"wandb_group": "PPOLag_kino_cl1e1_clr1em2",
             "wandb_group": f"{alg}_kino_cl1e1_clr1em2",
             "use_tensorboard": False,
             "save_model_freq": 50,
@@ -57,13 +54,22 @@ def experiment(
                 "lr": critic_lr,
             },
         },
-        "lagrange_cfgs": {
+        "seed": seed,
+    }
+
+    if alg == "PCPO":
+        custom_cfgs["algo_cfgs"]["cost_limit"] = cost_limit
+
+    if "Lag" in alg:
+        custom_cfgs["lagrange_cfgs"] = {
             "cost_limit": cost_limit,
             "lagrangian_multiplier_init": 1.,
             "lambda_lr": lambda_lr,
         },
-        "seed": seed,
-    }
+
+    if alg == "PPOLag":
+        custom_cfgs["algo_cfgs"]["clip"] = 0.05
+
     agent = omnisafe.Agent(
         #'PPOLag',
         #'TRPOLag',
