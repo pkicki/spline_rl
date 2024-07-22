@@ -8,3 +8,6 @@ experiments/trained_models
 spline_rl.egg-info/
 paper/results
 __pycache__
+runs/
+playground/
+logs/
