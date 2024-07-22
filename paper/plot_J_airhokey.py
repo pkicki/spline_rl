@@ -26,7 +26,7 @@ def read_file(path):
                     if "__MIN" in d or "__MAX" in d:
                         save[k] = False
                     samples[k] = []
-                
+
 
                 #data_line = []
                 #for d in data[1:]:
@@ -47,7 +47,7 @@ def read_file(path):
         for i in range(1, len(v)):
             a.append(a[-1] * (1 - s) + v[i] * s)
         samples_filtered[k] = np.array(a)
-    
+
     max_length = max(*[len(v) for v in samples_filtered.values()])
     # aggregation
     for i in range(max_length):
@@ -93,22 +93,23 @@ def read_stats(path):
 
 
 if __name__ == '__main__':
-    ppolag_J_path = os.path.join(os.path.dirname(__file__), "results/air_hockey/ppolag_J_sto.csv")
+    results_dir = "results/air_hockey_fixed/"
+    ppolag_J_path = os.path.join(os.path.dirname(__file__), results_dir,  "ppolag_J_sto.csv")
     ppolag_J_m, ppolag_J_s, ppolag_steps_m, ppolag_steps_s = read_stats(ppolag_J_path)
 
-    ours_uns_J_path = os.path.join(os.path.dirname(__file__), "results/air_hockey/ours_unstructured_J_sto.csv")
+    ours_uns_J_path = os.path.join(os.path.dirname(__file__), results_dir,  "ours_unstructured_J_sto.csv")
     ours_uns_J_m, ours_uns_J_s, ours_uns_steps_m, ours_uns_steps_s = read_stats(ours_uns_J_path)
 
-    ours_J_path = os.path.join(os.path.dirname(__file__), "results/air_hockey/ours_J_sto.csv")
+    ours_J_path = os.path.join(os.path.dirname(__file__), results_dir,  "ours_J_sto.csv")
     ours_J_m, ours_J_s, ours_steps_m, ours_steps_s = read_stats(ours_J_path)
 
-    promp_J_path = os.path.join(os.path.dirname(__file__), "results/air_hockey/promp_J_sto.csv")
+    promp_J_path = os.path.join(os.path.dirname(__file__), results_dir,  "promp_J_sto.csv")
     promp_J_m, promp_J_s, promp_steps_m, promp_steps_s = read_stats(promp_J_path)
 
-    prodmp_J_path = os.path.join(os.path.dirname(__file__), "results/air_hockey/prodmp_J_sto.csv")
+    prodmp_J_path = os.path.join(os.path.dirname(__file__), results_dir,  "prodmp_J_sto.csv")
     prodmp_J_m, prodmp_J_s, prodmp_steps_m, prodmp_steps_s = read_stats(prodmp_J_path)
 
-    atacom_sac_J_path = os.path.join(os.path.dirname(__file__), "results/air_hockey/atacom_sac_J_sto.csv")
+    atacom_sac_J_path = os.path.join(os.path.dirname(__file__), results_dir,  "atacom_sac_J_sto.csv")
     atacom_sac_J_m, atacom_sac_J_s, atacom_sac_steps_m, atacom_sac_steps_s = read_stats(atacom_sac_J_path)
 
     plt.rcParams.update({'font.size': 20})
@@ -128,7 +129,7 @@ if __name__ == '__main__':
     plt.xlim(0, 2.6e7)
     plt.ylim(0, 110.)
     plt.xlabel('Steps')
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12),
-               fancybox=False, shadow=False, frameon=False, ncol=6)
+    #plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12),
+    #           fancybox=False, shadow=False, frameon=False, ncol=6)
     plt.tight_layout(pad=2)
     plt.show()
