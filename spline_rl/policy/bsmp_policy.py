@@ -261,12 +261,47 @@ class BSMPPolicy(Policy):
         q_dot_tau = qdN @ q_cps
         q_ddot_tau = qddN @ q_cps
 
-        dtau_dt = torch.exp(tN @ t_cps) if differentiable else np.exp(tN @ t_cps)
-        ddtau_dtt = dtau_dt * (tdN @ t_cps)
+        def compute_duration(dtau_dt):
+            dt = 1. / dtau_dt[..., 0] / dtau_dt.shape[-2]
+            t = np.cumsum(dt, axis=-1) - dt[..., :1] if not differentiable else torch.cumsum(dt, dim=-1) - dt[..., :1]
+            duration = t[:, -1]
+            return t, dt, duration
 
-        dt = 1. / dtau_dt[..., 0] / dtau_dt.shape[-2]
-        t = np.cumsum(dt, axis=-1) - dt[..., :1] if not differentiable else torch.cumsum(dt, dim=-1) - dt[..., :1]
-        duration = t[:, -1]
+        dtau_dt = torch.exp(tN @ t_cps) if differentiable else np.exp(tN @ t_cps)
+        #ddtau_dtt = dtau_dt * (tdN @ t_cps)
+        ddtau_dtt = dtau_dt**2 * (tdN @ t_cps)
+
+        t, dt, duration = compute_duration(dtau_dt)
+
+        episode_duration = 2.
+        if duration > episode_duration:
+            dtau_dt_ = dtau_dt * duration / episode_duration
+            s = torch.sum(ddtau_dtt / dtau_dt**2, axis=-2, keepdims=True) / dtau_dt.shape[-2]
+            ddtau_dtt_ = (ddtau_dtt * duration - dtau_dt * s) / episode_duration
+            dtau_dt = dtau_dt_
+            ddtau_dtt = ddtau_dtt_
+        #t_, dt_, duration_ = compute_duration(dtau_dt_)
+        t, dt, duration = compute_duration(dtau_dt)
+
+        #ddtau_dtt__ = (dtau_dt_[:, 1:] - dtau_dt_[:, :-1]) / (t_[:, 1:] - t_[:, :-1])[..., None]
+        #ddtau_dtt_hand = (dtau_dt[:, 1:] - dtau_dt[:, :-1]) / (t[:, 1:] - t[:, :-1])[..., None]
+        ##ddtau_dtt__ = (dtau_dt_[:, 1:] - dtau_dt_[:, :-1]) / (1. / dtau_dt.shape[-2])
+        ##ddtau_dtt_hand = (dtau_dt[:, 1:] - dtau_dt[:, :-1]) / (1. / dtau_dt.shape[-2])
+        
+        #plt.subplot(311)
+        #plt.plot(t[0], dtau_dt[0, :, 0], label='dtau_dt')
+        #plt.plot(t_[0], dtau_dt_[0, :, 0], label='dtau_dt_scaled')
+        #plt.subplot(312)
+        #plt.plot(t[0], ddtau_dtt[0, :, 0], label='ddtau_dtt')
+        #plt.plot(t[0, 1:], ddtau_dtt_hand[0, :, 0], label='ddtau_dtt_hand')
+        #plt.plot(t_[0], ddtau_dtt_[0, :, 0], label='ddtau_dtt_')
+        #plt.legend()
+        #plt.subplot(313)
+        #plt.plot(t_[0], ddtau_dtt[0, :, 0], label='ddtau_dtt')
+        #plt.plot(t_[0], ddtau_dtt_[0, :, 0], label='ddtau_dtt_')
+        #plt.plot(t_[0, 1:], ddtau_dtt__[0, :, 0], label='ddtau_dtt_hand')
+        #plt.legend()
+        #plt.show()
 
         q_dot = q_dot_tau * dtau_dt
         q_ddot = q_ddot_tau * dtau_dt ** 2 + ddtau_dtt * q_dot_tau * dtau_dt
