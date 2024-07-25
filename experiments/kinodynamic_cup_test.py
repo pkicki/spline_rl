@@ -1,10 +1,11 @@
 from glob import glob
 import sys
-from experiments.kinodynamic_deploy import load_env_agent
 import os
 import numpy as np
 import torch.random
 
+#from experiments.kinodynamic_deploy import load_env_agent
+from kinodynamic_deploy import load_env_agent
 from mushroom_rl.core import Core
 from mushroom_rl.utils.callbacks import CollectDataset
 
@@ -71,8 +72,8 @@ def experiment(n_eval_episodes: int = 100,
     torch.manual_seed(seed)
 
     #model_type = "promp_unstructured"
-    model_type = "prodmp_structured"
-    #model_type = "ours_unstructured"
+    #model_type = "prodmp_structured"
+    model_type = "ours_unstructured"
     model_type = sys.argv[1] if len(sys.argv) > 1 else model_type
 
     eval_params = dict(
@@ -81,7 +82,7 @@ def experiment(n_eval_episodes: int = 100,
         render=render
     )
 
-    n_seeds = 5
+    n_seeds = 1
     for i in range(n_seeds):
         agent_paths = glob(os.path.join(os.path.dirname(__file__), f"trained_models/kinodynamic/{model_type}/agent-{i}-2*.msh"))
         if not agent_paths:
@@ -111,7 +112,7 @@ def experiment(n_eval_episodes: int = 100,
             )
         print(results)
 
-        #assert False
+        assert False
         save_path = os.path.join(os.path.dirname(__file__), f"../paper/results/kino/{model_type}")
         os.makedirs(save_path, exist_ok=True)
         np.savez(os.path.join(save_path, f"{model_id}.npz"), **results)

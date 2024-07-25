@@ -57,6 +57,16 @@ def unpack_data_kinodynamic(x):
     dqk = z
     ddqk = z
     return q0, qk, dq0, dqk, ddq0, ddqk
+
+def unpack_data_box_pushing(x):
+    n = 7
+    q = x[..., :n]
+    dq = x[..., n:2*n]
+    box_pos = x[..., 2*n:2*n+3]
+    box_rot = x[..., 2*n+3:2*n+7]
+    box_pos_d = x[..., 2*n+7:2*n+10]
+    box_rot_d = x[..., 2*n+10:2*n+14]
+    return q, dq, box_pos, box_rot, box_pos_d, box_rot_d
     
 def project_entropy(chol, e_lb):
     a_dim = chol.size()[-1]

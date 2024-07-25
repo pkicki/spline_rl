@@ -10,11 +10,13 @@ model_dict = dict(
     promp="CNP3O-ProMP",
     prodmp="CNP3O-ProDMP",
     atacom_sac="ATACOM-SAC",
+    trpolag="TRPOLag",
     ppolag="PPOLag",
+    pcpo="PCPO",
 )
 
 colors = OrderedDict(ours='tab:blue', ours_unstructured='tab:orange', promp='tab:green', prodmp='tab:red',
-                     atacom_sac='tab:purple', ppolag='tab:brown')
+                     atacom_sac='tab:purple', trpolag='tab:brown', ppolag='tab:pink', pcpo='tab:gray')
 positions = np.linspace(0.1, 0.9, len(colors))
 
 results = {}
@@ -34,7 +36,7 @@ for model_type in colors.keys():
         ee_zub=[],
         ee_zeb=[]
     )
-    for res_path in glob(os.path.join(os.path.dirname(__file__), f"results/air_hockey/{model_type}/*.npz")):
+    for res_path in glob(os.path.join(os.path.dirname(__file__), f"results/air_hockey_fixed/{model_type}/*.npz")):
         data = np.load(res_path, allow_pickle=True)
         results[model_type]["J_det"].append(data["J_det"])
         results[model_type]["R"].append(data["R"])
@@ -78,6 +80,7 @@ for i, crit in enumerate(plot_crits):
     ax.set_title(titles[i])
     ax.set_xlim(0., 1.)
     for k, model_type in enumerate(colors.keys()):
+        print(model_type)
         model_name = model_dict[model_type]
         c = colors[model_type]
         if crit == "success":
@@ -93,8 +96,8 @@ for i, crit in enumerate(plot_crits):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.set_xticks([])
-    if crit == "ee_zeb":
-        ax.set_yscale("log")
+    #if crit == "ee_zeb":
+    #    ax.set_yscale("log")
 plt.subplots_adjust(wspace=0.3)
 labels = [model_dict[model_type] for model_type in colors.keys()]
 plt.gcf().legend(labels, ncol=len(labels), bbox_to_anchor=(0.85, 0.1),

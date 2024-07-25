@@ -26,7 +26,6 @@ class MPPolicy(Policy):
 
         self._traj_no = 0
 
-        self.desired_ee_z = env_info['robot']['ee_desired_height']
         self.joint_vel_limit = env_info['robot']['joint_vel_limit'][1]
         self.joint_acc_limit = env_info['robot']['joint_acc_limit'][1]
 
@@ -48,7 +47,6 @@ class MPPolicy(Policy):
             _n_pts_fixed_begin='primitive',
             _n_trainable_q_pts='primitive',
             _traj_no='primitive',
-            desired_ee_z='primitive',
             joint_vel_limit='pickle',
             joint_acc_limit='pickle',
         )

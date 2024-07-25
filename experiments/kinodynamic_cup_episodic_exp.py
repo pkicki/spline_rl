@@ -25,19 +25,22 @@ os.environ["WANDB_START_METHOD"] = "thread"
 
 @single_experiment
 def experiment(env: str = 'kinodynamic_cup',
-               group_name: str = "test_single",
+               group_name: str = "test_single_from0",
                n_envs: int = 1,
-               alg: str = "bsmp_eppo_kinodynamic",
+               #alg: str = "bsmp_eppo_kinodynamic",
+               #alg: str = "bsmp_eppo_kinodynamic_unstructured",
+               #alg: str = "promp_eppo_kinodynamic",
+               alg: str = "prodmp_eppo_kinodynamic",
                #alg: str = "prodmp_eppo_unstructured",
                n_epochs: int = 700,
                #n_episodes: int = 256,
                #n_episodes_per_fit: int = 64,
                #n_eval_episodes: int = 25,
                #batch_size: int = 64,
-               n_episodes: int = 16,
-               n_episodes_per_fit: int = 16,
+               n_episodes: int = 4,
+               n_episodes_per_fit: int = 4,
                n_eval_episodes: int = 2,
-               batch_size: int = 16,
+               batch_size: int = 4,
                use_cuda: bool = False,
 
                # agent params
@@ -52,12 +55,17 @@ def experiment(env: str = 'kinodynamic_cup',
                eps_ppo: float = 5e-2,
                #initial_entropy_lb: float = 118,
                #entropy_lb: float = -118,
+               #initial_entropy_lb: float = 52,
+               #entropy_lb: float = -52,
+               #initial_entropy_lb: float = 71,
+               #entropy_lb: float = -71,
                initial_entropy_lb: float = 45,
                entropy_lb: float = -45,
                entropy_lb_ep: int = 200,
                t_scale: float = 1.0,
                q_scale: float = 1. / 50.,
-               q_d_scale: float = 1. / 150.,
+               #q_d_scale: float = 1. / 150.,
+               q_d_scale: float = 1. / 50.,
                q_dot_d_scale: float = 1. / 50.,
                q_ddot_d_scale: float = 1.0,
 
@@ -65,12 +73,12 @@ def experiment(env: str = 'kinodynamic_cup',
                horizon: int = 100,
                gamma: float = 0.99,
 
-               mode: str = "online",
-               #mode: str = "disabled",
+               #mode: str = "online",
+               mode: str = "disabled",
                seed: int = 444,
                quiet: bool = True,
-               render: bool = False,
-               #render: bool = True,
+               #render: bool = False,
+               render: bool = True,
                results_dir: str = './logs',
                **kwargs):
     np.random.seed(seed)
@@ -234,10 +242,10 @@ def experiment(env: str = 'kinodynamic_cup',
             V_sto = 0.
             E = 0.
             VJ_bias = 0.
-            constraints_violation_sto_mean = np.zeros(18)
-            constraints_violation_sto_max = np.zeros(18)
-            constraints_violation_det_mean = np.zeros(18)
-            constraints_violation_det_max = np.zeros(18)
+            constraints_violation_sto_mean = np.zeros(100)
+            constraints_violation_sto_max = np.zeros(100)
+            constraints_violation_det_mean = np.zeros(100)
+            constraints_violation_det_max = np.zeros(100)
             mean_duration = 0.
 
         times.append(perf_counter())

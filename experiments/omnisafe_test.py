@@ -1,4 +1,5 @@
 import os
+import sys
 import numpy as np
 
 import omnisafe
@@ -10,7 +11,12 @@ from spline_rl.envs.omnisafe_wrapper import OmnisafeWrapper
 if __name__ == '__main__':
     evaluator = omnisafe.Evaluator(render_mode='rgb_array')
 
-    models_dir = os.path.join(os.path.dirname(__file__), 'trained_models/air_hockey/ppolag')
+    model_type = "ppolag"
+
+    if len(sys.argv) > 1:
+        model_type = sys.argv[1]
+
+    models_dir = os.path.join(os.path.dirname(__file__), 'trained_models/air_hockey_fixed/', model_type)
     for item in os.scandir(os.path.join(models_dir, "torch_save")):
         if item.is_file() and item.name.split('.')[-1] == 'pt':
             evaluator.load_saved(
@@ -63,8 +69,8 @@ if __name__ == '__main__':
                 ee_zeb_constraint=ee_zeb
             )
 
-            model_type = "ppolag"
+            #assert False
             model_id = item.name.split('.')[0]
-            save_path = os.path.join(os.path.dirname(__file__), f"../paper/results/air_hockey/{model_type}")
+            save_path = os.path.join(os.path.dirname(__file__), f"../paper/results/air_hockey_fixed/{model_type}")
             os.makedirs(save_path, exist_ok=True)
             np.savez(os.path.join(save_path, f"{model_id}.npz"), **results)

@@ -1,7 +1,9 @@
+from spline_rl.policy.bsmp_policy_box_pushing import BSMPPolicyBoxPushing
 from spline_rl.policy.bsmp_policy_kino import BSMPPolicyKino
 from spline_rl.policy.bsmp_unstructured_policy_kino import BSMPPolicyUnstructuredKino
 from spline_rl.policy.prodmp_policy_kino import ProDMPPolicyKino
 from spline_rl.policy.promp_policy_kino import ProMPPolicyKino
+from spline_rl.utils.box_pushing_network import BoxPushingConfigurationTimeNetworkWrapper, BoxPushingLogSigmaNetworkWrapper
 from spline_rl.utils.kino_network import KinoConfigurationTimeNetworkWrapper, KinoLogSigmaNetworkWrapper
 import torch
 
@@ -17,7 +19,7 @@ from spline_rl.algorithm.bsmp_eppo import BSMPePPO
 from spline_rl.policy.bsmp_policy_stop import BSMPPolicyStop
 from spline_rl.utils.context_builder import IdentityContextBuilder
 from spline_rl.utils.network import ConfigurationNetworkWrapper, ConfigurationTimeNetworkWrapper, LogSigmaNetworkWrapper
-from spline_rl.utils.value_network import KinoValueNetwork, ValueNetwork
+from spline_rl.utils.value_network import BoxPushingValueNetwork, KinoValueNetwork, ValueNetwork
 
 
 
@@ -80,6 +82,10 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
         mu_network = KinoConfigurationTimeNetworkWrapper
         logsigma_network = KinoLogSigmaNetworkWrapper
         value_netwotk = KinoValueNetwork
+    if "box_pushing" in agent_params["alg"]:
+        mu_network = BoxPushingConfigurationTimeNetworkWrapper
+        logsigma_network = BoxPushingLogSigmaNetworkWrapper
+        value_netwotk = BoxPushingValueNetwork
     else:
         mu_network = ConfigurationTimeNetworkWrapper
         logsigma_network = LogSigmaNetworkWrapper
@@ -128,6 +134,8 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
         policy = BSMPPolicyKino(**policy_args)
     elif agent_params["alg"] == "bsmp_eppo_kinodynamic_unstructured":
         policy = BSMPPolicyUnstructuredKino(**policy_args)
+    elif agent_params["alg"] == "bsmp_eppo_box_pushing":
+        policy = BSMPPolicyBoxPushing(**policy_args)
     else:
         policy = BSMPPolicy(**policy_args)
 

@@ -23,22 +23,20 @@ os.environ["WANDB_START_METHOD"] = "thread"
 
 
 @single_experiment
-def experiment(env: str = 'air_hockey',
-               group_name: str = "dummy",
+def experiment(env: str = 'box_pushing',
+               #group_name: str = "dummy",
+               group_name: str = "base_run_bsmp_box_pushing",
                n_envs: int = 1,
-               #alg: str = "bsmp_eppo_stop",
-               #alg: str = "bsmp_eppo_unstructured",
-               alg: str = "prodmp_eppo_unstructured",
-               #alg: str = "promp_eppo_unstructured",
+               alg: str = "bsmp_eppo_box_pushing",
                n_epochs: int = 5000,
-               #n_episodes: int = 256,
-               #n_episodes_per_fit: int = 64,
-               #n_eval_episodes: int = 25,
-               #batch_size: int = 64,
-               n_episodes: int = 4,
-               n_episodes_per_fit: int = 4,
-               n_eval_episodes: int = 2,
-               batch_size: int = 4,
+               n_episodes: int = 256,
+               n_episodes_per_fit: int = 64,
+               n_eval_episodes: int = 25,
+               batch_size: int = 64,
+               #n_episodes: int = 16,
+               #n_episodes_per_fit: int = 4,
+               #n_eval_episodes: int = 4,
+               #batch_size: int = 4,
                use_cuda: bool = False,
 
                # agent params
@@ -46,13 +44,15 @@ def experiment(env: str = 'air_hockey',
                n_t_cps: int = 10,
                sigma_init_q: float = 1.0,
                sigma_init_t: float = 1.0,
-               constraint_lr: float = 1e-2,
+               constraint_lr: float = 1e-3,
                mu_lr: float = 5e-5,
                value_lr: float = 5e-4,
-               n_epochs_policy: int = 32,
+               n_epochs_policy: int = 64,
                eps_ppo: float = 5e-2,
-               initial_entropy_lb: float = 118,
-               entropy_lb: float = -118,
+               #initial_entropy_lb: float = 118,
+               #entropy_lb: float = -118,
+               initial_entropy_lb: float = 52,
+               entropy_lb: float = -52. / 2.,
                #initial_entropy_lb: float = 71,
                #entropy_lb: float = -71,
                entropy_lb_ep: int = 1000,
@@ -63,24 +63,27 @@ def experiment(env: str = 'air_hockey',
                q_ddot_d_scale: float = 1.0,
 
                # env params
-               horizon: int = 150,
-               gamma: float = 0.99,
-               moving_init: bool = True,
-               interpolation_order: int = -1,
-               reward_type: str = "puze",
+               full_mass_matrix: bool = True,
 
-               #mode: str = "online",
-               mode: str = "disabled",
+               mode: str = "online",
+               #mode: str = "disabled",
                seed: int = 445,
                quiet: bool = True,
-               render: bool = True,
-               #render: bool = False,
+               #render: bool = True,
+               render: bool = False,
                results_dir: str = './logs',
                **kwargs):
     #if len(sys.argv) > 1:
     #    seed = int(sys.argv[1])
     np.random.seed(seed)
     torch.manual_seed(seed)
+
+    n_pts_fixed_begin = 1
+    if "bsmp_eppo" in alg:
+        n_pts_fixed_begin = 3
+    n_pts_fixed_end = 0
+    if "bsmp_eppo_box_pushing" == alg:
+        n_pts_fixed_end = 2
 
     # TODO: add parameter regarding the constraint loss stuff
     agent_params = dict(
@@ -89,8 +92,8 @@ def experiment(env: str = 'air_hockey',
         n_dim=7,
         n_q_cps=n_q_cps,
         n_t_cps=n_t_cps,
-        n_pts_fixed_begin=1 if alg.endswith("mp_eppo_unstructured") else 3,
-        n_pts_fixed_end=2 if "unstructured" in alg else 0,
+        n_pts_fixed_begin=n_pts_fixed_begin,
+        n_pts_fixed_end=n_pts_fixed_end,
         sigma_init_q=sigma_init_q,
         sigma_init_t=sigma_init_t,
         constraint_lr=constraint_lr,
@@ -109,14 +112,13 @@ def experiment(env: str = 'air_hockey',
         q_ddot_d_scale=q_ddot_d_scale,
     )
 
-    name = (f"ePPO_tdiv1qdiv50_150_10qdotscaled_50_"
-            f"gamma099_hor150_"
+    name = (f"ePPO_{alg}_tdiv1qdiv50_150_10qdotscaled_50_"
             f"lr{agent_params['mu_lr']}_valuelr{agent_params['value_lr']}_bs{batch_size}_"
             f"constrlr{agent_params['constraint_lr']}_nep{n_episodes}_neppf{n_episodes_per_fit}_"
             f"neppol{agent_params['n_epochs_policy']}_epsppo{agent_params['eps_ppo']}_"
             f"sigmainit{agent_params['sigma_init_q']}q_{agent_params['sigma_init_t']}t_entlb{agent_params['entropy_lb']}_"
             f"entlbinit{agent_params['initial_entropy_lb']}_entlbep{agent_params['entropy_lb_ep']}_"
-            f"nqcps{agent_params['n_q_cps']}_ntcps{agent_params['n_t_cps']}_seed{seed}")
+            f"nqcps{agent_params['n_q_cps']}_ntcps{agent_params['n_t_cps']}_{'fmm' if full_mass_matrix else 'dmm'}_seed{seed}")
 
     results_dir = os.path.join(results_dir, name)
 
@@ -134,16 +136,14 @@ def experiment(env: str = 'air_hockey',
     )
 
     env_params = dict(
-        moving_init=moving_init,
-        horizon=horizon,
-        gamma=gamma,
-        interpolation_order=interpolation_order,
-        reward_type=reward_type,
+        render_mode="human" if render else None,
+        frame_skip = 1,
+        full_mass_matrix = full_mass_matrix,
     )
 
     config = {**agent_params, **run_params, **env_params}
 
-    wandb_run = wandb.init(project="corl24_experiments_fixed", config=config, dir=results_dir, name=name, entity="kicai",
+    wandb_run = wandb.init(project="corl24_box_pushing", config=config, dir=results_dir, name=name, entity="kicai",
               group=f'{group_name}', mode=mode)
 
     eval_params = dict(
@@ -153,45 +153,9 @@ def experiment(env: str = 'air_hockey',
     )
 
     env, env_info_ = env_builder(env, n_envs, env_params)
+    env_info_['rl_info'].interpolation_order = 5
 
     agent = agent_builder(env_info_, agent_params)
-
-    # TRO hit moving with stop
-    #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_stop_verynewreward_gamma2_interpm1_tdiv1qdiv50_150_10qdotscaled_50_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep256_neppf64_neppol32_epsppo0.05_sigmainit1.0q_1.0t_entlb-118_entlbinit118_entlbep500_nqcps11_ntcps10_seed1/agent-1-571.msh")
-
-    # unstructured moving
-    #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_unstructured_gauss2_end131_yrangem035moving_qdiv50tdiv5_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep64_neppf64_neppol32_epsppo0.05_sigmainit1.0q_1.0t_entlb-52_entlbinit52_entlbep6000_nqcps11_ntcps10_seed444/agent-444-3856.msh")
-    #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_unstructured_gauss1_yrangem035moving_end131_qdiv50t5_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep64_neppf64_neppol32_epsppo0.02_entlb-52_entlbinit52_entlbep6000_nqcps11_ntcps10_seed444/agent-444-3156.msh")
-    
-    # TRO hit moving
-    #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_gamma2_interpm1_tdiv1qdiv50_150_10qdotscaled_50_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep64_neppf64_neppol32_epsppo0.05_sigmainit1.0q_1.0t_entlb-52_entlbinit52_entlbep2000_nqcps11_ntcps10_seed444/agent-444-1207.msh")
-    #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_TROhitmoving_gauss2_yrangem035_tdiv1qdiv50_150_10qdotscaled_50_goodduration_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep64_neppf64_neppol32_epsppo0.05_sigmainit1.0q_1.0t_entlb-52_entlbinit52_entlbep2000_nqcps11_ntcps10_seed444/agent-444-2864.msh")
-    
-    #unstructured
-    #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_unstructured_gauss10_xrangem03m06y03_qdiv100tdiv10_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep64_neppf64_neppol32_epsppo0.05_sigmainit1.0q_1.0t_entlb-26_entlbinit52_entlbep4000_nqcps11_ntcps10_seed444/agent-444-3471.msh")
-
-    # TRO hit
-    #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/ePPO_TROhit_cont_gauss2_yrangem035_tdiv1qdiv50_150_1_50_gamma099_hor150_lr5e-05_valuelr0.0005_bs64_constrlr0.01_nep64_neppf64_neppol32_epsppo0.05_sigmainit1.0q_1.0t_entlb-26_entlbinit52_entlbep4000_nqcps11_ntcps10_seed444/agent-444-2314.msh")
-
-    #print("Load agent from: ", agent_path)
-    #agent_ = agent_builder(env_info_, agent_params)
-    #agent = Agent.load(agent_path)
-    ##agent.load_robot()
-    #agent._optimizer = torch.optim.Adam(agent.distribution.parameters(), lr=agent_params["mu_lr"])
-    #agent.mdp_info = env_info_['rl_info']
-    ##agent._epoch_no = 0
-    ##agent.policy.optimizer = TrajectoryOptimizer(env_info_)
-    #agent.policy.load_policy(env_info_)
-    ##agent.policy.desired_ee_z = env_info_["robot"]["ee_desired_height"]
-    ##agent.policy.joint_vel_limit = env_info_["robot"]["joint_vel_limit"][1] 
-    ##agent.policy.joint_acc_limit = env_info_["robot"]["joint_acc_limit"][1] 
-    ##agent.info.is_stateful = agent_.info.is_stateful
-    ##agent.info.policy_state_shape = agent_.info.policy_state_shape
-    #agent.task_losses = []
-    #agent.scaled_constraint_losses = []
-    #agent.task_losses = []
-    ##agent.distribution._log_sigma_approximator.model.network._init_sigma *= 3.
-
 
     dataset_callback = CollectDataset()
     if n_envs > 1:
@@ -241,7 +205,7 @@ def experiment(env: str = 'air_hockey',
 
         times.append(perf_counter())
         # Evaluate
-        J_det, R, success, states, actions, time_to_hit, max_puck_vel, episode_length, dataset_info = compute_metrics(core, eval_params)
+        J_det, R, success, states, actions, box_pos_dist, box_rot_dist, energy, episode_length, dataset_info = compute_metrics(core, eval_params)
         #assert False
         #wandb_plotting(core, states, actions, epoch)
         times.append(perf_counter())
@@ -257,31 +221,32 @@ def experiment(env: str = 'air_hockey',
         logger.log_numpy(J_det=J_det, J_sto=J_sto, V_sto=V_sto, VJ_bias=VJ_bias, R=R, E=E,
                          success=success)
         logger.epoch_info(epoch, J_det=J_det, V_sto=V_sto, VJ_bias=VJ_bias, R=R, E=E,
-                          success=success, time_to_hit=time_to_hit, max_puck_vel=max_puck_vel)
+                          success=success, box_pos_dist=box_pos_dist, box_rot_dist=box_rot_dist, energy=energy)
         wandb.log({
             "Reward/": {"J_det": J_det, "J_sto": J_sto, "V_sto": V_sto, "VJ_bias": VJ_bias, "R": R, "success": success},
-            #"Entropy/": {"E": E, "entropy_bonus": core.agent._log_entropy_bonus.exp().detach().numpy()},
             "Entropy/": {"E": E},
-            "Constraints_sto/": {"avg/": {str(i): a for i, a in enumerate(constraints_violation_sto_mean)},
-                                 "max/": {str(i): a for i, a in enumerate(constraints_violation_sto_max)}},
-            "Constraints_det/": {"avg/": {str(i): a for i, a in enumerate(constraints_violation_det_mean)},
-                                 "max/": {str(i): a for i, a in enumerate(constraints_violation_det_max)}},
+            "Constraints_sto/": {
+                "avg/": {str(i): a for i, a in enumerate(constraints_violation_sto_mean)},
+                "max/": {str(i): a for i, a in enumerate(constraints_violation_sto_max)}
+            },
+            "Constraints_det/": {
+                "avg/": {str(i): a for i, a in enumerate(constraints_violation_det_mean)},
+                "max/": {str(i): a for i, a in enumerate(constraints_violation_det_max)}
+            },
             "Stats/": {
                 "mean_duration": mean_duration,
-                "hit_time": time_to_hit,
-                "max_puck_vel": max_puck_vel,
-                 "episode_length": episode_length,
+                "box_pos_dist": box_pos_dist,
+                "box_rot_dist": box_rot_dist,
+                "energy": energy,
+                "episode_length": episode_length,
             },
             "Constraints/": {
-                    "joint_pos": np.mean(dataset_info['joint_pos_constraint']),
-                    "joint_vel": np.mean(dataset_info['joint_vel_constraint']),
-                    "ee_xlb": np.mean(dataset_info['ee_xlb_constraint']),
-                    "ee_ylb": np.mean(dataset_info['ee_ylb_constraint']),
-                    "ee_yub": np.mean(dataset_info['ee_yub_constraint']),
-                    "ee_zlb": np.mean(dataset_info['ee_zlb_constraint']),
-                    "ee_zub": np.mean(dataset_info['ee_zub_constraint']),
-                    "ee_zeb": np.mean(dataset_info['ee_zeb_constraint']),
-                }
+                "joint_pos": np.mean(dataset_info['joint_pos_constraint']),
+                "joint_vel": np.mean(dataset_info['joint_vel_constraint']),
+                "rod_tip_pos_constraint": np.mean(dataset_info['rod_tip_pos_constraint']),
+                "qpos_constraint": np.mean(dataset_info['qpos_constraint']),
+                "qvel_constraint": np.mean(dataset_info['qvel_constraint']),
+            }                
         }, step=epoch)
         logger.info(f"BEST J_det: {best_J_det}")
         logger.info(f"BEST J_sto: {best_J_sto}")
@@ -318,28 +283,21 @@ def compute_metrics(core, eval_params):
     eps_length = dataset.episodes_length
     success = 0
     current_idx = 0
-    time_to_hit = []
-    max_puck_vel = []
-    puck_poses = []
-    scored = []
+    box_goal_pos_dist = []
+    box_goal_rot_dist = []
+    energy = []
     for episode_len in eps_length:
         success += dataset.info["success"][current_idx + episode_len - 1]
-        hit_time = dataset.info["hit_time"][current_idx + episode_len - 1]
-        puck_poses.append(dataset.state[current_idx, :2])
-        scored.append(dataset.info["success"][current_idx + episode_len - 1])
-        if hit_time > 0:
-            time_to_hit.append(hit_time)
-        max_puck_vel.append(np.max(dataset.info["puck_velocity"][current_idx:current_idx + episode_len]))
+        box_goal_pos_dist.append(dataset.info["box_goal_pos_dist"][current_idx + episode_len - 1])
+        box_goal_rot_dist.append(dataset.info["box_goal_rot_dist"][current_idx + episode_len - 1])
+        energy.append(dataset.info["episode_energy"][current_idx + episode_len - 1])
         current_idx += episode_len
     success /= len(eps_length)
-
-    puck_poses = np.array(puck_poses)
-    scored = np.array(scored).astype(bool)
 
     state = dataset.state
     action = dataset.action
 
-    return J, R, success, state, action, np.mean(time_to_hit), np.mean(max_puck_vel), np.mean(eps_length), dataset.info
+    return J, R, success, state, action, np.mean(box_goal_pos_dist), np.mean(box_goal_rot_dist), np.mean(energy), eps_length, dataset.info
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 from glob import glob
 from time import perf_counter
-from experiments.air_hockey_deploy import load_env_agent
+from air_hockey_deploy import load_env_agent
 import os
 import sys
 import numpy as np
@@ -77,13 +77,13 @@ def experiment(n_eval_episodes: int = 100,#00,
         render=render
     )
 
-    model_type = "ours"
+    #model_type = "ours"
     #model_id = "7-1382"
 
     #model_type = "ours_unstructured"
     #model_id = "11-2140"
 
-    #model_type = "promp"
+    model_type = "promp"
     #model_id = "0-1749"
 
     #model_type = "prodmp"
@@ -97,7 +97,7 @@ def experiment(n_eval_episodes: int = 100,#00,
     #agent_path = os.path.join(os.path.dirname(__file__), "trained_models/air_hockey/ours_unstructured/agent-11-2140.msh")
     #agent_path = os.path.join(os.path.dirname(__file__), f"trained_models/air_hockey/{model_type}/agent-{model_id}.msh")
 
-    agent_paths = glob(os.path.join(os.path.dirname(__file__), f"trained_models/air_hockey/{model_type}/*.msh"))
+    agent_paths = glob(os.path.join(os.path.dirname(__file__), f"trained_models/air_hockey_fixed/{model_type}/*.msh"))
     for agent_path in agent_paths:
         model_id = os.path.basename(agent_path).split(".")[0].replace("agent-", "")
         env, agent = load_env_agent(agent_path)
@@ -135,7 +135,7 @@ def experiment(n_eval_episodes: int = 100,#00,
             ee_zeb_constraint=ee_zeb
         )
 
-        save_path = os.path.join(os.path.dirname(__file__), f"../paper/results/air_hockey/{model_type}")
+        save_path = os.path.join(os.path.dirname(__file__), f"../paper/results/air_hockey_fixed/{model_type}")
         os.makedirs(save_path, exist_ok=True)
         np.savez(os.path.join(save_path, f"{model_id}.npz"), **results)
 

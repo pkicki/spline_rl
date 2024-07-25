@@ -164,6 +164,10 @@ class BSMPPolicy(Policy):
             q_dot = q_dot.detach().numpy()
             q_ddot = q_ddot.detach().numpy()
             t = t.detach().numpy()
+            #for i in range(q.shape[-1]):
+            #    plt.plot(t[0], q[0, :, i], label=f'q_{i}')
+            #plt.legend()
+            #plt.show()
             duration = duration.detach().numpy()
             self.q = interp1d(t[0], q[0], axis=0)
             self.q_dot = interp1d(t[0], q_dot[0], axis=0)

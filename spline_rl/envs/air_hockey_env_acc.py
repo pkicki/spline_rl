@@ -54,7 +54,7 @@ class AirHockeyAccEnv(AccelerationControl, AirHockeySingle):
             raise ValueError("Unknown reward type")
 
         # Compute EE Constraints Bounds
-        self.ee_z_eb = self.env_info['robot']['ee_desired_height']
+        self.ee_z_eb = 0.06#self.env_info['robot']['ee_desired_height']
         self.ee_z_lb = self.ee_z_eb - 0.02
         self.ee_z_ub = self.ee_z_eb + 0.02
 
@@ -247,11 +247,12 @@ class AirHockeyAccEnv(AccelerationControl, AirHockeySingle):
         wr_pos = self._data.body("iiwa_1/link_6").xpos - pos_offset
         el_pos = self._data.body("iiwa_1/link_4").xpos - pos_offset
 
+        ee_z = self._data.body("iiwa_1/striker_mallet").xpos[-1]
         x_lb = self.ee_x_lb - ee_pos[0]
         y_lb = self.ee_y_lb - ee_pos[1]
         y_ub = ee_pos[1] - self.ee_y_ub
-        z_lb = self.ee_z_lb - ee_pos[2]
-        z_ub = ee_pos[2] - self.ee_z_ub
+        z_lb = self.ee_z_lb - ee_z
+        z_ub = ee_z - self.ee_z_ub
         y_b = np.maximum(y_lb, y_ub)
         z_b = np.maximum(z_lb, z_ub)
 
@@ -267,15 +268,15 @@ class AirHockeyAccEnv(AccelerationControl, AirHockeySingle):
         task_info['ee_xlb_constraint'] = np.maximum(self.ee_x_lb - ee_pos[0], 0)
         task_info['ee_ylb_constraint'] = np.maximum(self.ee_y_lb - ee_pos[1], 0)
         task_info['ee_yub_constraint'] = np.maximum(ee_pos[1] - self.ee_y_ub, 0)
-        task_info['ee_zeb_constraint'] = np.abs(ee_pos[2] - self.ee_z_eb)
-        task_info['ee_zlb_constraint'] = np.maximum(self.ee_z_lb - ee_pos[2], 0)
-        task_info['ee_zub_constraint'] = np.maximum(ee_pos[2] - self.ee_z_ub, 0)
+        task_info['ee_zeb_constraint'] = np.abs(ee_z - self.ee_z_eb)
+        task_info['ee_zlb_constraint'] = np.maximum(self.ee_z_eb - ee_z, 0)
+        task_info['ee_zub_constraint'] = np.maximum(ee_z - self.ee_z_eb, 0)
 
         task_info["success"] = puck_pos[0] - (self.env_info['table']['length'] / 2 - self.env_info['puck']['radius']) > 0 and \
                                np.abs(puck_pos[1]) - self.env_info['table']['goal_width'] / 2 < 0
 
         puck_mallet_dist = self.env_info['puck']['radius'] + self.env_info['mallet']['radius'] + 5e-3
-        if self.hit_time < 0 and np.linalg.norm(puck_pos[:2] - ee_pos[:2]) < puck_mallet_dist and np.abs(ee_pos[2] - 0.065) < 0.02:
+        if self.hit_time < 0 and np.linalg.norm(puck_pos[:2] - ee_pos[:2]) < puck_mallet_dist and np.abs(ee_z - self.ee_z_eb) < 0.02:
             self.hit_time = self._data.time
         task_info["hit_time"] = self.hit_time
         task_info["puck_velocity"] = np.linalg.norm(puck_vel[:2])

@@ -97,6 +97,12 @@ if __name__ == '__main__':
     ppolag_J_path = os.path.join(os.path.dirname(__file__), results_dir,  "ppolag_J_sto.csv")
     ppolag_J_m, ppolag_J_s, ppolag_steps_m, ppolag_steps_s = read_stats(ppolag_J_path)
 
+    trpolag_J_path = os.path.join(os.path.dirname(__file__), results_dir,  "trpolag_J_sto.csv")
+    trpolag_J_m, trpolag_J_s, trpolag_steps_m, trpolag_steps_s = read_stats(trpolag_J_path)
+
+    pcpo_J_path = os.path.join(os.path.dirname(__file__), results_dir,  "pcpo_J_sto.csv")
+    pcpo_J_m, pcpo_J_s, pcpo_steps_m, pcpo_steps_s = read_stats(pcpo_J_path)
+
     ours_uns_J_path = os.path.join(os.path.dirname(__file__), results_dir,  "ours_unstructured_J_sto.csv")
     ours_uns_J_m, ours_uns_J_s, ours_uns_steps_m, ours_uns_steps_s = read_stats(ours_uns_J_path)
 
@@ -124,9 +130,13 @@ if __name__ == '__main__':
     plt.fill_between(prodmp_steps_m, prodmp_J_m - prodmp_J_s, prodmp_J_m + prodmp_J_s, alpha=0.2)
     plt.plot(atacom_sac_steps_m, atacom_sac_J_m, label='ATACOM-SAC')
     plt.fill_between(atacom_sac_steps_m, atacom_sac_J_m - atacom_sac_J_s, atacom_sac_J_m + atacom_sac_J_s, alpha=0.2)
+    plt.plot(trpolag_steps_m, trpolag_J_m, label='TRPOLag')
+    plt.fill_between(trpolag_steps_m, trpolag_J_m - trpolag_J_s, trpolag_J_m + trpolag_J_s, alpha=0.2)
     plt.plot(ppolag_steps_m, ppolag_J_m, label='PPOLag')
     plt.fill_between(ppolag_steps_m, ppolag_J_m - ppolag_J_s, ppolag_J_m + ppolag_J_s, alpha=0.2)
-    plt.xlim(0, 2.6e7)
+    plt.plot(pcpo_steps_m, pcpo_J_m, label='PCPO')
+    plt.fill_between(pcpo_steps_m, pcpo_J_m - pcpo_J_s, pcpo_J_m + pcpo_J_s, alpha=0.2)
+    plt.xlim(0, 2.35e7)
     plt.ylim(0, 110.)
     plt.xlabel('Steps')
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12),
