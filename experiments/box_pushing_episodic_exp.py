@@ -25,7 +25,7 @@ os.environ["WANDB_START_METHOD"] = "thread"
 @single_experiment
 def experiment(env: str = 'box_pushing',
                #group_name: str = "dummy",
-               group_name: str = "base_run_bsmp_box_pushing",
+               group_name: str = "bsmp_box_pushing_noenergytcplosses_betterexplore",
                n_envs: int = 1,
                alg: str = "bsmp_eppo_box_pushing",
                n_epochs: int = 5000,
@@ -58,7 +58,7 @@ def experiment(env: str = 'box_pushing',
                entropy_lb_ep: int = 1000,
                t_scale: float = 1.0,
                q_scale: float = 1. / 50.,
-               q_d_scale: float = 1. / 150.,
+               q_d_scale: float = 1. / 50.,
                q_dot_d_scale: float = 1. / 50.,
                q_ddot_d_scale: float = 1.0,
 
