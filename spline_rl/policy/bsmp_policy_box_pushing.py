@@ -31,8 +31,8 @@ class BSMPPolicyBoxPushing(BSMPPolicy):
         for i in range(7):
             self._data.joint("panda_joint" + str(i + 1)).qpos = q[i]
         mujoco.mj_fwdPosition(self._model, self._data)
-        pos = self._data.body("tcp").xpos
-        diff_x = desired_pos - pos
+        rod_tip_pos = self._data.site("rod_tip").xpos
+        diff_x = desired_pos - rod_tip_pos
         return np.linalg.norm(diff_x)
 
     def inverse_kinematics(self, pos, q0):
@@ -51,8 +51,11 @@ class BSMPPolicyBoxPushing(BSMPPolicy):
         trainable_q_d = torch.tanh(trainable_q_cps[:, -1:] * self.q_d_scale) * np.pi
 
         q_d_s = []
+        desired_tip_pos = box_pos_d.detach().numpy()
+        desired_tip_pos[..., -1] = 0.045
+        q_0_np = q_0.detach().numpy()
         for k in range(q_0.shape[0]):
-            q_d = self.inverse_kinematics(box_pos_d[k].detach().numpy(), q_0[k].detach().numpy())
+            q_d = self.inverse_kinematics(desired_tip_pos[k], q_0_np[k])
             q_d_s.append(q_d)
         q_d_bias = torch.tensor(np.array(q_d_s))[:, None]
         q_d = q_d_bias + trainable_q_d 

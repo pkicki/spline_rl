@@ -6,6 +6,7 @@ from time import perf_counter
 
 from storm_kit.differentiable_robot_model.differentiable_robot_model import DifferentiableRobotModel
 
+from spline_rl.utils.constants import BOX_PUSHING_ROD_MINIMUM_HEIGHT
 from spline_rl.utils.utils import equality_loss, huber, limit_loss
 
 
@@ -195,7 +196,7 @@ class BoxPushingConstraints(Constraint):
         self.q_max = q_max
         self.q_dot_max = q_dot_max
         self.q_ddot_max = q_ddot_max
-        self.ee_z_lb = 0.035
+        self.ee_z_lb = BOX_PUSHING_ROD_MINIMUM_HEIGHT
         self.violation_limits = np.array([1e-3] * 7 + [1e-4] * 7 + [1e-5] * 7 + [5e-6] * 1)
         self.constraints_num = 22
         self.urdf_path = os.path.join(os.path.dirname(__file__), "../urdf/panda.urdf")
@@ -206,7 +207,7 @@ class BoxPushingConstraints(Constraint):
         q_ = torch.cat([q_, torch.zeros((q_.shape[0], 9 - q_.shape[1]))], dim=-1) # TODO adjust size
         q_dot_ = q_dot.reshape((-1, q_dot.shape[-1]))
         q_dot_ = torch.cat([q_dot_, torch.zeros((q_dot_.shape[0], 9 - q_dot_.shape[1]))], dim=-1)
-        ee_pos, ee_rot = self.robot.compute_forward_kinematics(q_, q_dot_, "panda_rightfinger") # TODO: fix this
+        ee_pos, ee_rot = self.robot.compute_forward_kinematics(q_, q_dot_, "push_rod_tip")
         ee_pos = ee_pos.reshape((q.shape[0], q.shape[1], 3))
         ee_rot = ee_rot.reshape((q.shape[0], q.shape[1], 3, 3))
         return ee_pos, ee_rot
@@ -228,7 +229,7 @@ class BoxPushingConstraints(Constraint):
 
         ee_pos, ee_rot = self.compute_forward_kinematics(q, q_dot)
 
-        z_ee_loss_low = limit_loss(self.ee_z_lb, dt, ee_pos[..., 0])[..., None]
+        z_ee_loss_low = limit_loss(self.ee_z_lb, dt, ee_pos[..., -1])[..., None]
 
         constraint_losses = torch.cat([q_loss,
                                        q_dot_loss,
