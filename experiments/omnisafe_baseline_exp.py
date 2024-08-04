@@ -67,7 +67,7 @@ def experiment(
             "cost_limit": cost_limit,
             "lagrangian_multiplier_init": 1.,
             "lambda_lr": lambda_lr,
-        },
+        }
 
     if alg == "PPOLag":
         custom_cfgs["algo_cfgs"]["clip"] = 0.05
