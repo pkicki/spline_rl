@@ -255,8 +255,10 @@ class AirHockeyAccEnv(AccelerationControl, AirHockeySingle):
         z_ub = ee_z - self.ee_z_ub
         y_b = np.maximum(y_lb, y_ub)
         z_b = np.maximum(z_lb, z_ub)
+        z_eb = np.abs(ee_z - self.ee_z_eb)
 
-        constraints = np.concatenate([q_constraint, dq_constraint, [x_lb, y_b, z_b]])
+        #constraints = np.concatenate([q_constraint, dq_constraint, [x_lb, y_b, z_b]])
+        constraints = np.concatenate([q_constraint, dq_constraint, [x_lb, y_b, z_eb]])
         constraint_violations = np.maximum(constraints, 0)
         task_info = {'cost': constraint_violations}
 
