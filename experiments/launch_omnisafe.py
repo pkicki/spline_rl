@@ -39,7 +39,8 @@ alg = 'PPOLag'
 #alg = 'TRPOLag'
 #alg = 'PCPO'
 
-experiment_name = f'omnisafe_{env}_{alg}'
+postfix = "equality"
+experiment_name = f'omnisafe_{env}_{alg}_{postfix}'
 
 launcher = Launcher(
     exp_name=experiment_name,
@@ -63,10 +64,10 @@ launcher = Launcher(
 launcher.add_experiment(
     alg=alg,
     env=env,
-    group_name=experiment_name,
     avg_steps_per_episode=avg_steps_per_episode,
     cost_limit=cost_limit,
     lambda_lr=lambda_lr,
+    group_name_postfix=postfix,
     #mode="disabled",
 )
 launcher.run(LOCAL, TEST)

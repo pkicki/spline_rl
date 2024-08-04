@@ -16,11 +16,12 @@ def experiment(
     critic_lr: float = 5e-4,
     cost_limit: float =  1e1,
     lambda_lr: float = 0.01,
+    group_name_postfix: str = '',
     results_dir: str = './logs',
     seed: int = 444,
     **kwargs
 ):
-    wandb_group = f"{alg}_{env}_cl{cost_limit}"
+    wandb_group = f"{alg}_{env}_cl{cost_limit}_{group_name_postfix}"
     if "Lag" in alg:
         wandb_group += f"_clr{lambda_lr}"
     custom_cfgs = {
