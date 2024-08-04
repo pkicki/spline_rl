@@ -55,8 +55,8 @@ class AirHockeyAccEnv(AccelerationControl, AirHockeySingle):
 
         # Compute EE Constraints Bounds
         self.ee_z_eb = 0.06#self.env_info['robot']['ee_desired_height']
-        self.ee_z_lb = self.ee_z_eb - 0.02
-        self.ee_z_ub = self.ee_z_eb + 0.02
+        self.ee_z_lb = self.ee_z_eb - 0.01
+        self.ee_z_ub = self.ee_z_eb + 0.01
 
         self.ee_x_lb = - self.env_info['robot']['base_frame'][0][0, 3] \
                        - self.env_info['table']['length'] / 2 + self.env_info['mallet']['radius']
