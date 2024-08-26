@@ -1,0 +1,582 @@
+<?xml version="1.0" ?>
+<robot name="converted_robot">
+   <link name="world">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.0"/>
+         <inertia ixx="0.0" iyy="0.0" izz="0.0" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+   </link>
+   <link name="origin_base">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="100.0"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="dual_ur_stand_ring">
+         <origin xyz="-0.00042199117760292594 -0.0004115072715111762 0.010853554513204959" rpy="-1.6022833552374744 -1.5701665565950693 -2.3537753518342357"/>
+         <geometry>
+            <mesh filename="converted_dual_ur_stand_ring.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="fixed" name="world2origin_base">
+      <parent link="world"/>
+      <child link="origin_base"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+   </joint>
+   <link name="dual_ur_stand">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="20.0"/>
+         <inertia ixx="0.25" iyy="0.25" izz="0.25" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="dual_ur_stand">
+         <origin xyz="3.383000566199109e-05 2.017077152058954e-09 0.2597167953019423" rpy="0.0007416385135932124 -2.5429938155241416e-09 1.570799755680337"/>
+         <geometry>
+            <mesh filename="converted_dual_ur_stand.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="ur_stand_joint">
+      <parent link="origin_base"/>
+      <child link="dual_ur_stand"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <axis xyz="0.0 0.0 1.0"/>
+      <limit lower="-6.28319" upper="6.28319" effort="100" velocity="100"/>
+   </joint>
+   <link name="base_link_ur5right">
+      <inertial>
+         <origin xyz="-0.00030467910436184824 -0.00029768628230515974 0.009558165220441289" rpy="-1.6010375331506113 -1.570161978629185 -2.354559596401888"/>
+         <mass value="0.3434595570509624"/>
+         <inertia ixx="0.0008497854593475304" iyy="0.000439131575302873" izz="0.0004336965675309395" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link0">
+         <origin xyz="-0.00030467910436184824 -0.00029768628230515974 0.009558165220441289" rpy="-1.6010375331504265 -1.5701619786291847 -2.3545595964020727"/>
+         <geometry>
+            <mesh filename="converted_link0.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="fixed" name="dual_ur_stand2base_link_ur5right_fixed">
+      <parent link="dual_ur_stand"/>
+      <child link="base_link_ur5right"/>
+      <origin xyz="0.15 0.0 0.447889" rpy="0.0 0.785398 0.0"/>
+   </joint>
+   <link name="link1_ur5right">
+      <inertial>
+         <origin xyz="0.0 -0.02561 0.00193" rpy="0.0 0.0 0.0"/>
+         <mass value="3.761"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link1_connector">
+         <origin xyz="1.4570267261277963e-11 -4.001779643118932e-19 0.00400000065566293" rpy="3.141592653589793 -1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="converted_link1_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link1">
+         <origin xyz="-0.012176110513144798 -1.0912744129521318e-07 0.058087457533068404" rpy="3.141574065305313 -1.0216144756009822 -9.702572216330196e-06"/>
+         <geometry>
+            <mesh filename="converted_link1.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link1_cap">
+         <origin xyz="0.008169411099457553 4.7566825640501905e-06 0.11318482639741904" rpy="-3.13729916167605 -1.2453932470664353 -9.16562944179855e-05"/>
+         <geometry>
+            <mesh filename="converted_link1_cap.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint0_ur5right">
+      <parent link="base_link_ur5right"/>
+      <child link="link1_ur5right"/>
+      <origin xyz="0.0 0.0 0.0213" rpy="0.0 0.0 3.14159"/>
+      <axis xyz="0.0 0.0 1.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="link2_ur5right">
+      <inertial>
+         <origin xyz="-0.04706 0.0 0.2125" rpy="0.0 0.0 0.0"/>
+         <mass value="8.058"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link2_connector">
+         <origin xyz="-0.004000000655407118 2.5456141280080066e-11 2.835988027758122e-09" rpy="0.0 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link2_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link2">
+         <origin xyz="-0.06106598255958729 -5.53731372116567e-11 0.2125000024658367" rpy="0.0 0.0 1.5707963267948966"/>
+         <geometry>
+            <mesh filename="converted_link2.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link2_cap">
+         <origin xyz="-0.1096484178602328 -7.09458332139945e-05 0.21184783387256678" rpy="1.5928316741488222e-05 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link2_cap.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link2_tube">
+         <origin xyz="-0.06791131858609385 -4.338227252065948e-06 0.21219877458644867" rpy="3.887150601400435e-09 3.0498152165270298e-05 1.5709237820766098"/>
+         <geometry>
+            <mesh filename="converted_link2_tube.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint1_ur5right">
+      <parent link="link1_ur5right"/>
+      <child link="link2_ur5right"/>
+      <origin xyz="-0.0663 0.0 0.0679" rpy="0.5 0.0 0.0"/>
+      <axis xyz="-1.0 0.0 0.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="link3_ur5right">
+      <inertial>
+         <origin xyz="0.0478 0.0 0.15" rpy="0.0 0.0 0.0"/>
+         <mass value="2.846"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link3a_connector">
+         <origin xyz="0.0040000006556510925 3.854474922705115e-19 -2.928999320413698e-09" rpy="0.0 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link3a_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3a">
+         <origin xyz="0.04362648187000698 1.3322968498102586e-07 0.011419760384678368" rpy="-8.751660116822237e-06 0.3809614957260008 5.286192812753697e-06"/>
+         <geometry>
+            <mesh filename="converted_link3a.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3_tube">
+         <origin xyz="0.058999999980686016 -1.9955154843726296e-10 0.20299999293274262" rpy="0.0 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link3_tube.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3b_connector">
+         <origin xyz="0.05900619107341218 -9.348989080816584e-05 0.3433999972431905" rpy="1.5707963267948966 -1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="converted_link3b_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3b_connector2">
+         <origin xyz="0.058999999967207756 -4.868768716028646e-11 0.3435020917887905" rpy="1.5707963267948966 -1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="converted_link3b_connector2.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3b">
+         <origin xyz="0.05236720007708202 -4.506714089853499e-05 0.3842092351656602" rpy="-0.00013136554035294104 -0.5962861257895239 0.00012049906000210153"/>
+         <geometry>
+            <mesh filename="converted_link3b.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3_cap">
+         <origin xyz="0.09871153734407968 3.003124408397419e-05 0.39578493488200334" rpy="-0.06161674483600575 -0.325846005746933 -0.00011031876098541865"/>
+         <geometry>
+            <mesh filename="converted_link3_cap.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint2_ur5right">
+      <parent link="link2_ur5right"/>
+      <child link="link3_ur5right"/>
+      <origin xyz="-0.008 0.0 0.425" rpy="2.2 0.0 0.0"/>
+      <axis xyz="1.0 0.0 0.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="link4_ur5right">
+      <inertial>
+         <origin xyz="-0.05796 -0.0018 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="1.37"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link4_connector">
+         <origin xyz="-0.00392500119011266 1.2433949328626672e-11 2.870445179401284e-08" rpy="0.0 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link4_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link4">
+         <origin xyz="-0.045209218208819645 -4.997304380026823e-07 0.006632814142349832" rpy="3.1415094966915973 -0.9745100297147521 0.00017740092264073581"/>
+         <geometry>
+            <mesh filename="converted_link4.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link4_cap">
+         <origin xyz="-0.05703508958027077 -3.0115938662791465e-05 -0.03971144039960583" rpy="-3.0793594762885625 -1.2449429736522588 -0.0003110150436762549"/>
+         <geometry>
+            <mesh filename="converted_link4_cap.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint3_ur5right">
+      <parent link="link3_ur5right"/>
+      <child link="link4_ur5right"/>
+      <origin xyz="0.0173 0.0 0.3922" rpy="-1.1 0.0 0.0"/>
+      <axis xyz="-1.0 0.0 0.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="link5_ur5right">
+      <inertial>
+         <origin xyz="0.0018 0.0 0.01634" rpy="0.0 0.0 0.0"/>
+         <mass value="1.3"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link5_connector">
+         <origin xyz="-2.7179467097693827e-10 -4.4234158405602195e-20 0.003925025521208987" rpy="1.5707963267948966 -1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="converted_link5_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link5">
+         <origin xyz="-0.006632804794239365 5.002212492734246e-07 0.04510921375792022" rpy="-0.00013129973172922404 -0.5962870802241271 0.00012039670911878437"/>
+         <geometry>
+            <mesh filename="converted_link5.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link5_cap">
+         <origin xyz="0.040011560084351055 3.0408178275149154e-05 0.05678499309400591" rpy="-0.061470230339380774 -0.32584848673575517 -0.0001036789165209627"/>
+         <geometry>
+            <mesh filename="converted_link5_cap.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint4_ur5right">
+      <parent link="link4_ur5right"/>
+      <child link="link5_ur5right"/>
+      <origin xyz="-0.05325 0.0 0.04165" rpy="0.0 0.0 0.8"/>
+      <axis xyz="0.0 0.0 1.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="link6_ur5right">
+      <inertial>
+         <origin xyz="-0.038841 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.365"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link6_connector">
+         <origin xyz="-0.003925003169173134 1.2433910265722856e-11 3.850428888075489e-08" rpy="0.0 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link6_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link6">
+         <origin xyz="-0.022805060630345535 -1.199924251445483e-07 0.0003573755456176856" rpy="0.0001646075091794551 0.00031599912283386544 3.0527386064458723e-06"/>
+         <geometry>
+            <mesh filename="converted_link6.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint5_ur5right">
+      <parent link="link5_ur5right"/>
+      <child link="link6_ur5right"/>
+      <origin xyz="-0.04165 0.0 0.05305" rpy="0.0 0.0 0.0"/>
+      <axis xyz="-1.0 0.0 0.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="EE_ur5right"></link>
+   <joint type="fixed" name="link6_ur5right_to_EE_ur5right">
+      <parent link="link6_ur5right"/>
+      <child link="EE_ur5right"/>
+      <origin xyz="0.0 0.0 0.145" rpy="0.0 -1.5707963267948963 0.0"/>
+   </joint>
+
+   <link name="base_link_ur5left">
+      <inertial>
+         <origin xyz="-0.00030467910436184824 -0.00029768628230515974 0.009558165220441289" rpy="-1.6010375331506113 -1.570161978629185 -2.354559596401888"/>
+         <mass value="0.3434595570509624"/>
+         <inertia ixx="0.0008497854593475304" iyy="0.000439131575302873" izz="0.0004336965675309395" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link0">
+         <origin xyz="-0.00030467910436184824 -0.00029768628230515974 0.009558165220441289" rpy="-1.6010375331504265 -1.5701619786291847 -2.3545595964020727"/>
+         <geometry>
+            <mesh filename="converted_link0.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="fixed" name="dual_ur_stand2base_link_ur5left_fixed">
+      <parent link="dual_ur_stand"/>
+      <child link="base_link_ur5left"/>
+      <origin xyz="-0.15 0.0 0.447889" rpy="0.0 -0.785398 0.0"/>
+   </joint>
+   <link name="link1_ur5left">
+      <inertial>
+         <origin xyz="0.0 -0.02561 0.00193" rpy="0.0 0.0 0.0"/>
+         <mass value="3.761"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link1_connector">
+         <origin xyz="1.4570267261277963e-11 -4.001779643118932e-19 0.00400000065566293" rpy="3.141592653589793 -1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="converted_link1_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link1">
+         <origin xyz="-0.012176110513144798 -1.0912744129521318e-07 0.058087457533068404" rpy="3.141574065305313 -1.0216144756009822 -9.702572216330196e-06"/>
+         <geometry>
+            <mesh filename="converted_link1.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link1_cap">
+         <origin xyz="0.008169411099457553 4.7566825640501905e-06 0.11318482639741904" rpy="-3.13729916167605 -1.2453932470664353 -9.16562944179855e-05"/>
+         <geometry>
+            <mesh filename="converted_link1_cap.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint0_ur5left">
+      <parent link="base_link_ur5left"/>
+      <child link="link1_ur5left"/>
+      <origin xyz="0.0 0.0 0.0213" rpy="0.0 0.0 0.0"/>
+      <axis xyz="0.0 0.0 1.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="link2_ur5left">
+      <inertial>
+         <origin xyz="-0.04706 0.0 0.2125" rpy="0.0 0.0 0.0"/>
+         <mass value="8.058"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link2_connector">
+         <origin xyz="-0.004000000655407118 2.5456141280080066e-11 2.835988027758122e-09" rpy="0.0 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link2_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link2">
+         <origin xyz="-0.06106598255958729 -5.53731372116567e-11 0.2125000024658367" rpy="0.0 0.0 1.5707963267948966"/>
+         <geometry>
+            <mesh filename="converted_link2.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link2_cap">
+         <origin xyz="-0.1096484178602328 -7.09458332139945e-05 0.21184783387256678" rpy="1.5928316741488222e-05 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link2_cap.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link2_tube">
+         <origin xyz="-0.06791131858609385 -4.338227252065948e-06 0.21219877458644867" rpy="3.887150601400435e-09 3.0498152165270298e-05 1.5709237820766098"/>
+         <geometry>
+            <mesh filename="converted_link2_tube.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint1_ur5left">
+      <parent link="link1_ur5left"/>
+      <child link="link2_ur5left"/>
+      <origin xyz="-0.0663 0.0 0.0679" rpy="-0.5 0.0 0.0"/>
+      <axis xyz="-1.0 0.0 0.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="link3_ur5left">
+      <inertial>
+         <origin xyz="0.0478 0.0 0.15" rpy="0.0 0.0 0.0"/>
+         <mass value="2.846"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link3a_connector">
+         <origin xyz="0.0040000006556510925 3.854474922705115e-19 -2.928999320413698e-09" rpy="0.0 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link3a_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3a">
+         <origin xyz="0.04362648187000698 1.3322968498102586e-07 0.011419760384678368" rpy="-8.751660116822237e-06 0.3809614957260008 5.286192812753697e-06"/>
+         <geometry>
+            <mesh filename="converted_link3a.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3_tube">
+         <origin xyz="0.058999999980686016 -1.9955154843726296e-10 0.20299999293274262" rpy="0.0 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link3_tube.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3b_connector">
+         <origin xyz="0.05900619107341218 -9.348989080816584e-05 0.3433999972431905" rpy="1.5707963267948966 -1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="converted_link3b_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3b_connector2">
+         <origin xyz="0.058999999967207756 -4.868768716028646e-11 0.3435020917887905" rpy="1.5707963267948966 -1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="converted_link3b_connector2.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3b">
+         <origin xyz="0.05236720007708202 -4.506714089853499e-05 0.3842092351656602" rpy="-0.00013136554035294104 -0.5962861257895239 0.00012049906000210153"/>
+         <geometry>
+            <mesh filename="converted_link3b.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link3_cap">
+         <origin xyz="0.09871153734407968 3.003124408397419e-05 0.39578493488200334" rpy="-0.06161674483600575 -0.325846005746933 -0.00011031876098541865"/>
+         <geometry>
+            <mesh filename="converted_link3_cap.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint2_ur5left">
+      <parent link="link2_ur5left"/>
+      <child link="link3_ur5left"/>
+      <origin xyz="-0.008 0.0 0.425" rpy="-2.2 0.0 0.0"/>
+      <axis xyz="1.0 0.0 0.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="link4_ur5left">
+      <inertial>
+         <origin xyz="-0.05796 -0.0018 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="1.37"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link4_connector">
+         <origin xyz="-0.00392500119011266 1.2433949328626672e-11 2.870445179401284e-08" rpy="0.0 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link4_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link4">
+         <origin xyz="-0.045209218208819645 -4.997304380026823e-07 0.006632814142349832" rpy="3.1415094966915973 -0.9745100297147521 0.00017740092264073581"/>
+         <geometry>
+            <mesh filename="converted_link4.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link4_cap">
+         <origin xyz="-0.05703508958027077 -3.0115938662791465e-05 -0.03971144039960583" rpy="-3.0793594762885625 -1.2449429736522588 -0.0003110150436762549"/>
+         <geometry>
+            <mesh filename="converted_link4_cap.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint3_ur5left">
+      <parent link="link3_ur5left"/>
+      <child link="link4_ur5left"/>
+      <origin xyz="0.0173 0.0 0.3922" rpy="1.1 0.0 0.0"/>
+      <axis xyz="-1.0 0.0 0.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="link5_ur5left">
+      <inertial>
+         <origin xyz="0.0018 0.0 0.01634" rpy="0.0 0.0 0.0"/>
+         <mass value="1.3"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link5_connector">
+         <origin xyz="-2.7179467097693827e-10 -4.4234158405602195e-20 0.003925025521208987" rpy="1.5707963267948966 -1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="converted_link5_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link5">
+         <origin xyz="-0.006632804794239365 5.002212492734246e-07 0.04510921375792022" rpy="-0.00013129973172922404 -0.5962870802241271 0.00012039670911878437"/>
+         <geometry>
+            <mesh filename="converted_link5.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link5_cap">
+         <origin xyz="0.040011560084351055 3.0408178275149154e-05 0.05678499309400591" rpy="-0.061470230339380774 -0.32584848673575517 -0.0001036789165209627"/>
+         <geometry>
+            <mesh filename="converted_link5_cap.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint4_ur5left">
+      <parent link="link4_ur5left"/>
+      <child link="link5_ur5left"/>
+      <origin xyz="-0.05325 0.0 0.04165" rpy="0.0 0.0 -0.8"/>
+      <axis xyz="0.0 0.0 1.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="link6_ur5left">
+      <inertial>
+         <origin xyz="-0.038841 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.365"/>
+         <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="link6_connector">
+         <origin xyz="-0.003925003169173134 1.2433910265722856e-11 3.850428888075489e-08" rpy="0.0 0.0 0.0"/>
+         <geometry>
+            <mesh filename="converted_link6_connector.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+      <visual name="link6">
+         <origin xyz="-0.022805060630345535 -1.199924251445483e-07 0.0003573755456176856" rpy="0.0001646075091794551 0.00031599912283386544 3.0527386064458723e-06"/>
+         <geometry>
+            <mesh filename="converted_link6.stl"/>
+         </geometry>
+         <material name="white"/>
+      </visual>
+   </link>
+   <joint type="revolute" name="joint5_ur5left">
+      <parent link="link5_ur5left"/>
+      <child link="link6_ur5left"/>
+      <origin xyz="-0.04165 0.0 0.05305" rpy="0.0 0.0 0.0"/>
+      <axis xyz="-1.0 0.0 0.0"/>
+      <limit lower="-6." upper="6." effort="100" velocity="100"/>
+   </joint>
+   <link name="EE_ur5left"></link>
+   <joint type="fixed" name="link6_ur5left_to_EE_ur5left">
+      <parent link="link6_ur5left"/>
+      <child link="EE_ur5left"/>
+      <origin xyz="0.0 0.0 0.145" rpy="0.0 -1.5707963267948963 0.0"/>
+   </joint>
+
+
+   <material name="white">
+      <color rgba="1 1 1 1"/>
+   </material>
+</robot>
