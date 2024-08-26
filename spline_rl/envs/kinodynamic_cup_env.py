@@ -116,6 +116,7 @@ class KinodynamicCupEnv(PositionControlIIWA, MuJoCo):
             [self._model.joint(f"iiwa_cup/joint_{i + 1}").range for i in range(7)]).T
         self.env_info['robot']['radius'] = 0.14
         self.env_info["rl_info"] = self.info
+        self.env_info['episode_duration'] = self.info.horizon * self.info.dt
 
         self.constraints = KinodynamicCupConstraints(
             q_max=self.env_info['robot']['joint_pos_limit'][1],

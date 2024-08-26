@@ -2,8 +2,10 @@ import os
 from spline_rl.utils.collisions import collision_with_box, simple_collision_with_box
 import torch
 import numpy as np
+from pytorch3d.transforms import so3_relative_angle
 from time import perf_counter
 
+import pytorch_kinematics as pk
 from storm_kit.differentiable_robot_model.differentiable_robot_model import DifferentiableRobotModel
 
 from spline_rl.utils.constants import BOX_PUSHING_ROD_MINIMUM_HEIGHT
@@ -237,3 +239,68 @@ class BoxPushingConstraints(Constraint):
                                        z_ee_loss_low], dim=-1)
         return constraint_losses
 
+
+class BimanualConstraints(Constraint):
+    def __init__(self, q_dot_max, q_ddot_max, ee_dist) -> None:
+        self.q_dot_max = q_dot_max
+        self.q_ddot_max = q_ddot_max
+        self.ee_dist = ee_dist
+        self.ee_vector = torch.tensor([0., ee_dist, 0.])
+        #self.violation_limits = np.array([1e-4] * 13 + [1e-5] * 13 + [1e-6] * 4)
+        #self.constraints_num = 30
+        self.violation_limits = np.array([1e-4] * 13 + [1e-5] * 13 + [1e-6] * 1)
+        self.constraints_num = 27
+        #self.urdf_path = os.path.join(os.path.dirname(__file__), "../urdf/dual_ur5.urdf")
+        #self.urdf_path = os.path.join(os.path.dirname(__file__), "../urdf/dual_ur5_gpt.urdf")
+        #self.robot = DifferentiableRobotModel(urdf_path=self.urdf_path, name="dual_ur5")
+        self.urdf_path = os.path.join(os.path.dirname(__file__), "../envs/data/dual_ur5_for_urdf_conversion.xml")
+        self.robot = pk.build_chain_from_mjcf(open(self.urdf_path).read())
+
+    def compute_forward_kinematics(self, q, q_dot):
+        q_ = q.reshape((-1, q.shape[-1]))
+        q_dot_ = q_dot.reshape((-1, q_dot.shape[-1]))
+        #left_ee_pos, left_ee_rot = self.robot.compute_forward_kinematics(q_, q_dot_, "EE_ur5left")
+        #right_ee_pos, right_ee_rot = self.robot.compute_forward_kinematics(q_, q_dot_, "EE_ur5right")
+        fk = self.robot.forward_kinematics(q_.to(torch.float32))
+        left_ee = fk["EE_ur5left"].get_matrix().to(torch.float64)
+        right_ee = fk["EE_ur5right"].get_matrix().to(torch.float64)
+        left_ee_pos = left_ee[:, :3, 3]
+        left_ee_rot = left_ee[:, :3, :3]
+        right_ee_pos = right_ee[:, :3, 3]
+        right_ee_rot = right_ee[:, :3, :3]
+        left_ee_pos = left_ee_pos.reshape((q.shape[0], q.shape[1], 3))
+        left_ee_rot = left_ee_rot.reshape((q.shape[0], q.shape[1], 3, 3))
+        right_ee_pos = right_ee_pos.reshape((q.shape[0], q.shape[1], 3))
+        right_ee_rot = right_ee_rot.reshape((q.shape[0], q.shape[1], 3, 3))
+        return left_ee_pos, left_ee_rot, right_ee_pos, right_ee_rot
+
+    def evaluate(self, q, q_dot, q_ddot, dt):
+        # TODO: make this shape adaptation more general and not hardcoded
+        dt_ = dt[..., None]
+        # Prepare the constraint limits tensors
+        q_dot_limits = torch.Tensor(self.q_dot_max)[None, None]
+        q_ddot_limits = torch.Tensor(self.q_ddot_max)[None, None]
+
+        q_dot_loss = limit_loss(torch.abs(q_dot), dt_, q_dot_limits)
+        q_ddot_loss = limit_loss(torch.abs(q_ddot), dt_, q_ddot_limits)
+
+        left_ee_pos, left_ee_rot, right_ee_pos, right_ee_rot = self.compute_forward_kinematics(q, q_dot)
+
+        left_right_vector = left_ee_pos - right_ee_pos
+        error_left = torch.abs(left_ee_rot @ left_right_vector[..., None])[..., 0]
+        error_right = torch.abs(right_ee_rot @ left_right_vector[..., None])[..., 0]
+        #z_error_left = torch.abs(left_ee_rot @ left_right_vector)[-1]
+        #z_error_right = torch.abs(right_ee_rot @ left_right_vector)[-1]
+
+        rot_loss = so3_relative_angle(left_ee_rot.reshape(-1, 3, 3), right_ee_rot.reshape(-1, 3, 3))
+        rot_loss = rot_loss.reshape(left_ee_rot.shape[:-2])
+
+        left_distance_loss = equality_loss(error_left, dt[..., None], self.ee_vector).sum(-1, keepdim=True)
+        right_distance_loss = equality_loss(error_right, dt[..., None], self.ee_vector).sum(-1, keepdim=True)
+        orientation_loss = equality_loss(rot_loss, dt, 0.)[..., None]
+
+        dist_ee_loss = equality_loss(torch.linalg.norm(left_ee_pos - right_ee_pos, axis=-1), dt, self.ee_dist)[..., None]
+
+        #constraint_losses = torch.cat([q_dot_loss, q_ddot_loss, dist_ee_loss, left_distance_loss, right_distance_loss, orientation_loss], dim=-1)
+        constraint_losses = torch.cat([q_dot_loss, q_ddot_loss, dist_ee_loss], dim=-1)
+        return constraint_losses

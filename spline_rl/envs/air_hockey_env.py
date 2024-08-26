@@ -70,6 +70,7 @@ class AirHockeyEnv(PositionControlIIWA, AirHockeySingle):
             high = high[:2]
         self.env_info['rl_info'].action_space = Box(low, high)
         self.env_info['rl_info'].interpolation_order = interpolation_order
+        self.env_info['episode_duration'] = self.info.dt * self.info.horizon
 
 
 

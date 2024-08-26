@@ -67,6 +67,19 @@ def unpack_data_box_pushing(x):
     box_pos_d = x[..., 2*n+7:2*n+10]
     box_rot_d = x[..., 2*n+10:2*n+14]
     return q, dq, box_pos, box_rot, box_pos_d, box_rot_d
+
+def unpack_data_bimanual(x):
+    n = 6
+    left_ee_pos = x[..., :3]
+    right_ee_pos = x[..., 3:6]
+    plate_pos = x[..., 6:9]
+    plate_rot = x[..., 9:13]
+    plate_vel = x[..., 13:19]
+    pegs_pos = x[..., 19:22]
+    pegs_rot = x[..., 22:26]
+    joints_pos = x[..., 26:26+2*n+1]
+    joints_vel = x[..., 26+2*n+1:26+4*n+2]
+    return joints_pos, joints_vel, left_ee_pos, right_ee_pos, plate_pos, plate_rot, plate_vel, pegs_pos, pegs_rot
     
 def project_entropy(chol, e_lb):
     a_dim = chol.size()[-1]

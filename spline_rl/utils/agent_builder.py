@@ -1,10 +1,3 @@
-from spline_rl.policy.bsmp_policy_box_pushing import BSMPPolicyBoxPushing
-from spline_rl.policy.bsmp_policy_kino import BSMPPolicyKino
-from spline_rl.policy.bsmp_unstructured_policy_kino import BSMPPolicyUnstructuredKino
-from spline_rl.policy.prodmp_policy_kino import ProDMPPolicyKino
-from spline_rl.policy.promp_policy_kino import ProMPPolicyKino
-from spline_rl.utils.box_pushing_network import BoxPushingConfigurationTimeNetworkWrapper, BoxPushingLogSigmaNetworkWrapper
-from spline_rl.utils.kino_network import KinoConfigurationTimeNetworkWrapper, KinoLogSigmaNetworkWrapper
 import torch
 
 from mushroom_rl.approximators import Regressor
@@ -15,11 +8,18 @@ from spline_rl.policy.bsmp_policy import BSMPPolicy
 from spline_rl.policy.bsmp_unstructured_policy import BSMPUnstructuredPolicy
 from spline_rl.policy.prodmp_policy import ProDMPPolicy
 from spline_rl.policy.promp_policy import ProMPPolicy
-from spline_rl.algorithm.bsmp_eppo import BSMPePPO
+from spline_rl.policy.bsmp_policy_bimanual import BSMPPolicyBimanual
+from spline_rl.policy.bsmp_policy_box_pushing import BSMPPolicyBoxPushing
+from spline_rl.policy.bsmp_policy_kino import BSMPPolicyKino
+from spline_rl.policy.bsmp_unstructured_policy_kino import BSMPPolicyUnstructuredKino
+from spline_rl.policy.prodmp_policy_kino import ProDMPPolicyKino
+from spline_rl.policy.promp_policy_kino import ProMPPolicyKino
 from spline_rl.policy.bsmp_policy_stop import BSMPPolicyStop
+from spline_rl.algorithm.bsmp_eppo import BSMPePPO
 from spline_rl.utils.context_builder import IdentityContextBuilder
-from spline_rl.utils.network import ConfigurationNetworkWrapper, ConfigurationTimeNetworkWrapper, LogSigmaNetworkWrapper
-from spline_rl.utils.value_network import BoxPushingValueNetwork, KinoValueNetwork, ValueNetwork
+from spline_rl.utils.basic_network import BasicConfigurationNetworkWrapper, BasicConfigurationTimeNetworkWrapper, BasicLogSigmaNetworkWrapper
+from spline_rl.utils.air_hockey_network import AirHockeyConfigurationNetworkWrapper, AirHockeyConfigurationTimeNetworkWrapper, AirHockeyLogSigmaNetworkWrapper
+from spline_rl.utils.value_network import AirHockeyValueNetwork, BasicValueNetwork
 
 
 
@@ -34,17 +34,10 @@ def agent_builder(env_info, agent_params):
     eppo_params = dict(n_epochs_policy=agent_params["n_epochs_policy"],
                        batch_size=agent_params["batch_size"],
                        eps_ppo=agent_params["eps_ppo"],
+                       kl_threshold=agent_params["kl_threshold"],
                        context_builder=IdentityContextBuilder(),
                        )
 
-    #if alg == "bsmp_eppo":
-    #    agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
-    #elif alg == "bsmp_eppo_unstructured":
-    #    agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
-    #elif alg == "bsmp_eppo_stop":
-    #    agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
-    #elif alg == "bsmp_eppo_kinodynamic":
-    #    agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
     if alg.startswith("bsmp"):
         agent = build_agent_BSMPePPO(env_info, eppo_params, agent_params)
     elif alg.startswith("pro"):
@@ -78,18 +71,32 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
     sigma_t = agent_params["sigma_init_t"] * torch.ones((n_trainable_t_pts))
     sigma = torch.cat([sigma_q.reshape(-1), sigma_t]).type(torch.FloatTensor)
 
-    if "kinodynamic" in agent_params["alg"]:
-        mu_network = KinoConfigurationTimeNetworkWrapper
-        logsigma_network = KinoLogSigmaNetworkWrapper
-        value_netwotk = KinoValueNetwork
-    if "box_pushing" in agent_params["alg"]:
-        mu_network = BoxPushingConfigurationTimeNetworkWrapper
-        logsigma_network = BoxPushingLogSigmaNetworkWrapper
-        value_netwotk = BoxPushingValueNetwork
+    #if "kinodynamic" in agent_params["alg"]:
+    #    mu_network = KinoConfigurationTimeNetworkWrapper
+    #    logsigma_network = KinoLogSigmaNetworkWrapper
+    #    value_netwotk = KinoValueNetwork
+    #elif "box_pushing" in agent_params["alg"]:
+    #    mu_network = BoxPushingConfigurationTimeNetworkWrapper
+    #    logsigma_network = BoxPushingLogSigmaNetworkWrapper
+    #    value_netwotk = BoxPushingValueNetwork
+    #elif "bimanual" in agent_params["alg"]:
+    #    mu_network = BimanualConfigurationTimeNetworkWrapper
+    #    logsigma_network = BimanualLogSigmaNetworkWrapper
+    #    value_netwotk = BimanualValueNetwork
+    #else:
+    #    mu_network = ConfigurationTimeNetworkWrapper
+    #    logsigma_network = LogSigmaNetworkWrapper
+    #    value_netwotk = ValueNetwork
+
+    if "air_hockey" in agent_params["env"]:
+        mu_network = AirHockeyConfigurationTimeNetworkWrapper
+        logsigma_network = AirHockeyLogSigmaNetworkWrapper
+        value_network = AirHockeyValueNetwork
     else:
-        mu_network = ConfigurationTimeNetworkWrapper
-        logsigma_network = LogSigmaNetworkWrapper
-        value_netwotk = ValueNetwork
+        mu_network = BasicConfigurationTimeNetworkWrapper
+        logsigma_network = BasicLogSigmaNetworkWrapper
+        value_network = BasicValueNetwork
+    
 
     mu_approximator = Regressor(TorchApproximator,
                                 network=mu_network,
@@ -109,7 +116,7 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
                                 input_shape=(mdp_info.observation_space.shape[0],),
                                 output_shape=(n_dim * n_trainable_q_pts + n_trainable_t_pts,))
 
-    value_function_approximator = value_netwotk(mdp_info.observation_space)
+    value_function_approximator = value_network(mdp_info.observation_space, agent_params["value_function_bias"])
 
     policy_args = dict(
         env_info=env_info,
@@ -136,6 +143,8 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
         policy = BSMPPolicyUnstructuredKino(**policy_args)
     elif agent_params["alg"] == "bsmp_eppo_box_pushing":
         policy = BSMPPolicyBoxPushing(**policy_args)
+    elif agent_params["alg"] == "bsmp_eppo_bimanual":
+        policy = BSMPPolicyBimanual(**policy_args)
     else:
         policy = BSMPPolicy(**policy_args)
 
@@ -154,8 +163,17 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
 
     sigma = agent_params["sigma_init_q"] * torch.ones(n_trainable_pts + 1)
 
+    if "air_hockey" in agent_params["env"]:
+        mu_network = AirHockeyConfigurationNetworkWrapper
+        logsigma_network = AirHockeyLogSigmaNetworkWrapper
+        value_network = AirHockeyValueNetwork
+    else:
+        mu_network = BasicConfigurationNetworkWrapper
+        logsigma_network = BasicLogSigmaNetworkWrapper
+        value_network = BasicValueNetwork
+
     mu_approximator = Regressor(TorchApproximator,
-                                network=ConfigurationNetworkWrapper,
+                                network=mu_network,
                                 batch_size=1,
                                 params={
                                         "input_space": mdp_info.observation_space,
@@ -163,7 +181,7 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
                                 input_shape=(mdp_info.observation_space.shape[0],),
                                 output_shape=(n_trainable_pts + 1,))
     log_sigma_approximator = Regressor(TorchApproximator,
-                                network=LogSigmaNetworkWrapper,
+                                network=logsigma_network,
                                 batch_size=1,
                                 params={
                                         "input_space": mdp_info.observation_space,
@@ -172,7 +190,7 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
                                 input_shape=(mdp_info.observation_space.shape[0],),
                                 output_shape=(n_trainable_pts + 1,))
 
-    value_function_approximator = ValueNetwork(mdp_info.observation_space)
+    value_function_approximator = value_network(mdp_info.observation_space, agent_params["value_function_bias"])
 
 
     if agent_params["alg"] == "promp_eppo_unstructured":

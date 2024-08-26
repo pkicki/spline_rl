@@ -31,6 +31,7 @@ class ProDMPPolicy(MPPolicy):
         #    plt.plot(self.N[0, :, i], label=f'{i}')
         #plt.legend()
         #plt.show()
+        self.desired_ee_z = 0.06
         a = 0
 
     def load_policy(self, env_info):

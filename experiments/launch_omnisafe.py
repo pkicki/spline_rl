@@ -35,8 +35,8 @@ elif env == 'air_hockey':
     cost_limit = 1e-3
     lambda_lr = 1e-2
 
-alg = 'PPOLag'
-#alg = 'TRPOLag'
+#alg = 'PPOLag'
+alg = 'TRPOLag'
 #alg = 'PCPO'
 
 postfix = "equality"

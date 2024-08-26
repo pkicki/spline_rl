@@ -27,10 +27,10 @@ os.environ["WANDB_START_METHOD"] = "thread"
 def experiment(env: str = 'kinodynamic_cup',
                group_name: str = "test_single_from0",
                n_envs: int = 1,
-               #alg: str = "bsmp_eppo_kinodynamic",
+               alg: str = "bsmp_eppo_kinodynamic",
                #alg: str = "bsmp_eppo_kinodynamic_unstructured",
                #alg: str = "promp_eppo_kinodynamic",
-               alg: str = "prodmp_eppo_kinodynamic",
+               #alg: str = "prodmp_eppo_kinodynamic",
                #alg: str = "prodmp_eppo_unstructured",
                n_epochs: int = 700,
                #n_episodes: int = 256,
@@ -95,6 +95,7 @@ def experiment(env: str = 'kinodynamic_cup',
     
     # TODO: add parameter regarding the constraint loss stuff
     agent_params = dict(
+        env=env,
         alg=alg,
         seed=seed,
         n_dim=7,

@@ -1,0 +1,205 @@
+<mujoco>
+    <!-- <compiler angle="radian" meshdir="data" autolimits="true"/> -->
+    <compiler angle="radian" meshdir="/home/piotrkicki/rl/spline-rl/spline_rl/envs/data" autolimits="true"/>
+    <asset>
+        <!-- arm models -->
+        <mesh name="link0" file="meshes/ur5/link0.stl"/>
+        <mesh name="link1" file="meshes/ur5/link1.stl"/>
+        <mesh name="link1_cap" file="meshes/ur5/link1_cap.stl" />
+        <mesh name="link1_connector" file="meshes/ur5/link1_connector.stl" />
+        <mesh name="link2" file="meshes/ur5/link2.stl" />
+        <mesh name="link2_tube" file="meshes/ur5/link2_tube.stl" />
+        <mesh name="link2_cap" file="meshes/ur5/link2_cap.stl" />
+        <mesh name="link2_connector" file="meshes/ur5/link2_connector.stl" />
+        <mesh name="link3a" file="meshes/ur5/link3a.stl" />
+        <mesh name="link3a_connector" file="meshes/ur5/link3a_connector.stl" />
+        <mesh name="link3_tube" file="meshes/ur5/link3_tube.stl" />
+        <mesh name="link3_cap" file="meshes/ur5/link3_cap.stl" />
+        <mesh name="link3b" file="meshes/ur5/link3b.stl" />
+        <mesh name="link3b_connector" file="meshes/ur5/link3b_connector.stl" />
+        <mesh name="link3b_connector2" file="meshes/ur5/link3b_connector2.stl"/>
+        <mesh name="link4" file="meshes/ur5/link4.stl" />
+        <mesh name="link4_cap" file="meshes/ur5/link4_cap.stl" />
+        <mesh name="link4_connector" file="meshes/ur5/link4_connector.stl" />
+        <mesh name="link5" file="meshes/ur5/link5.stl" />
+        <mesh name="link5_cap" file="meshes/ur5/link5_cap.stl" />
+        <mesh name="link5_connector" file="meshes/ur5/link5_connector.stl" />
+        <mesh name="link6" file="meshes/ur5/link6.stl" />
+        <mesh name="link6_connector" file="meshes/ur5/link6_connector.stl" />
+
+        <mesh name="dual_ur_stand_ring" file="meshes/dual_ur_stand/dual_ur_stand_ring.stl" />
+        <mesh name="dual_ur_stand"  file="meshes/dual_ur_stand/dual_ur_stand2.stl" />
+
+        <material name="grey" rgba="0.5 0.5 0.5 1"/>
+        <material name="black" rgba="0 0 0 1"/>
+        <material name="blue" rgba="0 0 1 1"/>
+        <material name="silver" rgba="0.75 0.75 0.75 1"/>
+    </asset>
+
+    <worldbody>
+        <!-- <body name="x_dir" pos="0.5 0 0" mocap="true">
+            <geom type="box" size=".2 .01 .01" rgba="1 0 0 1" contype="2" conaffinity="2"/>
+        </body>
+        <body name="y_dir" pos="0 0.5 0" mocap="true">
+            <geom type="box" size=".01 .2 .01" rgba="0 1 0 1" contype="2" conaffinity="2"/>
+        </body> -->
+
+        <body name="origin_base" pos="0.0 0.0 0.0" euler="0 0 0">
+            <inertial pos="0 0 0" mass="100.0" diaginertia="0.1 0.1 0.1"/>
+            <geom name="ur_stand_ring" type="mesh" mesh="dual_ur_stand_ring" pos="0 0 0" material="grey" conaffinity="1" contype="2"/>
+            <body name="dual_ur_stand" pos="0.0 0.0 0.0" euler="0 0 0">
+                <joint name="ur_stand_joint" axis="0 0 1" pos="0 0 0" limited="false" range="-6.28319 6.28319"/>
+                <body name="ur_stand_dummy" pos="0 0 0" euler="0 0 0"></body>
+
+                <inertial pos="0 0 0" mass="20.0" diaginertia="0.25 0.25 0.25"/>
+                <geom name="ur_stand_base" type="mesh" mesh="dual_ur_stand" pos="0 0 0" material="grey" conaffinity="1" contype="2"/>
+            
+
+                <!-- Left UR5 -->
+                <body name="base_link_ur5left" pos="-0.15 0 0.447889" euler="0 -0.785398 0">
+                    <geom name="link0_ur5left" type="mesh" mesh="link0" pos="0 0 0"/>
+
+                    <body name="link1_ur5left" pos="0 0 0.0213">
+                        <joint name="joint0_ur5left" axis="0 0 1" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                        <inertial pos="0 -0.02561 0.00193" mass="3.761" diaginertia="0.1 0.1 0.1"/>
+                        <geom name="link1_connector_ur5left" type="mesh" mesh="link1_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                        <geom name="link1_ur5left" type="mesh" mesh="link1" pos="0 0 0.008" material="grey"/>
+                        <geom name="link1_cap_ur5left" type="mesh" mesh="link1_cap" pos="0 0 .1025" material="blue"/>
+
+                        <body name="link2_ur5left" pos="-0.0663 0 0.0679" euler="-0.5 0 0">
+                            <joint name="joint1_ur5left" axis="-1 0 0" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                            <inertial pos="-0.04706 0 0.2125" mass="8.058" diaginertia="0.1 0.1 0.1"/>
+                            <geom name="link2_connector_ur5left" type="mesh" mesh="link2_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                            <geom name="link2_ur5left" type="mesh" mesh="link2" pos="-0.008 0 0" material="grey"/>
+                            <geom name="link2_cap_ur5left" type="mesh" mesh="link2_cap" pos="-0.1015 0 -0.0025" material="blue"/>
+                            <geom name="link2_tube_ur5left" type="mesh" mesh="link2_tube" pos="-0.0679 0 0.066" material="silver"/>
+
+                            <body name="link3_ur5left" pos="-0.008 0 0.425" euler="-2.2 0 0">
+                                <joint name="joint2_ur5left" axis="1 0 0" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                                <inertial pos="0.0478 0 0.15" mass="2.846" diaginertia="0.1 0.1 0.1"/>
+                                <geom name="link3a_connector_ur5left" type="mesh" mesh="link3a_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                                <geom name="link3a_ur5left" type="mesh" mesh="link3a" pos="0.008 0 0" material="grey"/>
+                                <geom name="link3_tube_ur5left" type="mesh" mesh="link3_tube" pos="0.059 0 0.066" material="silver"/>
+                                <geom name="link3b_connector_ur5left" type="mesh" mesh="link3b_connector" pos="0.059 0 0.3418" material="black" />
+                                <geom name="link3b_connector2_ur5left" type="mesh" mesh="link3b_connector2" pos="0.059 0 0.34" material="grey" conaffinity="32" contype="32"/>
+                                <geom name="link3b_ur5left" type="mesh" mesh="link3b" pos="0.059 0 0.347" material="grey"/>
+                                <geom name="link3_cap_ur5left" type="mesh" mesh="link3_cap" pos="0.0837 0 0.392" material="blue"/>
+
+                                <body name="link4_ur5left" pos="0.0173 0 0.3922" euler="1.1 0 0">
+                                    <joint name="joint3_ur5left" axis="-1 0 0" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                                    <inertial pos="-0.05796 -0.0018 0" mass="1.37" diaginertia="0.1 0.1 0.1"/>
+                                    <geom name="link4_connector_ur5left" type="mesh" mesh="link4_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                                    <geom name="link4_ur5left" type="mesh" mesh="link4" pos="-0.008 0 0" material="grey"/>
+                                    <geom name="link4_cap_ur5left" type="mesh" mesh="link4_cap" pos="-0.05325 0 -0.0247" material="blue"/>
+
+                                    <body name="link5_ur5left" pos="-0.05325 0 0.04165" euler="0 0 -0.8">
+                                        <joint name="joint4_ur5left" axis="0 0 1" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                                        <inertial pos="0.0018 0 0.01634" mass="1.3" diaginertia="0.1 0.1 0.1"/>
+                                        <geom name="link5_connector_ur5left" type="mesh" mesh="link5_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                                        <geom name="link5_ur5left" type="mesh" mesh="link5" pos="0 0 0.0079" material="grey"/>
+                                        <geom name="link5_cap_ur5left" type="mesh" mesh="link5_cap" pos="0.025 0 0.053" material="blue"/>
+
+                                        <body name="link6_ur5left" pos="-0.04165 0 0.05305">
+                                            <joint name="joint5_ur5left" axis="-1 0 0" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                                            <inertial pos="-0.038841 0 0" mass="0.365" diaginertia="0.1 0.1 0.1"/>
+                                            <geom name="link6_connector_ur5left" type="mesh" mesh="link6_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                                            <geom name="link6_ur5left" type="mesh" mesh="link6" pos="-0.008 0 0" material="silver"/>
+                                            
+                                            <body name="ur_EE_ur5left" euler="0 -1.57 0">
+                                                <body name="EE_ur5left" pos="0 0 0.145" euler="0 0 0">
+                                                    <site name="EE_ur5left" pos="0 0 0" size="0.01 0.01 0.01" rgba="1 0 0 1" type="sphere" group="1" />
+                                                </body>
+                                            </body>
+                                        </body>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+
+                <!-- Right UR5 -->
+                <body name="base_link_ur5right" pos="0.15 0 0.447889" euler="0 0.785398 0">
+                    <geom name="link0_ur5right" type="mesh" mesh="link0" pos="0 0 0"/>
+
+                    <body name="link1_ur5right" pos="0 0 0.0213" euler="0 0 3.14159">
+                        <joint name="joint0_ur5right" axis="0 0 1" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                        <inertial pos="0 -0.02561 0.00193" mass="3.761" diaginertia="0.1 0.1 0.1"/>
+                        <geom name="link1_connector_ur5right" type="mesh" mesh="link1_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                        <geom name="link1_ur5right" type="mesh" mesh="link1" pos="0 0 0.008" material="grey"/>
+                        <geom name="link1_cap_ur5right" type="mesh" mesh="link1_cap" pos="0 0 .1025" material="blue"/>
+
+                        <body name="link2_ur5right" pos="-0.0663 0 0.0679" euler="0.5 0 0">
+                            <joint name="joint1_ur5right" axis="-1 0 0" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                            <inertial pos="-0.04706 0 0.2125" mass="8.058" diaginertia="0.1 0.1 0.1"/>
+                            <geom name="link2_connector_ur5right" type="mesh" mesh="link2_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                            <geom name="link2_ur5right" type="mesh" mesh="link2" pos="-0.008 0 0" material="grey"/>
+                            <geom name="link2_cap_ur5right" type="mesh" mesh="link2_cap" pos="-0.1015 0 -0.0025" material="blue"/>
+                            <geom name="link2_tube_ur5right" type="mesh" mesh="link2_tube" pos="-0.0679 0 0.066" material="silver"/>
+
+                            <body name="link3_ur5right" pos="-0.008 0 0.425" euler="2.2 0 0">
+                                <joint name="joint2_ur5right" axis="1 0 0" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                                <inertial pos="0.0478 0 0.15" mass="2.846" diaginertia="0.1 0.1 0.1"/>
+                                <geom name="link3a_connector_ur5right" type="mesh" mesh="link3a_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                                <geom name="link3a_ur5right" type="mesh" mesh="link3a" pos="0.008 0 0" material="grey"/>
+                                <geom name="link3_tube_ur5right" type="mesh" mesh="link3_tube" pos="0.059 0 0.066" material="silver"/>
+                                <geom name="link3b_connector_ur5right" type="mesh" mesh="link3b_connector" pos="0.059 0 0.3418" material="black" />
+                                <geom name="link3b_connector2_ur5right" type="mesh" mesh="link3b_connector2" pos="0.059 0 0.34" material="grey" conaffinity="32" contype="32"/>
+                                <geom name="link3b_ur5right" type="mesh" mesh="link3b" pos="0.059 0 0.347" material="grey"/>
+                                <geom name="link3_cap_ur5right" type="mesh" mesh="link3_cap" pos="0.0837 0 0.392" material="blue"/>
+
+                                <body name="link4_ur5right" pos="0.0173 0 0.3922" euler="-1.1 0 0">
+                                    <joint name="joint3_ur5right" axis="-1 0 0" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                                    <inertial pos="-0.05796 -0.0018 0" mass="1.37" diaginertia="0.1 0.1 0.1"/>
+                                    <geom name="link4_connector_ur5right" type="mesh" mesh="link4_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                                    <geom name="link4_ur5right" type="mesh" mesh="link4" pos="-0.008 0 0" material="grey"/>
+                                    <geom name="link4_cap_ur5right" type="mesh" mesh="link4_cap" pos="-0.05325 0 -0.0247" material="blue"/>
+
+                                    <body name="link5_ur5right" pos="-0.05325 0 0.04165" euler="0 0 0.8">
+                                        <joint name="joint4_ur5right" axis="0 0 1" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                                        <inertial pos="0.0018 0 0.01634" mass="1.3" diaginertia="0.1 0.1 0.1"/>
+                                        <geom name="link5_connector_ur5right" type="mesh" mesh="link5_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                                        <geom name="link5_ur5right" type="mesh" mesh="link5" pos="0 0 0.0079" material="grey"/>
+                                        <geom name="link5_cap_ur5right" type="mesh" mesh="link5_cap" pos="0.025 0 0.053" material="blue"/>
+
+                                        <body name="link6_ur5right" pos="-0.04165 0 0.05305">
+                                            <joint name="joint5_ur5right" axis="-1 0 0" pos="0 0 0" limited="true" range="-6.28319 6.28319"/>
+                                            <inertial pos="-0.038841 0 0" mass="0.365" diaginertia="0.1 0.1 0.1"/>
+                                            <geom name="link6_connector_ur5right" type="mesh" mesh="link6_connector" pos="0 0 0" material="black" conaffinity="32" contype="32"/>
+                                            <geom name="link6_ur5right" type="mesh" mesh="link6" pos="-0.008 0 0" material="silver"/>
+                                            
+                                            <body name="ur_EE_ur5right" pos="0 0 0" euler="0 -1.57 0">
+                                                <!-- <body name="EE_ur5right" pos="0 0 0.145" quat="0.707105 0 0 -0.707105"> -->
+                                                <body name="EE_ur5right" pos="0 0 0.145" euler="0 0 0">
+                                                    <site name="EE_ur5right" pos="0 0 0" size="0.01 0.01 0.01" rgba="1 0 0 1" type="sphere" group="1" />
+                                                </body>
+                                            </body>
+                                        </body>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+
+    <actuator>
+        <motor name="ur_stand_joint_motor" joint="ur_stand_joint" ctrlrange="-300 300"/>
+
+        <motor name="joint0_motor_ur5right" joint="joint0_ur5right" ctrlrange="-150 150"/>
+        <motor name="joint1_motor_ur5right" joint="joint1_ur5right" ctrlrange="-150 150"/>
+        <motor name="joint2_motor_ur5right" joint="joint2_ur5right" ctrlrange="-150 150"/>
+        <motor name="joint3_motor_ur5right" joint="joint3_ur5right" ctrlrange="-28 28"/>
+        <motor name="joint4_motor_ur5right" joint="joint4_ur5right" ctrlrange="-28 28"/>
+        <motor name="joint5_motor_ur5right" joint="joint5_ur5right" ctrlrange="-28 28"/>
+
+        <motor name="joint0_motor_ur5left" joint="joint0_ur5left" ctrlrange="-150 150"/>
+        <motor name="joint1_motor_ur5left" joint="joint1_ur5left" ctrlrange="-150 150"/>
+        <motor name="joint2_motor_ur5left" joint="joint2_ur5left" ctrlrange="-150 150"/>
+        <motor name="joint3_motor_ur5left" joint="joint3_ur5left" ctrlrange="-28 28"/>
+        <motor name="joint4_motor_ur5left" joint="joint4_ur5left" ctrlrange="-28 28"/>
+        <motor name="joint5_motor_ur5left" joint="joint5_ur5left" ctrlrange="-28 28"/>
+    </actuator>
+</mujoco>

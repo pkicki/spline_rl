@@ -20,11 +20,12 @@ def load_env_agent(agent_path, q_scale=1./50., q_d_scale=1./150.):
     agent = Agent.load(agent_path)
     agent.mdp_info = env_info_['rl_info']
     agent.policy.load_policy(env_info_)
-    agent.policy._q_bsp.N = agent.policy._q_bsp.N.astype(np.float64)
-    agent.policy._q_bsp.dN = agent.policy._q_bsp.dN.astype(np.float64)
-    agent.policy._q_bsp.ddN = agent.policy._q_bsp.ddN.astype(np.float64)
-    agent.policy._t_bsp.N = agent.policy._t_bsp.N.astype(np.float64)
-    agent.policy._t_bsp.dN = agent.policy._t_bsp.dN.astype(np.float64)
+    if hasattr(agent.policy, "_q_bsp") and hasattr(agent.policy, "_t_bsp"):
+        agent.policy._q_bsp.N = agent.policy._q_bsp.N.astype(np.float64)
+        agent.policy._q_bsp.dN = agent.policy._q_bsp.dN.astype(np.float64)
+        agent.policy._q_bsp.ddN = agent.policy._q_bsp.ddN.astype(np.float64)
+        agent.policy._t_bsp.N = agent.policy._t_bsp.N.astype(np.float64)
+        agent.policy._t_bsp.dN = agent.policy._t_bsp.dN.astype(np.float64)
     agent.distribution._log_sigma_approximator.model.network = agent.distribution._log_sigma_approximator.model.network.to(torch.double)
     agent.distribution._mu_approximator.model.network = agent.distribution._mu_approximator.model.network.to(torch.double)
     agent.policy.t_scale = 1.

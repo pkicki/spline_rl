@@ -26,9 +26,9 @@ os.environ["WANDB_START_METHOD"] = "thread"
 def experiment(env: str = 'air_hockey',
                group_name: str = "dummy",
                n_envs: int = 1,
-               #alg: str = "bsmp_eppo_stop",
+               alg: str = "bsmp_eppo_stop",
                #alg: str = "bsmp_eppo_unstructured",
-               alg: str = "prodmp_eppo_unstructured",
+               #alg: str = "prodmp_eppo_unstructured",
                #alg: str = "promp_eppo_unstructured",
                n_epochs: int = 5000,
                #n_episodes: int = 256,
@@ -84,6 +84,7 @@ def experiment(env: str = 'air_hockey',
 
     # TODO: add parameter regarding the constraint loss stuff
     agent_params = dict(
+        env=env,
         alg=alg,
         seed=seed,
         n_dim=7,

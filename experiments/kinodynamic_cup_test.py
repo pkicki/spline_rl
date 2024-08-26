@@ -62,18 +62,20 @@ def compute_metrics(core, eval_params):
 
     return J, R, success, success_position, success_orientation, success_velocity, eps_length, joint_pos, joint_vel, orientation, collision
 
-def experiment(n_eval_episodes: int = 100,
+def experiment(n_eval_episodes: int = 1,#00,
                seed: int = 444,
                quiet: bool = True,
-               render: bool = False,
-               #render: bool = True,
+               #render: bool = False,
+               render: bool = True,
                **kwargs):
     np.random.seed(seed)
     torch.manual_seed(seed)
 
     #model_type = "promp_unstructured"
+    model_type = "promp_structured"
     #model_type = "prodmp_structured"
-    model_type = "ours_unstructured"
+    #model_type = "ours_unstructured"
+    #model_type = "ours_structured"
     model_type = sys.argv[1] if len(sys.argv) > 1 else model_type
 
     eval_params = dict(
@@ -82,12 +84,8 @@ def experiment(n_eval_episodes: int = 100,
         render=render
     )
 
-    n_seeds = 1
-    for i in range(n_seeds):
-        agent_paths = glob(os.path.join(os.path.dirname(__file__), f"trained_models/kinodynamic/{model_type}/agent-{i}-2*.msh"))
-        if not agent_paths:
-            continue
-        agent_path = sorted(agent_paths)[-1]
+    agent_paths = glob(os.path.join(os.path.dirname(__file__), f"trained_models/kinodynamic_fixed/{model_type}/agent-*.msh"))
+    for agent_path in agent_paths:
         model_id = os.path.basename(agent_path).split(".")[0].replace("agent-", "")
         if "unstructured" in model_type:
             q_d_scale = 1. / 50.
@@ -113,7 +111,7 @@ def experiment(n_eval_episodes: int = 100,
         print(results)
 
         assert False
-        save_path = os.path.join(os.path.dirname(__file__), f"../paper/results/kino/{model_type}")
+        save_path = os.path.join(os.path.dirname(__file__), f"../paper/results/kino_fixed/{model_type}")
         os.makedirs(save_path, exist_ok=True)
         np.savez(os.path.join(save_path, f"{model_id}.npz"), **results)
 

@@ -65,7 +65,7 @@ def compute_metrics(core, eval_params):
     return J, R, success, time_to_hit, max_puck_vel, eps_length, joint_pos, joint_vel, ee_xlb, ee_ylb, ee_yub, ee_zlb, ee_zub, ee_zeb
 
 
-def experiment(n_eval_episodes: int = 100,#00,
+def experiment(n_eval_episodes: int = 1,#00,
                quiet: bool = True,
                render: bool = False,
                #render: bool = True,
@@ -80,10 +80,10 @@ def experiment(n_eval_episodes: int = 100,#00,
     #model_type = "ours"
     #model_id = "7-1382"
 
-    #model_type = "ours_unstructured"
+    model_type = "ours_unstructured"
     #model_id = "11-2140"
 
-    model_type = "promp"
+    #model_type = "promp"
     #model_id = "0-1749"
 
     #model_type = "prodmp"
@@ -135,9 +135,9 @@ def experiment(n_eval_episodes: int = 100,#00,
             ee_zeb_constraint=ee_zeb
         )
 
-        save_path = os.path.join(os.path.dirname(__file__), f"../paper/results/air_hockey_fixed/{model_type}")
-        os.makedirs(save_path, exist_ok=True)
-        np.savez(os.path.join(save_path, f"{model_id}.npz"), **results)
+        #save_path = os.path.join(os.path.dirname(__file__), f"../paper/results/air_hockey_fixed/{model_type}")
+        #os.makedirs(save_path, exist_ok=True)
+        #np.savez(os.path.join(save_path, f"{model_id}.npz"), **results)
 
 
 if __name__ == "__main__":

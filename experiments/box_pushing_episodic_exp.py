@@ -29,14 +29,14 @@ def experiment(env: str = 'box_pushing',
                n_envs: int = 1,
                alg: str = "bsmp_eppo_box_pushing",
                n_epochs: int = 5000,
-               n_episodes: int = 256,
-               n_episodes_per_fit: int = 64,
-               n_eval_episodes: int = 25,
-               batch_size: int = 64,
-               #n_episodes: int = 16,
-               #n_episodes_per_fit: int = 4,
-               #n_eval_episodes: int = 4,
-               #batch_size: int = 4,
+               #n_episodes: int = 256,
+               #n_episodes_per_fit: int = 64,
+               #n_eval_episodes: int = 25,
+               #batch_size: int = 64,
+               n_episodes: int = 16,
+               n_episodes_per_fit: int = 8,
+               n_eval_episodes: int = 4,
+               batch_size: int = 8,
                use_cuda: bool = False,
 
                # agent params
@@ -65,12 +65,12 @@ def experiment(env: str = 'box_pushing',
                # env params
                full_mass_matrix: bool = True,
 
-               mode: str = "online",
-               #mode: str = "disabled",
+               #mode: str = "online",
+               mode: str = "disabled",
                seed: int = 444,
                quiet: bool = True,
-               #render: bool = True,
-               render: bool = False,
+               render: bool = True,
+               #render: bool = False,
                results_dir: str = './logs',
                **kwargs):
     #if len(sys.argv) > 1:
@@ -166,8 +166,8 @@ def experiment(env: str = 'box_pushing',
     best_success = -np.inf
     best_J_det = -np.inf
     best_J_sto = -np.inf
-    #if_learn = False
-    if_learn = True
+    if_learn = False
+    #if_learn = True
     for epoch in range(n_epochs):
         times = []
         times.append(perf_counter())
@@ -271,7 +271,7 @@ def experiment(env: str = 'box_pushing',
 
 def compute_metrics(core, eval_params):
     with torch.no_grad():
-        core.agent.set_deterministic(True)
+        #core.agent.set_deterministic(True)
         dataset = core.evaluate(**eval_params)
         core.agent.set_deterministic(False)
 

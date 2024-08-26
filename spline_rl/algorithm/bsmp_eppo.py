@@ -18,7 +18,7 @@ class BSMPePPO(ePPO):
     """
 
     def __init__(self, mdp_info, distribution, policy, optimizer, value_function, value_function_optimizer,
-                 constraint_lr, n_epochs_policy, batch_size, eps_ppo, ent_coeff=0., context_builder=None): 
+                 constraint_lr, n_epochs_policy, batch_size, eps_ppo, ent_coeff=0., kl_threshold=1e10, context_builder=None): 
         self.alphas = np.array([0.] * mdp_info.constraints.constraints_num)
         self.constraint_lr = constraint_lr
         self.constraint_losses = []
@@ -35,6 +35,8 @@ class BSMPePPO(ePPO):
         self.value_function_optimizer = value_function_optimizer
 
         self._epoch_no = 0
+        self.kl_threshold = kl_threshold
+        self.last_kl_divergence = 0.
 
         self._q = None
         self._q_dot = None
@@ -112,21 +114,27 @@ class BSMPePPO(ePPO):
             value = self.value_function(context)[:, 0]
             mean_advantage = torch.mean(Jep - value)
 
-        old_dist = self.distribution.log_pdf(theta, context).detach()
+        old_dist_ = self.distribution.distribution(context)
+        old_lp = old_dist_.log_prob(theta).detach()
+        #old_dist = self.distribution.log_pdf(theta, context).detach()
 
         if self.distribution.is_contextual:
-            full_batch = (theta, Jep, old_dist, context)
+            full_batch = (theta, Jep, old_lp, context)
         else:
-            full_batch = (theta, Jep, old_dist)
+            full_batch = (theta, Jep, old_lp)
 
+        stop_training = False
         for epoch in range(self._n_epochs_policy()):
             for minibatch in minibatch_generator(self._batch_size(), *full_batch):
                 self._optimizer.zero_grad()
-                theta_i, context_i, Jep_i, old_dist_i = self._unpack(minibatch)
+                theta_i, context_i, Jep_i, old_lp_i = self._unpack(minibatch)
 
                 # ePPO loss
-                lp = self.distribution.log_pdf(theta_i, context_i)
-                prob_ratio = torch.exp(lp - old_dist_i)
+                new_dist_i = self.distribution.distribution(context_i)
+                lp_i = new_dist_i.log_prob(theta_i)
+                #lp = self.distribution.log_pdf(theta_i, context_i)
+                log_ratio = lp_i - old_lp_i
+                prob_ratio = torch.exp(log_ratio)
                 clipped_ratio = torch.clamp(prob_ratio, 1 - self._eps_ppo(), 1 + self._eps_ppo.get_value())
                 value_i = self.value_function(context_i)[:, 0]
                 A = Jep_i - value_i
@@ -134,8 +142,18 @@ class BSMPePPO(ePPO):
                 A_unbiased = A_unbiased.detach()
                 task_loss = -torch.min(prob_ratio * A_unbiased, clipped_ratio * A_unbiased)
 
+                with torch.no_grad():
+                    approx_kl_div_ = torch.distributions.kl.kl_divergence(old_dist_, new_dist_i).mean().cpu().numpy()
+                    #approx_kl_div = torch.mean((torch.exp(log_ratio) - 1) - log_ratio).cpu().numpy()
+                    self.last_kl_divergence = approx_kl_div_
+                #if approx_kl_div > 1.5 * self._eps_ppo():
+                if approx_kl_div_ > self.kl_threshold:
+                    stop_training = True
+                    break
+
                 # constraint loss
-                mu = self.distribution.estimate_mu(context_i)
+                #mu = self.distribution.estimate_mu(context_i)
+                mu = new_dist_i.mean
                 constraint_losses = self.compute_constraint_losses(mu, context_i)
                 self.constraint_losses.append(constraint_losses.detach().numpy())
                 constraint_loss = torch.exp(torch.Tensor(self.alphas))[None] * constraint_losses
@@ -148,5 +166,7 @@ class BSMPePPO(ePPO):
                 self.value_function_optimizer.zero_grad()
                 value_loss.backward()
                 self.value_function_optimizer.step()
+            if stop_training:
+                break
             self.update_alphas()
             self._epoch_no += 1

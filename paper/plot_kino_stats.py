@@ -11,12 +11,14 @@ model_dict = OrderedDict(
     ours_unstructured="CNP3O",
     promp_unstructured="CNP3O-ProMP",
     prodmp_unstructured="CNP3O-ProDMP",
-    #ppolag="PPOLag-PK",
+    trpolag="TRPOLag",
+    ppolag="PPOLag",
+    pcpo="PCPO",
 )
 
 colors = dict(ours_structured='tab:blue', promp_structured='tab:green', prodmp_structured='tab:red',
               ours_unstructured='tab:orange', promp_unstructured='tab:olive', prodmp_unstructured='tab:cyan',
-              ppolag='tab:brown')
+              trpolag='tab:brown', ppolag='tab:pink', pcpo='tab:gray')
 positions = np.linspace(0.1, 0.9, len(colors))
 
 results = {}
@@ -30,7 +32,7 @@ for model_type in colors.keys():
         orientation=[],
         collision=[],
     )
-    for res_path in glob(os.path.join(os.path.dirname(__file__), f"results/kino/{model_type}/*.npz")):
+    for res_path in glob(os.path.join(os.path.dirname(__file__), f"results/kino_fixed/{model_type}/*.npz")):
         data = np.load(res_path, allow_pickle=True)
         results[model_type]["J_det"].append(data["J_det"])
         results[model_type]["R"].append(data["R"])
@@ -62,6 +64,8 @@ for i, crit in enumerate(plot_crits):
     ax = plt.subplot(1, len(plot_crits), 1 + i)
     ax.set_title(titles[i])
     ax.set_xlim(0., 1.)
+    if crit != "J_det":
+        ax.set_yscale('log')
     for k, model_type in enumerate(model_dict.keys()):
         model_name = model_dict[model_type]
         c = colors[model_type]
@@ -79,10 +83,14 @@ for i, crit in enumerate(plot_crits):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.set_xticks([])
+    if crit == "joint_vel":
+        ax.set_ylim(1e-5, 1e1)
+    elif crit == "collision":
+        ax.set_ylim(1e-7, 2e-4)
 plt.subplots_adjust(hspace=0.3)
 labels = [model_dict[model_type] for model_type in model_dict.keys()]
-#plt.gcf().legend(labels)
-#plt.gcf().legend([x["boxes"][0] for x in plots[-len(model_dict.keys()):]], labels, ncol=len(labels), bbox_to_anchor=(0.85, 0.1),
-#                 frameon=False)
+plt.gcf().legend(labels)
+plt.gcf().legend([x["boxes"][0] for x in plots[-len(model_dict.keys()):]], labels, ncol=len(labels), bbox_to_anchor=(0.85, 0.1),
+                 frameon=False)
 plt.gcf().tight_layout()
 plt.show()

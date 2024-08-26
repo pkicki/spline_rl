@@ -1,18 +1,10 @@
 import numpy as np
 import torch
-from air_hockey_challenge.utils.kinematics import forward_kinematics, jacobian
-from baseline.baseline_agent.optimizer import TrajectoryOptimizer
-from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
 
-from mushroom_rl.policy import Policy
-
-from spline_rl.policy.bsmp_policy import BSMPPolicy
-from spline_rl.utils.bspline import BSpline
-from spline_rl.utils.utils import unpack_data_airhockey
+from spline_rl.policy.bsmp_policy_air_hockey import BSMPPolicyAirHockey
 
 
-class BSMPPolicyStop(BSMPPolicy):
+class BSMPPolicyStop(BSMPPolicyAirHockey):
     def __init__(self, env_info, dt, n_q_pts, n_dim, n_t_pts, n_pts_fixed_begin, n_pts_fixed_end,
                  t_scale=1., q_scale=1., q_d_scale=1., q_dot_d_scale=1., q_ddot_d_scale=1.):
         super().__init__(env_info, dt, n_q_pts, n_dim, n_t_pts, n_pts_fixed_begin, n_pts_fixed_end,
@@ -22,7 +14,6 @@ class BSMPPolicyStop(BSMPPolicy):
 
         self._weights = np.zeros((self._n_trainable_q_pts * self.n_dim + self._n_trainable_q_stop_pts +
                                   self._n_trainable_t_pts + self._n_trainable_t_stop_pts,))
-
 
         self._add_save_attr(
             _n_trainable_q_stop_pts='primitive',
