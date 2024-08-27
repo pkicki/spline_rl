@@ -32,7 +32,7 @@ class BasicNetwork(torch.nn.Module):
 
 
 class BasicConfigurationTimeNetwork(BasicNetwork):
-    def __init__(self, input_shape, output_shape, input_space, observation_stats):
+    def __init__(self, input_shape, output_shape, input_space, observation_stats=None):
         super(BasicConfigurationTimeNetwork, self).__init__(input_space, observation_stats)
 
         activation = torch.nn.Tanh()
@@ -67,7 +67,7 @@ class BasicConfigurationTimeNetworkWrapper(BasicConfigurationTimeNetwork):
 
 
 class BasicLogSigmaNetwork(BasicNetwork):
-    def __init__(self, input_shape, output_shape, input_space, init_sigma, observation_stats):
+    def __init__(self, input_shape, output_shape, input_space, init_sigma, observation_stats=None):
         super(BasicLogSigmaNetwork, self).__init__(input_space, observation_stats)
 
         self._init_sigma = init_sigma
@@ -95,7 +95,7 @@ class BasicLogSigmaNetworkWrapper(BasicLogSigmaNetwork):
 
 
 class BasicFullSigmaNetwork(BasicNetwork):
-    def __init__(self, input_shape, output_shape, input_space, init_sigma, observation_stats):
+    def __init__(self, input_shape, output_shape, input_space, init_sigma, observation_stats=None):
         super(BasicFullSigmaNetwork, self).__init__(input_space, observation_stats)
 
         self._init_sigma = init_sigma
