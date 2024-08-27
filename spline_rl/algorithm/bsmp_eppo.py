@@ -59,6 +59,8 @@ class BSMPePPO(ePPO):
             value_function_optimizer='torch',
             constraint_losses='pickle',
             constraint_losses_log='pickle',
+            kl_threshold='primitive',
+            last_kl_divergence='primitive',
             _epoch_no='primitive',
         )
 

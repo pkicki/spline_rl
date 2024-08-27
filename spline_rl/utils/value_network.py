@@ -4,8 +4,8 @@ import torch
 from spline_rl.utils.air_hockey_network import AirHockeyNetwork
 
 class BasicValueNetwork(BasicNetwork):
-    def __init__(self, input_space, bias):
-        super().__init__(input_space)
+    def __init__(self, input_space, bias, observation_stats):
+        super().__init__(input_space, observation_stats)
         W = 128
         self.bias = bias
 
@@ -20,8 +20,8 @@ class BasicValueNetwork(BasicNetwork):
         return super().__call__(x) + self.bias
 
 class AirHockeyValueNetwork(AirHockeyNetwork):
-    def __init__(self, input_space, bias):
-        super().__init__(input_space)
+    def __init__(self, input_space, bias, observation_stats):
+        super().__init__(input_space, observation_stats)
         W = 128
         self.bias = bias
 

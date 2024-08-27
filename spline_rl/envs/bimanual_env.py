@@ -93,6 +93,27 @@ class BimanualEnv(MuJoCo):
         self.target_quat = None
         self.absorbing_type = AbsorbType.NONE
 
+        self.desired_gripper_joints = {
+            'left_inner_finger_joint_ur5left': -0.73191728,
+            'right_inner_finger_joint_ur5left': -0.78984115,
+            'left_inner_knuckle_joint_ur5left': 0.7341096,
+            'right_inner_knuckle_joint_ur5left': 0.7538488,
+            'left_outer_knuckle_joint_ur5left': 0.73120889,
+            'right_outer_knuckle_joint_ur5left': 0.75101009,
+            'left_inner_finger_joint_ur5right': -0.74807509,
+            'right_inner_finger_joint_ur5right': -0.7812078,
+            'left_inner_knuckle_joint_ur5right': 0.73657761,
+            'right_inner_knuckle_joint_ur5right': 0.75597062,
+            'left_outer_knuckle_joint_ur5right': 0.7337423,
+            'right_outer_knuckle_joint_ur5right': 0.75317061,
+        }
+
+        observations = np.array([self.setup(None) for _ in range(100)])
+        self.observation_stats = dict(mean=observations.mean(axis=0),
+                                      std=observations.std(axis=0))
+        #self.env_info['observation_stats'] = self.observation_stats
+        self.env_info['observation_stats'] = None
+
 
     def _modify_mdp_info(self, mdp_info):
         self.joint_pos_limits = np.concatenate([
@@ -121,6 +142,29 @@ class BimanualEnv(MuJoCo):
             high = high[:2]
         action_space = Box(low, high)
         mdp_info.action_space = action_space
+
+        #observation_spec += [("left_EE_pos", "EE_ur5left", ObservationType.SITE_POS),]
+        #observation_spec += [("right_EE_pos", "EE_ur5right", ObservationType.SITE_POS),]
+        #observation_spec += [("plate_pos", "grommet_11mm", ObservationType.BODY_POS),]
+        #observation_spec += [("plate_rot", "grommet_11mm", ObservationType.BODY_ROT),]
+        #observation_spec += [("plate_vel", "grommet_11mm", ObservationType.BODY_VEL),]
+        #observation_spec += [("pegs_pos", "quad_peg", ObservationType.BODY_POS),]
+        #observation_spec += [("pegs_rot", "quad_peg", ObservationType.BODY_ROT),]
+        #observation_spec += [("stand_joint_pos", "ur_stand_joint", ObservationType.JOINT_POS),]
+        #observation_spec += [(f"left_joint{i}_pos", f"joint{i}_ur5left", ObservationType.JOINT_POS) for i in range(6)]
+        #observation_spec += [(f"right_joint{i}_pos", f"joint{i}_ur5right", ObservationType.JOINT_POS) for i in range(6)]
+        #observation_spec += [("stand_joint_vel", "ur_stand_joint", ObservationType.JOINT_VEL),]
+        #observation_spec += [(f"left_joint{i}_vel", f"joint{i}_ur5left", ObservationType.JOINT_VEL) for i in range(6)]
+        #observation_spec += [(f"right_joint{i}_vel", f"joint{i}_ur5right", ObservationType.JOINT_VEL) for i in range(6)]
+        #low_o = np.concatenate([
+        #    -np.ones(3), # left_EE_pos
+        #    -np.ones(3), # right_EE_pos
+        #    -np.ones(3), # plate_pos
+        #    -np.ones(4), # plate_rot
+        #    -3. * np.ones(3), # plate_vel
+
+        #    
+        #observation_space = Box(low_o, high_o)
         return mdp_info
 
     def inverse_kinematics(self, robot, pos, rot):
@@ -215,6 +259,30 @@ class BimanualEnv(MuJoCo):
         return left_grip_pos, left_handle_mjquat, right_grip_pos, right_handle_mjquat
         
 
+    def move_plate_to_pose(self, plate_pos, plate_quat):
+        plate_angle = np.arctan2(plate_pos[1], plate_pos[0])
+        stand_joint_rot = plate_angle - np.pi / 2
+
+        # sanity check
+        #plate_pos = self._model.body("quad_peg").pos + np.array([0., 0., 0.03])
+        #plate_quat = self._model.body("quad_peg").quat
+
+        #self._data.joint("ur_stand_joint").qpos = -np.pi / 2
+        #self._data.joint("ur_stand_joint").qpos = -np.pi / 20.
+        self._data.joint("ur_stand_joint").qpos = stand_joint_rot 
+        self._data.joint("free_joint_quad_grommet").qpos[:3] = plate_pos
+        self._data.joint("free_joint_quad_grommet").qpos[3:] = plate_quat
+        #self._data.joint("free_joint_quad_peg").qpos[:3] = plate_pos
+        #self._data.joint("free_joint_quad_peg").qpos[3:] = quad_quat
+        mujoco.mj_fwdPosition(self._model, self._data)
+
+        left_grip_pos, left_handle_mjquat, right_grip_pos, right_handle_mjquat = self.get_grip_pose()            
+
+        left_ik_success = self.inverse_kinematics("left", left_grip_pos, left_handle_mjquat)
+        right_ik_success = self.inverse_kinematics("right", right_grip_pos, right_handle_mjquat)
+        mujoco.mj_fwdPosition(self._model, self._data)
+        return left_ik_success and right_ik_success
+
     def setup(self, obs):
         self.absorbing_type = AbsorbType.NONE
         # place plate in random position and move robots to its handles
@@ -223,32 +291,16 @@ class BimanualEnv(MuJoCo):
             #plate_pos = np.array([0.0, 0.6, 0.1])
             #plate_pos = np.array([0.5, 0.0, 0.2])
             #plate_pos = np.array([0.0, 0.6, 0.025])
+            #plate_pos = np.array([0.0, 0.6, 0.2])
             #plate_pos = np.array([0.0, 0.6, 0.4])
             plate_pos = np.random.uniform(low=[-0.1, -0.1, -0.1], high=[0.1, 0.1, 0.1]) + np.array([0.0, 0.6, 0.4])
 
             plate_angle = np.arctan2(plate_pos[1], plate_pos[0])
             plate_rot = np.random.uniform(low=[0, 0, 0], high=[0., 0., 0.]) + np.array([np.pi - plate_angle, 0., 0.])
             plate_quat = euler2quat(plate_rot)
-            stand_joint_rot = plate_angle - np.pi / 2
 
-            # sanity check
-            #plate_pos = self._model.body("quad_peg").pos + np.array([0., 0., 0.03])
-            #plate_quat = self._model.body("quad_peg").quat
-
-            #self._data.joint("ur_stand_joint").qpos = -np.pi / 2
-            #self._data.joint("ur_stand_joint").qpos = -np.pi / 20.
-            self._data.joint("ur_stand_joint").qpos = stand_joint_rot 
-            self._data.joint("free_joint_quad_grommet").qpos[:3] = plate_pos
-            self._data.joint("free_joint_quad_grommet").qpos[3:] = plate_quat
-            #self._data.joint("free_joint_quad_peg").qpos[:3] = plate_pos
-            #self._data.joint("free_joint_quad_peg").qpos[3:] = quad_quat
-            mujoco.mj_fwdPosition(self._model, self._data)
-
-            left_grip_pos, left_handle_mjquat, right_grip_pos, right_handle_mjquat = self.get_grip_pose()            
-
-            left_ik_success = self.inverse_kinematics("left", left_grip_pos, left_handle_mjquat)
-            right_ik_success = self.inverse_kinematics("right", right_grip_pos, right_handle_mjquat)
-            if left_ik_success and right_ik_success:
+            success = self.move_plate_to_pose(plate_pos, plate_quat)
+            if success:
                 break
         
         ## close grippers
@@ -279,28 +331,16 @@ class BimanualEnv(MuJoCo):
         #        self._data.qvel[self._data.joint(joint_name).id] = 0.
         #        self._data.qacc[self._data.joint(joint_name).id] = 0.
 
-        init_gripper_joints = {
-            'left_inner_finger_joint_ur5left': -0.73191728,
-            'right_inner_finger_joint_ur5left': -0.78984115,
-            'left_inner_knuckle_joint_ur5left': 0.7341096,
-            'right_inner_knuckle_joint_ur5left': 0.7538488,
-            'left_outer_knuckle_joint_ur5left': 0.73120889,
-            'right_outer_knuckle_joint_ur5left': 0.75101009,
-            'left_inner_finger_joint_ur5right': -0.74807509,
-            'right_inner_finger_joint_ur5right': -0.7812078,
-            'left_inner_knuckle_joint_ur5right': 0.73657761,
-            'right_inner_knuckle_joint_ur5right': 0.75597062,
-            'left_outer_knuckle_joint_ur5right': 0.7337423,
-            'right_outer_knuckle_joint_ur5right': 0.75317061,
-        }
-        for k, v in init_gripper_joints.items():
+        for k, v in self.desired_gripper_joints.items():
             self._data.qpos[self._data.joint(k).id] = v
         
         mujoco.mj_fwdPosition(self._model, self._data)
 
         super().setup(obs)
         mujoco.mj_fwdPosition(self._model, self._data)
-        self.min_weighted_dist = self.weighted_dist(self._create_observation(self.obs_helper._build_obs(self._data)))
+        obs = self._create_observation(self.obs_helper._build_obs(self._data))
+        self.min_weighted_dist = self.weighted_dist(obs)
+        return obs
 
     def weighted_dist(self, state):
         goal_pos_dist, goal_rot_dist = self.goal_dists(state)
@@ -309,7 +349,9 @@ class BimanualEnv(MuJoCo):
     def is_absorbing(self, state):
         # check for goal reaching
         goal_pos_dist, goal_rot_dist = self.goal_dists(state)
-        if goal_pos_dist < 0.015 and goal_rot_dist < 0.015:
+        #if goal_pos_dist < 0.015 and goal_rot_dist < 0.015:
+        # NOTE only position is considered as it is hard to define the orientation limits
+        if goal_pos_dist < 0.015:
             self.absorbing_type = AbsorbType.SUCCESS
             return True
 
@@ -318,9 +360,16 @@ class BimanualEnv(MuJoCo):
         left_grip_pos, left_handle_mjquat, right_grip_pos, right_handle_mjquat = self.get_grip_pose()            
         left_grip_dist = np.linalg.norm(left_grip_pos - left_ee_pos)
         right_grip_dist = np.linalg.norm(right_grip_pos - right_ee_pos)
-        if left_grip_dist > 0.02 or right_grip_dist > 0.02:
+        if left_grip_dist > 0.015 or right_grip_dist > 0.015:
             self.absorbing_type = AbsorbType.DROP
             return True
+
+        # check for bad grasps
+        for k, v in self.desired_gripper_joints.items():
+            #print(k, np.abs(self._data.qpos[self._data.joint(k).id] - v))
+            if np.abs(self._data.qpos[self._data.joint(k).id] - v) > 0.2:
+                self.absorbing_type = AbsorbType.DROP
+                return True
         return False
 
     def goal_dists(self, state):
@@ -344,15 +393,18 @@ class BimanualEnv(MuJoCo):
 
         #reward = -weighted_dist
         #reward = np.exp(-2. * weighted_dist**2)
-        reward = max(self.min_weighted_dist - weighted_dist, 0.) / self.min_weighted_dist
-        reward = reward ** 2
+
+        #reward = max(self.min_weighted_dist - weighted_dist, 0.) / self.min_weighted_dist
+        #reward = reward ** 2
+        reward = 1. / ((weighted_dist / self.min_weighted_dist) + 0.01) - 1.
+        reward *= 0.01
         if absorbing:
             t = self._data.time
             it = int(t / self.info.dt)
             horizon = self.info.horizon
             gamma = self.info.gamma 
             factor = (1 - gamma ** (horizon - it + 1)) / (1 - gamma)
-            mul = 1.
+            mul = 2.
             if self.absorbing_type == AbsorbType.SUCCESS:
                 #reward += 10.
                 #reward += 100.
@@ -361,7 +413,8 @@ class BimanualEnv(MuJoCo):
             elif self.absorbing_type == AbsorbType.DROP:
                 #reward -= 10.
                 #reward -= 100.
-                reward *= factor / mul
+                #reward *= factor / mul
+                reward = 0.
                 print("DROP")
         return reward
 
@@ -414,7 +467,8 @@ class BimanualEnv(MuJoCo):
         task_info['left_ee_orientation'] = mat2euler(self._data.site("EE_ur5left").xmat.reshape(3, 3))
         task_info['right_ee_orientation'] = mat2euler(self._data.site("EE_ur5right").xmat.reshape(3, 3))
 
-        task_info["success"] = goal_pos_dist < 0.015 and goal_rot_dist < 0.015
+        #task_info["success"] = goal_pos_dist < 0.015#and goal_rot_dist < 0.015
+        task_info["success"] = (self.absorbing_type == AbsorbType.SUCCESS)
         return task_info
 
 
@@ -428,9 +482,17 @@ if __name__ == "__main__":
         action = np.stack([robot_pos, np.zeros_like(robot_pos), np.zeros_like(robot_pos)], axis=0)
         state, reward, absorbing, info = env.step(action)
         env.render()
+
+        plate_pos = np.array([0.01, 0.6, 0.04])
+        plate_angle = np.arctan2(plate_pos[1], plate_pos[0])
+        plate_rot = np.random.uniform(low=[0, 0, 0], high=[0., 0., 0.]) + np.array([np.pi - plate_angle, 0., 0.])
+        plate_quat = euler2quat(plate_rot)
+        success = env.move_plate_to_pose(plate_pos, plate_quat)
+        robot_pos = env.get_current_robot_state()[0]
+
         #print(env._data.site("EE_ur5left").xmat.reshape(3, 3))
-        ee_left = env._data.site("EE_ur5left").xpos
-        ee_right = env._data.site("EE_ur5right").xpos
-        print(np.linalg.norm(ee_left - ee_right))
+        #ee_left = env._data.site("EE_ur5left").xpos
+        #ee_right = env._data.site("EE_ur5right").xpos
+        #print(np.linalg.norm(ee_left - ee_right))
         #env.reward(None, None, None, None)
     print("Done.")

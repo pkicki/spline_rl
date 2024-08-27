@@ -103,6 +103,7 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
                                 batch_size=1,
                                 params={
                                         "input_space": mdp_info.observation_space,
+                                        "observation_stats": env_info["observation_stats"],
                                         },
                                 input_shape=(mdp_info.observation_space.shape[0],),
                                 output_shape=(n_dim * n_trainable_q_pts, n_trainable_t_pts))
@@ -112,11 +113,13 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
                                 params={
                                         "input_space": mdp_info.observation_space,
                                         "init_sigma": sigma,
+                                        "observation_stats": env_info["observation_stats"],
                                         },
                                 input_shape=(mdp_info.observation_space.shape[0],),
                                 output_shape=(n_dim * n_trainable_q_pts + n_trainable_t_pts,))
 
-    value_function_approximator = value_network(mdp_info.observation_space, agent_params["value_function_bias"])
+    value_function_approximator = value_network(mdp_info.observation_space, agent_params["value_function_bias"],
+                                                env_info["observation_stats"])
 
     policy_args = dict(
         env_info=env_info,
@@ -177,6 +180,7 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
                                 batch_size=1,
                                 params={
                                         "input_space": mdp_info.observation_space,
+                                        "observation_stats": env_info["observation_stats"],
                                         },
                                 input_shape=(mdp_info.observation_space.shape[0],),
                                 output_shape=(n_trainable_pts + 1,))
@@ -186,11 +190,13 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
                                 params={
                                         "input_space": mdp_info.observation_space,
                                         "init_sigma": sigma,
+                                        "observation_stats": env_info["observation_stats"],
                                         },
                                 input_shape=(mdp_info.observation_space.shape[0],),
                                 output_shape=(n_trainable_pts + 1,))
 
-    value_function_approximator = value_network(mdp_info.observation_space, agent_params["value_function_bias"])
+    value_function_approximator = value_network(mdp_info.observation_space, agent_params["value_function_bias"],
+                                                observation_stats=env_info["observation_stats"])
 
 
     if agent_params["alg"] == "promp_eppo_unstructured":

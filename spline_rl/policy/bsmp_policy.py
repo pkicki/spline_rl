@@ -69,6 +69,11 @@ class BSMPPolicy(Policy):
             episode_duration='primitive',
             joint_vel_limit='pickle',
             joint_acc_limit='pickle',
+            t_scale='primitive',
+            q_scale='primitive',
+            q_d_scale='primitive',
+            q_dot_d_scale='primitive',
+            q_ddot_d_scale='primitive',
         )
 
     def unpack_context(self, context):

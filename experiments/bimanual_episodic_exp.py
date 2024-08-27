@@ -24,18 +24,19 @@ os.environ["WANDB_START_METHOD"] = "thread"
 
 @single_experiment
 def experiment(env: str = 'bimanual',
-               group_name: str = "bsmp_bimanual_single_episode_works",
+               #group_name: str = "bsmp_bimanual_easy_pm10cm_newreward_betterinputscaling",
+               group_name: str = "bsmp_bimanual_easypm10cm_newreward_betterinputscaling_onlyposabsorbing_drop02gripjoint",
                n_envs: int = 1,
                alg: str = "bsmp_eppo_bimanual",
                n_epochs: int = 5000,
-               #n_episodes: int = 256,
-               #n_episodes_per_fit: int = 64,
-               #n_eval_episodes: int = 25,
-               #batch_size: int = 64,
-               n_episodes: int = 64,
-               n_episodes_per_fit: int = 16,
-               n_eval_episodes: int = 2,
-               batch_size: int = 16,
+               n_episodes: int = 256,
+               n_episodes_per_fit: int = 64,
+               n_eval_episodes: int = 10,
+               batch_size: int = 64,
+               #n_episodes: int = 64,
+               #n_episodes_per_fit: int = 16,
+               #n_eval_episodes: int = 2,
+               #batch_size: int = 16,
                #n_episodes: int = 2,
                #n_episodes_per_fit: int = 2,
                #n_eval_episodes: int = 2,
@@ -58,14 +59,14 @@ def experiment(env: str = 'bimanual',
                entropy_lb: float = -88. / 2.,
                #initial_entropy_lb: float = 71,
                #entropy_lb: float = -71,
-               entropy_lb_ep: int = 1000,
+               entropy_lb_ep: int = 500,
                t_scale: float = 1.0,
                q_scale: float = 1. / 1500.,
                q_d_scale: float = 1. / 500.,
                q_dot_d_scale: float = 1. / 50.,
                q_ddot_d_scale: float = 1.0,
-               value_function_bias: float = 70.0,
-               kl_threshold: float = 0.01,
+               value_function_bias: float = 2.5,
+               kl_threshold: float = 0.02,
 
                # env params
                gamma: float = 0.997,
@@ -122,11 +123,11 @@ def experiment(env: str = 'bimanual',
         kl_threshold=kl_threshold,
     )
 
-    name = (f"ePPO_bimanual_{alg}_tdiv1qdiv50_150_10qdotscaled_50_"
+    name = (f"ePPO_bimanual_{alg}_tdiv1qdiv1500_500_easypm10cm_"
             f"lr{agent_params['mu_lr']}_valuelr{agent_params['value_lr']}_bs{batch_size}_"
             f"constrlr{agent_params['constraint_lr']}_nep{n_episodes}_neppf{n_episodes_per_fit}_"
             f"neppol{agent_params['n_epochs_policy']}_epsppo{agent_params['eps_ppo']}_"
-            f"sigmainit{agent_params['sigma_init_q']}q_{agent_params['sigma_init_t']}t_entlb{agent_params['entropy_lb']}_"
+            f"siginit{agent_params['sigma_init_q']}q_{agent_params['sigma_init_t']}t_entlb{agent_params['entropy_lb']}_"
             f"entlbinit{agent_params['initial_entropy_lb']}_entlbep{agent_params['entropy_lb_ep']}_klth{agent_params['kl_threshold']}_"
             f"nqcps{agent_params['n_q_cps']}_ntcps{agent_params['n_t_cps']}_{'fmm' if full_mass_matrix else 'dmm'}_seed{seed}")
 
@@ -166,6 +167,28 @@ def experiment(env: str = 'bimanual',
     env, env_info_ = env_builder(env, n_envs, env_params)
 
     agent = agent_builder(env_info_, agent_params)
+
+    ##agent_path = os.path.join(os.path.dirname(__file__), "logs/444/ePPO_bimanual_bsmp_eppo_bimanual_tdiv1qdiv1500_500_newreward_lr5e-05_valuelr0.0005_bs16_constrlr0.01_nep64_neppf16_neppol64_epsppo0.05_sigmainit1.0q_1.0t_entlb-44.0_entlbinit88.0_entlbep500_klth0.02_nqcps11_ntcps10_fmm_seed444/bimanual/agent-444-13.msh")
+    #agent_path = os.path.join(os.path.dirname(__file__), "logs/444/ePPO_bimanual_bsmp_eppo_bimanual_tdiv1qdiv1500_500_newreward_onlyposabsorbing_lr5e-05_valuelr0.0005_bs16_constrlr0.01_nep64_neppf16_neppol64_epsppo0.05_sigmainit1.0q_1.0t_entlb-44.0_entlbinit88.0_entlbep500_klth0.02_nqcps11_ntcps10_fmm_seed444/bimanual/agent-444-15.msh")
+
+    #print("Load agent from: ", agent_path)
+    #agent = Agent.load(agent_path)
+    #agent.load_constraints(env_info_['rl_info'])
+    #agent._optimizer = torch.optim.Adam(agent.distribution.parameters(), lr=agent_params["mu_lr"])
+    #agent.mdp_info = env_info_['rl_info']
+    ##agent._epoch_no = 0
+    #agent.task_losses = []
+    #agent.scaled_constraint_losses = []
+    #agent.task_losses = []
+    #agent.last_kl_divergence = 0.
+    #agent.kl_threshold = agent_params["kl_threshold"]
+    ##agent.distribution._log_sigma_approximator.model.network._init_sigma *= 3.
+    #agent.policy.t_scale = 1.
+    #agent.policy.q_scale = 1. / 1500.
+    #agent.policy.q_d_scale = 1. / 500.
+    #agent.policy.q_dot_d_scale = 1. / 50.
+    #agent.policy.q_ddot_d_scale = 1.
+    #agent.policy._traj_no = 0
 
     dataset_callback = CollectDataset()
     if n_envs > 1:
@@ -276,6 +299,7 @@ def experiment(env: str = 'bimanual',
         
         if epoch % 100 == 0:
             logger.log_agent(agent, epoch=epoch)
+        logger.log_agent(agent, epoch=epoch)
         times.append(perf_counter())
         print("Epoch Times: ", times[1] - times[0], times[2] - times[1], times[3] - times[2])
 

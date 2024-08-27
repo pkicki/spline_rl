@@ -1,17 +1,24 @@
 import torch
 
 class BasicNetwork(torch.nn.Module):
-    def __init__(self, input_space):
+    def __init__(self, input_space, observation_stats=None):
         super(BasicNetwork, self).__init__()
         self.input_space = input_space
+        self.observation_stats = observation_stats
 
     def normalize_input(self, x):
-        low = torch.Tensor(self.input_space.low)[None]
-        high = torch.Tensor(self.input_space.high)[None]
-        low_high_defined = torch.logical_and(torch.isfinite(low), torch.isfinite(high))
-        normalized = torch.where(low_high_defined, 2 * ((x - low) / (high - low + 1e-8)) - 1, x)
-        #normalized = (x - low) / (high - low + 1e-8)
-        #normalized = 2 * normalized - 1
+        if self.observation_stats is not None:
+            mean = torch.Tensor(self.observation_stats["mean"])[None]
+            std = torch.Tensor(self.observation_stats["std"])[None]
+            normalized = (x - mean) / (std + 1e-8)
+            return normalized
+        else:
+            low = torch.Tensor(self.input_space.low)[None]
+            high = torch.Tensor(self.input_space.high)[None]
+            low_high_defined = torch.logical_and(torch.isfinite(low), torch.isfinite(high))
+            normalized = torch.where(low_high_defined, 2 * ((x - low) / (high - low + 1e-8)) - 1, x)
+            #normalized = (x - low) / (high - low + 1e-8)
+            #normalized = 2 * normalized - 1
         return normalized
 
     def prepare_data(self, x):
@@ -25,8 +32,8 @@ class BasicNetwork(torch.nn.Module):
 
 
 class BasicConfigurationTimeNetwork(BasicNetwork):
-    def __init__(self, input_shape, output_shape, input_space):
-        super(BasicConfigurationTimeNetwork, self).__init__(input_space)
+    def __init__(self, input_shape, output_shape, input_space, observation_stats):
+        super(BasicConfigurationTimeNetwork, self).__init__(input_space, observation_stats)
 
         activation = torch.nn.Tanh()
         W = 256
@@ -54,12 +61,14 @@ class BasicConfigurationTimeNetwork(BasicNetwork):
 
 class BasicConfigurationTimeNetworkWrapper(BasicConfigurationTimeNetwork):
     def __init__(self, input_shape, output_shape, params, **kwargs):
-        super(BasicConfigurationTimeNetworkWrapper, self).__init__(input_shape, output_shape, params["input_space"])
+        super(BasicConfigurationTimeNetworkWrapper, self).__init__(input_shape, output_shape,
+                                                                   params["input_space"],
+                                                                   params["observation_stats"])
 
 
 class BasicLogSigmaNetwork(BasicNetwork):
-    def __init__(self, input_shape, output_shape, input_space, init_sigma):
-        super(BasicLogSigmaNetwork, self).__init__(input_space)
+    def __init__(self, input_shape, output_shape, input_space, init_sigma, observation_stats):
+        super(BasicLogSigmaNetwork, self).__init__(input_space, observation_stats)
 
         self._init_sigma = init_sigma
 
@@ -79,12 +88,15 @@ class BasicLogSigmaNetwork(BasicNetwork):
 
 class BasicLogSigmaNetworkWrapper(BasicLogSigmaNetwork):
     def __init__(self, input_shape, output_shape, params, **kwargs):
-        super(BasicLogSigmaNetworkWrapper, self).__init__(input_shape, output_shape, params["input_space"], params["init_sigma"])
+        super(BasicLogSigmaNetworkWrapper, self).__init__(input_shape, output_shape,
+                                                          params["input_space"],
+                                                          params["init_sigma"],
+                                                          params["observation_stats"])
 
 
 class BasicFullSigmaNetwork(BasicNetwork):
-    def __init__(self, input_shape, output_shape, input_space, init_sigma):
-        super(BasicFullSigmaNetwork, self).__init__(input_space)
+    def __init__(self, input_shape, output_shape, input_space, init_sigma, observation_stats):
+        super(BasicFullSigmaNetwork, self).__init__(input_space, observation_stats)
 
         self._init_sigma = init_sigma
         self.N = output_shape[0]
@@ -105,11 +117,14 @@ class BasicFullSigmaNetwork(BasicNetwork):
 
 class BasicFullSigmaNetworkWrapper(BasicFullSigmaNetwork):
     def __init__(self, input_shape, output_shape, params, **kwargs):
-        super(BasicFullSigmaNetworkWrapper, self).__init__(input_shape, output_shape, params["input_space"], params["init_sigma"])
+        super(BasicFullSigmaNetworkWrapper, self).__init__(input_shape, output_shape,
+                                                           params["input_space"],
+                                                           params["init_sigma"],
+                                                           params["observation_stats"])
 
 class BasicConfigurationNetwork(BasicNetwork):
-    def __init__(self, input_shape, output_shape, input_space):
-        super(BasicConfigurationNetwork, self).__init__(input_space)
+    def __init__(self, input_shape, output_shape, input_space, observation_stats):
+        super(BasicConfigurationNetwork, self).__init__(input_space, observation_stats)
 
         activation = torch.nn.Tanh()
         W = 256
@@ -123,4 +138,6 @@ class BasicConfigurationNetwork(BasicNetwork):
 
 class BasicConfigurationNetworkWrapper(BasicConfigurationNetwork):
     def __init__(self, input_shape, output_shape, params, **kwargs):
-        super(BasicConfigurationNetworkWrapper, self).__init__(input_shape, output_shape, params["input_space"])
+        super(BasicConfigurationNetworkWrapper, self).__init__(input_shape, output_shape,
+                                                               params["input_space"],
+                                                               params["observation_stats"])
