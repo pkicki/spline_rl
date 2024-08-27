@@ -111,8 +111,8 @@ class BimanualEnv(MuJoCo):
         observations = np.array([self.setup(None) for _ in range(100)])
         self.observation_stats = dict(mean=observations.mean(axis=0),
                                       std=observations.std(axis=0))
-        #self.env_info['observation_stats'] = self.observation_stats
-        self.env_info['observation_stats'] = None
+        self.env_info['observation_stats'] = self.observation_stats
+        #self.env_info['observation_stats'] = None
 
 
     def _modify_mdp_info(self, mdp_info):
@@ -365,11 +365,18 @@ class BimanualEnv(MuJoCo):
             return True
 
         # check for bad grasps
-        for k, v in self.desired_gripper_joints.items():
-            #print(k, np.abs(self._data.qpos[self._data.joint(k).id] - v))
-            if np.abs(self._data.qpos[self._data.joint(k).id] - v) > 0.2:
-                self.absorbing_type = AbsorbType.DROP
-                return True
+        gripper_joint_errors = [np.abs(self._data.qpos[self._data.joint(k).id] - v) for k, v in self.desired_gripper_joints.items()]
+        #for k, v in self.desired_gripper_joints.items():
+        #    print(k, np.abs(self._data.qpos[self._data.joint(k).id] - v))
+        #    if np.abs(self._data.qpos[self._data.joint(k).id] - v) > 0.2:
+        #        self.absorbing_type = AbsorbType.DROP
+        #        return True
+        #print("NORM:", np.linalg.norm(gripper_joint_errors))
+        #print("MEAN:", np.mean(gripper_joint_errors))
+        #print("MAX:", np.max(gripper_joint_errors))
+        if np.mean(gripper_joint_errors) > 0.2:
+            self.absorbing_type = AbsorbType.DROP
+            return True
         return False
 
     def goal_dists(self, state):
