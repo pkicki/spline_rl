@@ -119,56 +119,89 @@ class BSMPePPO(ePPO):
         old_dist_ = self.distribution.distribution(context)
         old_lp = old_dist_.log_prob(theta).detach()
         #old_dist = self.distribution.log_pdf(theta, context).detach()
+        #old_lp_ = self.distribution.log_pdf(theta, context).detach()
 
         if self.distribution.is_contextual:
             full_batch = (theta, Jep, old_lp, context)
         else:
             full_batch = (theta, Jep, old_lp)
 
-        stop_training = False
         for epoch in range(self._n_epochs_policy()):
-            for minibatch in minibatch_generator(self._batch_size(), *full_batch):
-                self._optimizer.zero_grad()
-                theta_i, context_i, Jep_i, old_lp_i = self._unpack(minibatch)
+            self._optimizer.zero_grad()
+            # ePPO loss
+            new_dist_i = self.distribution.distribution(context)
+            lp_i = new_dist_i.log_prob(theta)
+            #lp_i = self.distribution.log_pdf(theta_i, context_i)
+            log_ratio = lp_i - old_lp
+            prob_ratio = torch.exp(log_ratio)
+            clipped_ratio = torch.clamp(prob_ratio, 1 - self._eps_ppo(), 1 + self._eps_ppo.get_value())
+            value_i = self.value_function(context)[:, 0]
+            A = Jep - value_i
+            A_unbiased = A - mean_advantage
+            A_unbiased = A_unbiased.detach()
+            task_loss = -torch.min(prob_ratio * A_unbiased, clipped_ratio * A_unbiased)
 
-                # ePPO loss
-                new_dist_i = self.distribution.distribution(context_i)
-                lp_i = new_dist_i.log_prob(theta_i)
-                #lp = self.distribution.log_pdf(theta_i, context_i)
-                log_ratio = lp_i - old_lp_i
-                prob_ratio = torch.exp(log_ratio)
-                clipped_ratio = torch.clamp(prob_ratio, 1 - self._eps_ppo(), 1 + self._eps_ppo.get_value())
-                value_i = self.value_function(context_i)[:, 0]
-                A = Jep_i - value_i
-                A_unbiased = A - mean_advantage
-                A_unbiased = A_unbiased.detach()
-                task_loss = -torch.min(prob_ratio * A_unbiased, clipped_ratio * A_unbiased)
-
-                with torch.no_grad():
-                    approx_kl_div_ = torch.distributions.kl.kl_divergence(old_dist_, new_dist_i).mean().cpu().numpy()
-                    #approx_kl_div = torch.mean((torch.exp(log_ratio) - 1) - log_ratio).cpu().numpy()
-                    self.last_kl_divergence = approx_kl_div_
-                #if approx_kl_div > 1.5 * self._eps_ppo():
-                if approx_kl_div_ > self.kl_threshold:
-                    stop_training = True
-                    break
-
-                # constraint loss
-                #mu = self.distribution.estimate_mu(context_i)
-                mu = new_dist_i.mean
-                constraint_losses = self.compute_constraint_losses(mu, context_i)
-                self.constraint_losses.append(constraint_losses.detach().numpy())
-                constraint_loss = torch.exp(torch.Tensor(self.alphas))[None] * constraint_losses
-                constraint_loss = torch.sum(constraint_loss, dim=-1)
-                loss = torch.mean(task_loss) + torch.mean(constraint_loss)
-
-                value_loss = torch.mean(A**2)
-                loss.backward()
-                self._optimizer.step()
-                self.value_function_optimizer.zero_grad()
-                value_loss.backward()
-                self.value_function_optimizer.step()
-            if stop_training:
+            with torch.no_grad():
+                approx_kl_div_ = torch.distributions.kl.kl_divergence(old_dist_, new_dist_i).mean().cpu().numpy()
+                #approx_kl_div = torch.mean((torch.exp(log_ratio) - 1) - log_ratio).cpu().numpy()
+                self.last_kl_divergence = approx_kl_div_
+            if approx_kl_div_ > self.kl_threshold:
                 break
+
+            # constraint loss
+            #mu = self.distribution.estimate_mu(context_i)
+            mu = new_dist_i.mean
+            constraint_losses = self.compute_constraint_losses(mu, context)
+            self.constraint_losses.append(constraint_losses.detach().numpy())
+            constraint_loss = torch.exp(torch.Tensor(self.alphas))[None] * constraint_losses
+            constraint_loss = torch.sum(constraint_loss, dim=-1)
+            loss = torch.mean(task_loss) + torch.mean(constraint_loss)
+
+            value_loss = torch.mean(A**2)
+            loss.backward()
+            #print("UPDATE EPOCH:", epoch)
+            #print("SIGMA GRAD MAX:", self.distribution._log_sigma_approximator.model.network.fc[4].weight.grad.abs().max())
+            #print("MU GRAD MAX:", self.distribution._mu_approximator.model.network.fc[4].weight.grad.abs().max())
+            self._optimizer.step()
+            self.value_function_optimizer.zero_grad()
+            value_loss.backward()
+            self.value_function_optimizer.step()
             self.update_alphas()
             self._epoch_no += 1
+            #for minibatch in minibatch_generator(self._batch_size(), *full_batch):
+            #    self._optimizer.zero_grad()
+            #    theta_i, context_i, Jep_i, old_lp_i = self._unpack(minibatch)
+
+            #    # ePPO loss
+            #    new_dist_i = self.distribution.distribution(context_i)
+            #    lp_i = new_dist_i.log_prob(theta_i)
+            #    #lp_i = self.distribution.log_pdf(theta_i, context_i)
+            #    log_ratio = lp_i - old_lp_i
+            #    prob_ratio = torch.exp(log_ratio)
+            #    clipped_ratio = torch.clamp(prob_ratio, 1 - self._eps_ppo(), 1 + self._eps_ppo.get_value())
+            #    value_i = self.value_function(context_i)[:, 0]
+            #    A = Jep_i - value_i
+            #    A_unbiased = A - mean_advantage
+            #    A_unbiased = A_unbiased.detach()
+            #    task_loss = -torch.min(prob_ratio * A_unbiased, clipped_ratio * A_unbiased)
+
+            #    # constraint loss
+            #    #mu = self.distribution.estimate_mu(context_i)
+            #    mu = new_dist_i.mean
+            #    constraint_losses = self.compute_constraint_losses(mu, context_i)
+            #    self.constraint_losses.append(constraint_losses.detach().numpy())
+            #    constraint_loss = torch.exp(torch.Tensor(self.alphas))[None] * constraint_losses
+            #    constraint_loss = torch.sum(constraint_loss, dim=-1)
+            #    loss = torch.mean(task_loss) + torch.mean(constraint_loss)
+
+            #    value_loss = torch.mean(A**2)
+            #    loss.backward()
+            #    print("UPDATE EPOCH:", epoch)
+            #    print("SIGMA GRAD MAX:", self.distribution._log_sigma_approximator.model.network.fc[4].weight.grad.abs().max())
+            #    print("MU GRAD MAX:", self.distribution._mu_approximator.model.network.fc[4].weight.grad.abs().max())
+            #    self._optimizer.step()
+            #    self.value_function_optimizer.zero_grad()
+            #    value_loss.backward()
+            #    self.value_function_optimizer.step()
+            #self.update_alphas()
+            #self._epoch_no += 1
