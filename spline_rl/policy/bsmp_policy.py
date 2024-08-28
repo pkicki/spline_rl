@@ -202,20 +202,24 @@ class BSMPPolicy(Policy):
 
         t, dt, duration = compute_duration(dtau_dt)
 
-        duration = torch.tile(duration[:, None, None], (1, dtau_dt.shape[1], 1))
-        too_long_trajectory = duration > self.episode_duration
-        c = duration / self.episode_duration
-        log_c = torch.log(c)
-        tN_inv = torch.linalg.pinv(tN)
-        t_cps_update = tN_inv @ log_c
-        t_cps_ = t_cps + t_cps_update
-        dtau_dt_ = torch.exp(tN @ t_cps_) if differentiable else np.exp(tN @ t_cps_)
-        ddtau_dtt_ = dtau_dt_**2 * (tdN @ t_cps_)
+        # limit duration to maximum one
+        #duration = torch.tile(duration[:, None, None], (1, dtau_dt.shape[1], 1))
+        #too_long_trajectory = duration > self.episode_duration
+        #c = duration / self.episode_duration
+        #log_c = torch.log(c)
+        #tN_inv = torch.linalg.pinv(tN)
+        #t_cps_update = tN_inv @ log_c
+        #t_cps_ = t_cps + t_cps_update
+        #dtau_dt_ = torch.exp(tN @ t_cps_) if differentiable else np.exp(tN @ t_cps_)
+        #ddtau_dtt_ = dtau_dt_**2 * (tdN @ t_cps_)
 
-        dtau_dt = torch.where(too_long_trajectory, dtau_dt_, dtau_dt)
-        ddtau_dtt = torch.where(too_long_trajectory, ddtau_dtt_, ddtau_dtt)
-        #t_, dt_, duration_ = compute_duration(dtau_dt_)
-        t, dt, duration = compute_duration(dtau_dt)
+        #dtau_dt = torch.where(too_long_trajectory, dtau_dt_, dtau_dt)
+        #ddtau_dtt = torch.where(too_long_trajectory, ddtau_dtt_, ddtau_dtt)
+        ##t_, dt_, duration_ = compute_duration(dtau_dt_)
+        #t, dt, duration = compute_duration(dtau_dt)
+
+        
+
 
         #ddtau_dtt__ = (dtau_dt_[:, 1:] - dtau_dt_[:, :-1]) / (t_[:, 1:] - t_[:, :-1])[..., None]
         #ddtau_dtt_hand = (dtau_dt[:, 1:] - dtau_dt[:, :-1]) / (t[:, 1:] - t[:, :-1])[..., None]
