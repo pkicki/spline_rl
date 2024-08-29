@@ -107,13 +107,20 @@ class BasicFullSigmaNetwork(BasicNetwork):
             torch.nn.Linear(input_shape[0], W), activation,
             torch.nn.Linear(W, W), activation,
             torch.nn.Linear(W, W), activation,
-            torch.nn.Linear(W, self.N * (self.N + 1) // 2),
         )
+        self.diag = torch.nn.Linear(W, self.N)
+        self.tril = torch.nn.Linear(W, self.N * (self.N - 1) // 2)
 
     def __call__(self, x):
         x = self.prepare_data(x)
-        x = self.fc(x) + torch.log(self._init_sigma)[None]
-        return x
+        features = self.fc(x)
+        diag = self.diag(features) + torch.log(self._init_sigma)[None]
+        tril = self.tril(features)
+        sigma = torch.zeros(x.shape[0], self.N, self.N)
+        idx = torch.tril_indices(self.N, self.N, offset=-1).unbind()
+        sigma[:, idx[0], idx[1]] = tril
+        sigma[:, torch.arange(self.N), torch.arange(self.N)] = diag.exp()
+        return sigma
 
 class BasicFullSigmaNetworkWrapper(BasicFullSigmaNetwork):
     def __init__(self, input_shape, output_shape, params, **kwargs):

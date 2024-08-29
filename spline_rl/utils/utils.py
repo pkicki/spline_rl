@@ -96,6 +96,17 @@ def project_entropy_independently(chol, e_lb):
     chol_diag = torch.maximum(chol.diagonal(dim1=-2, dim2=-1).log(), torch.tensor(avg_log_diag)).exp()
     chol_ = torch.diag_embed(chol_diag, dim1=-2, dim2=-1)
     return chol_
+    
+def project_entropy_chol(chol, e_lb):
+    a_dim = chol.size()[-1]
+    cov = chol @ chol.transpose(-2, -1)
+    def entropy(cov):
+        return a_dim / 2 * np.log(2 * np.pi * np.e) + torch.linalg.det(cov).log() / 2.
+    ent = entropy(cov)
+    if ent.numel() > 1:
+        ent = ent[:, None, None]
+    chol = torch.where(ent < e_lb, chol * torch.exp((e_lb - ent) / a_dim), chol)
+    return chol
 
 def huber(x, delta=1.0):
     abs_x = torch.abs(x)

@@ -3,6 +3,7 @@ import torch
 from mushroom_rl.approximators import Regressor
 from mushroom_rl.approximators.parametric import TorchApproximator
 
+from spline_rl.distribution.bsmp_cholesky_distribution import CholeskyDiagonalGaussianBSMPSigmaDistribution
 from spline_rl.distribution.bsmp_distribution import DiagonalGaussianBSMPSigmaDistribution
 from spline_rl.policy.bsmp_policy import BSMPPolicy
 from spline_rl.policy.bsmp_unstructured_policy import BSMPUnstructuredPolicy
@@ -17,7 +18,7 @@ from spline_rl.policy.promp_policy_kino import ProMPPolicyKino
 from spline_rl.policy.bsmp_policy_stop import BSMPPolicyStop
 from spline_rl.algorithm.bsmp_eppo import BSMPePPO
 from spline_rl.utils.context_builder import IdentityContextBuilder
-from spline_rl.utils.basic_network import BasicConfigurationNetworkWrapper, BasicConfigurationTimeNetworkWrapper, BasicLogSigmaNetworkWrapper
+from spline_rl.utils.basic_network import BasicConfigurationNetworkWrapper, BasicConfigurationTimeNetworkWrapper, BasicFullSigmaNetworkWrapper, BasicLogSigmaNetworkWrapper
 from spline_rl.utils.air_hockey_network import AirHockeyConfigurationNetworkWrapper, AirHockeyConfigurationTimeNetworkWrapper, AirHockeyLogSigmaNetworkWrapper
 from spline_rl.utils.value_network import AirHockeyValueNetwork, BasicValueNetwork
 
@@ -89,12 +90,19 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
     #    value_netwotk = ValueNetwork
 
     if "air_hockey" in agent_params["env"]:
-        mu_network = AirHockeyConfigurationTimeNetworkWrapper
-        logsigma_network = AirHockeyLogSigmaNetworkWrapper
+        mu_network = AirHockeyConfigurationNetworkWrapper
+        if agent_params["cov"] == "diag":
+            logsigma_network = AirHockeyLogSigmaNetworkWrapper
+        elif agent_params["cov"] == "full":
+            raise NotImplementedError
+            logsigma_network = AirHockeyFullSigmaNetworkWrapper
         value_network = AirHockeyValueNetwork
     else:
-        mu_network = BasicConfigurationTimeNetworkWrapper
-        logsigma_network = BasicLogSigmaNetworkWrapper
+        mu_network = BasicConfigurationNetworkWrapper
+        if agent_params["cov"] == "diag":
+            logsigma_network = BasicLogSigmaNetworkWrapper
+        elif agent_params["cov"] == "full":
+            logsigma_network = BasicFullSigmaNetworkWrapper
         value_network = BasicValueNetwork
     
 
@@ -151,7 +159,10 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
     else:
         policy = BSMPPolicy(**policy_args)
 
-    dist = DiagonalGaussianBSMPSigmaDistribution(mu_approximator, log_sigma_approximator, agent_params["entropy_lb"])
+    if agent_params["cov"] == "diag":
+        dist = DiagonalGaussianBSMPSigmaDistribution(mu_approximator, log_sigma_approximator, agent_params["entropy_lb"])
+    elif agent_params["cov"] == "full":
+        dist = CholeskyDiagonalGaussianBSMPSigmaDistribution(mu_approximator, log_sigma_approximator, agent_params["entropy_lb"])
 
     value_function_optimizer = torch.optim.Adam(value_function_approximator.parameters(), lr=agent_params["value_lr"])
 
@@ -167,12 +178,19 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
     sigma = agent_params["sigma_init_q"] * torch.ones(n_trainable_pts + 1)
 
     if "air_hockey" in agent_params["env"]:
-        mu_network = AirHockeyConfigurationNetworkWrapper
-        logsigma_network = AirHockeyLogSigmaNetworkWrapper
+        mu_network = AirHockeyConfigurationTimeNetworkWrapper
+        if agent_params["cov"] == "diag":
+            logsigma_network = AirHockeyLogSigmaNetworkWrapper
+        elif agent_params["cov"] == "full":
+            raise NotImplementedError
+            logsigma_network = AirHockeyFullSigmaNetworkWrapper
         value_network = AirHockeyValueNetwork
     else:
-        mu_network = BasicConfigurationNetworkWrapper
-        logsigma_network = BasicLogSigmaNetworkWrapper
+        mu_network = BasicConfigurationTimeNetworkWrapper
+        if agent_params["cov"] == "diag":
+            logsigma_network = BasicLogSigmaNetworkWrapper
+        elif agent_params["cov"] == "full":
+            logsigma_network = BasicFullSigmaNetworkWrapper
         value_network = BasicValueNetwork
 
     mu_approximator = Regressor(TorchApproximator,
@@ -210,7 +228,10 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
     else:
         raise ValueError(f"Unknown algorithm: {agent_params['alg']}")
 
-    dist = DiagonalGaussianBSMPSigmaDistribution(mu_approximator, log_sigma_approximator, agent_params["entropy_lb"])
+    if agent_params["cov"] == "diag":
+        dist = DiagonalGaussianBSMPSigmaDistribution(mu_approximator, log_sigma_approximator, agent_params["entropy_lb"])
+    elif agent_params["cov"] == "full":
+        dist = CholeskyDiagonalGaussianBSMPSigmaDistribution(mu_approximator, log_sigma_approximator, agent_params["entropy_lb"])
 
     value_function_optimizer = torch.optim.Adam(value_function_approximator.parameters(), lr=agent_params["value_lr"])
 

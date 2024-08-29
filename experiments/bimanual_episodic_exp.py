@@ -51,7 +51,7 @@ def experiment(env: str = 'bimanual',
                constraint_lr: float = 1e-2,
                mu_lr: float = 5e-5,
                value_lr: float = 5e-4,
-               n_epochs_policy: int = 64,
+               n_epochs_policy: int = 32,
                eps_ppo: float = 5e-2,
                #initial_entropy_lb: float = 118,
                #entropy_lb: float = -118,
@@ -66,7 +66,9 @@ def experiment(env: str = 'bimanual',
                q_dot_d_scale: float = 1. / 50.,
                q_ddot_d_scale: float = 1.0,
                value_function_bias: float = 2.5,
-               kl_threshold: float = 0.02,
+               kl_threshold: float = 1e10,
+               #cov: str = "diag",
+               cov: str = "full",
 
                # env params
                gamma: float = 0.997,
@@ -121,6 +123,7 @@ def experiment(env: str = 'bimanual',
         q_ddot_d_scale=q_ddot_d_scale,
         value_function_bias=value_function_bias,
         kl_threshold=kl_threshold,
+        cov=cov,
     )
 
     name = (f"ePPO_bimanual_{alg}_tdiv1qdiv1500_500_easypm10cm_"
