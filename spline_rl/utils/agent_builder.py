@@ -90,7 +90,7 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
     #    value_netwotk = ValueNetwork
 
     if "air_hockey" in agent_params["env"]:
-        mu_network = AirHockeyConfigurationNetworkWrapper
+        mu_network = AirHockeyConfigurationTimeNetworkWrapper
         if agent_params["cov"] == "diag":
             logsigma_network = AirHockeyLogSigmaNetworkWrapper
         elif agent_params["cov"] == "full":
@@ -98,7 +98,7 @@ def build_agent_BSMPePPO(env_info, eppo_params, agent_params):
             logsigma_network = AirHockeyFullSigmaNetworkWrapper
         value_network = AirHockeyValueNetwork
     else:
-        mu_network = BasicConfigurationNetworkWrapper
+        mu_network = BasicConfigurationTimeNetworkWrapper
         if agent_params["cov"] == "diag":
             logsigma_network = BasicLogSigmaNetworkWrapper
         elif agent_params["cov"] == "full":
@@ -178,7 +178,7 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
     sigma = agent_params["sigma_init_q"] * torch.ones(n_trainable_pts + 1)
 
     if "air_hockey" in agent_params["env"]:
-        mu_network = AirHockeyConfigurationTimeNetworkWrapper
+        mu_network = AirHockeyConfigurationNetworkWrapper
         if agent_params["cov"] == "diag":
             logsigma_network = AirHockeyLogSigmaNetworkWrapper
         elif agent_params["cov"] == "full":
@@ -186,7 +186,7 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
             logsigma_network = AirHockeyFullSigmaNetworkWrapper
         value_network = AirHockeyValueNetwork
     else:
-        mu_network = BasicConfigurationTimeNetworkWrapper
+        mu_network = BasicConfigurationNetworkWrapper
         if agent_params["cov"] == "diag":
             logsigma_network = BasicLogSigmaNetworkWrapper
         elif agent_params["cov"] == "full":
