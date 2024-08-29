@@ -129,12 +129,13 @@ def experiment(env: str = 'bimanual',
         cov=cov,
     )
 
-    name = (f"ePPO_bimanual_{alg}_tdiv1qdiv1500_500_easypm10cm_"
+    name = (f"ePPO_bimanual_{alg}_easypm10cm_"
+            f"t{t_scale:.2e}_q{q_scale:.2e}_qd{q_d_scale:.2e}_succ{success_scale}_cov{cov}_"
             f"lr{agent_params['mu_lr']}_valuelr{agent_params['value_lr']}_bs{batch_size}_"
             f"constrlr{agent_params['constraint_lr']}_nep{n_episodes}_neppf{n_episodes_per_fit}_"
             f"neppol{agent_params['n_epochs_policy']}_epsppo{agent_params['eps_ppo']}_"
-            f"siginit{agent_params['sigma_init_q']}q_{agent_params['sigma_init_t']}t_entlb{agent_params['entropy_lb']}_"
-            f"entlbinit{agent_params['initial_entropy_lb']}_entlbep{agent_params['entropy_lb_ep']}_klth{agent_params['kl_threshold']}_"
+            f"entlb{agent_params['entropy_lb']}_"
+            f"entlbinit{agent_params['initial_entropy_lb']}_entlbep{agent_params['entropy_lb_ep']}_klth{agent_params['kl_threshold']:.2e}_"
             f"nqcps{agent_params['n_q_cps']}_ntcps{agent_params['n_t_cps']}_{'fmm' if full_mass_matrix else 'dmm'}_seed{seed}")
 
     results_dir = os.path.join(results_dir, name)
