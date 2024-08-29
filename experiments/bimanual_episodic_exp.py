@@ -61,20 +61,23 @@ def experiment(env: str = 'bimanual',
                #entropy_lb: float = -71,
                entropy_lb_ep: int = 500,
                t_scale: float = 1.0,
-               q_scale: float = 1. / 1500.,
-               q_d_scale: float = 1. / 500.,
+               #q_scale: float = 1. / 1500.,
+               #q_d_scale: float = 1. / 500.,
+               q_scale: float = 1. / 3000.,
+               q_d_scale: float = 1. / 1500.,
                q_dot_d_scale: float = 1. / 50.,
                q_ddot_d_scale: float = 1.0,
                value_function_bias: float = 2.5,
                kl_threshold: float = 1e10,
-               #cov: str = "diag",
-               cov: str = "full",
+               cov: str = "diag",
+               #cov: str = "full",
 
                # env params
                gamma: float = 0.997,
                horizon: int = 400,
                full_mass_matrix: bool = True,
                interpolation_order: int = 5,
+               success_scale: float = 2.0,
 
                debug: bool = False,
                #debug: bool = True,
@@ -153,7 +156,8 @@ def experiment(env: str = 'bimanual',
         gamma=gamma,
         horizon=horizon,
         render_mode="human" if render else None,
-        interpolation_order=interpolation_order
+        interpolation_order=interpolation_order,
+        success_scale=success_scale,
     )
 
     config = {**agent_params, **run_params, **env_params}

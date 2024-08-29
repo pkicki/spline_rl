@@ -1,4 +1,5 @@
 import os
+import pickle
 from time import sleep
 import numpy as np
 from dm_control import mujoco
@@ -22,7 +23,7 @@ class AbsorbType:
     DROP = 1
 
 class BimanualEnv(MuJoCo):
-    def __init__(self, gamma=0.99, horizon=100, interpolation_order=-1, **kwargs):
+    def __init__(self, gamma=0.99, horizon=100, interpolation_order=-1, success_scale=2., **kwargs):
         self.xml_file =  os.path.join(os.path.dirname(__file__), "data", "quad_insert.xml")
         observation_spec = []
         observation_spec += [("left_EE_pos", "EE_ur5left", ObservationType.SITE_POS),]
@@ -108,11 +109,20 @@ class BimanualEnv(MuJoCo):
             'right_outer_knuckle_joint_ur5right': 0.75317061,
         }
 
-        observations = np.array([self.setup(None) for _ in range(100)])
-        self.observation_stats = dict(mean=observations.mean(axis=0),
-                                      std=observations.std(axis=0))
+        # create normalization file
+        #observations = np.array([self.setup(None) for _ in range(1000)])
+        #self.observation_stats = dict(mean=observations.mean(axis=0),
+        #                              std=observations.std(axis=0))
+        #with open(os.path.join(os.path.dirname(__file__), 'data', 'easy_xyzpm10.pickle'), 'wb') as fh:
+        #    pickle.dump(self.observation_stats, fh, protocol=pickle.HIGHEST_PROTOCOL)
+
+        # read normalization file
+        with open(os.path.join(os.path.dirname(__file__), 'data', 'easy_xyzpm10.pickle'), 'rb') as fh:
+            self.observation_stats = pickle.load(fh)
+
         self.env_info['observation_stats'] = self.observation_stats
         #self.env_info['observation_stats'] = None
+        self.success_scale = success_scale
 
 
     def _modify_mdp_info(self, mdp_info):
@@ -411,11 +421,10 @@ class BimanualEnv(MuJoCo):
             horizon = self.info.horizon
             gamma = self.info.gamma 
             factor = (1 - gamma ** (horizon - it + 1)) / (1 - gamma)
-            mul = 2.
             if self.absorbing_type == AbsorbType.SUCCESS:
                 #reward += 10.
                 #reward += 100.
-                reward *= factor * mul
+                reward *= factor * self.success_scale
                 print("Success")
             elif self.absorbing_type == AbsorbType.DROP:
                 #reward -= 10.
