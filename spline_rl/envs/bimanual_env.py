@@ -109,15 +109,17 @@ class BimanualEnv(MuJoCo):
             'right_outer_knuckle_joint_ur5right': 0.75317061,
         }
 
-        # create normalization file
+        ## create normalization file
         #observations = np.array([self.setup(None) for _ in range(1000)])
         #self.observation_stats = dict(mean=observations.mean(axis=0),
         #                              std=observations.std(axis=0))
-        #with open(os.path.join(os.path.dirname(__file__), 'data', 'easy_xyzpm10.pickle'), 'wb') as fh:
+        ##with open(os.path.join(os.path.dirname(__file__), 'data', 'easy_xyzpm10.pickle'), 'wb') as fh:
+        #with open(os.path.join(os.path.dirname(__file__), 'data', 'hard.pickle'), 'wb') as fh:
         #    pickle.dump(self.observation_stats, fh, protocol=pickle.HIGHEST_PROTOCOL)
 
-        # read normalization file
-        with open(os.path.join(os.path.dirname(__file__), 'data', 'easy_xyzpm10.pickle'), 'rb') as fh:
+        ## read normalization file
+        #with open(os.path.join(os.path.dirname(__file__), 'data', 'easy_xyzpm10.pickle'), 'rb') as fh:
+        with open(os.path.join(os.path.dirname(__file__), 'data', 'hard.pickle'), 'rb') as fh:
             self.observation_stats = pickle.load(fh)
 
         self.env_info['observation_stats'] = self.observation_stats
@@ -303,10 +305,13 @@ class BimanualEnv(MuJoCo):
             #plate_pos = np.array([0.0, 0.6, 0.025])
             #plate_pos = np.array([0.0, 0.6, 0.2])
             #plate_pos = np.array([0.0, 0.6, 0.4])
-            plate_pos = np.random.uniform(low=[-0.1, -0.1, -0.1], high=[0.1, 0.1, 0.1]) + np.array([0.0, 0.6, 0.4])
+            #plate_pos = np.random.uniform(low=[-0.1, -0.1, -0.1], high=[0.1, 0.1, 0.1]) + np.array([0.0, 0.6, 0.4])
+            plate_pos = np.random.uniform(low=[-0.5, -0.4, -0.2], high=[0.5, 0.2, 0.2]) + np.array([0.0, 0.6, 0.4])
 
             plate_angle = np.arctan2(plate_pos[1], plate_pos[0])
-            plate_rot = np.random.uniform(low=[0, 0, 0], high=[0., 0., 0.]) + np.array([np.pi - plate_angle, 0., 0.])
+            #plate_rot = np.random.uniform(low=[0, 0, 0], high=[0., 0., 0.]) + np.array([np.pi - plate_angle, 0., 0.])
+            max_angle = np.pi / 6
+            plate_rot = np.random.uniform(low=[-3*max_angle, -max_angle, -max_angle], high=[3*max_angle, max_angle, max_angle]) + np.array([np.pi - plate_angle, 0., 0.])
             plate_quat = euler2quat(plate_rot)
 
             success = self.move_plate_to_pose(plate_pos, plate_quat)
