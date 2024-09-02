@@ -1,3 +1,4 @@
+from copy import copy
 import os
 import pickle
 from time import sleep
