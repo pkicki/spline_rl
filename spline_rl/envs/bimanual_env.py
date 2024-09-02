@@ -134,6 +134,8 @@ class BimanualEnv(MuJoCo):
         self.env_info['data'] = copy(self._data)
         self.env_info['dm_physics'] = copy(self.dm_physics)
         self.env_info['robot']['joint_ids'] = self.robot_joint_ids
+        self.env_info['robot']['left_joint_ids'] = self.left_robot_joint_ids
+        self.env_info['robot']['right_joint_ids'] = self.right_robot_joint_ids
         self.q_desired = []
         self.q_actual = []
 

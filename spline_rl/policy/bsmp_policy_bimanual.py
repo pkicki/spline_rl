@@ -20,6 +20,8 @@ class BSMPPolicyBimanual(BSMPPolicy):
         self._data = env_info['data']
         self._dm_physics = env_info['dm_physics']
         self._robot_joint_ids = env_info['robot']['joint_ids']
+        self._left_robot_joint_ids = env_info['robot']['left_joint_ids']
+        self._right_robot_joint_ids = env_info['robot']['right_joint_ids']
 
         #self.q_d_bias = torch.tensor([
         #    0., # base joint
@@ -85,13 +87,32 @@ class BSMPPolicyBimanual(BSMPPolicy):
         trainable_q_pts = torch.tanh(trainable_q_middle) * 2. * np.pi
         trainable_q_d = torch.tanh(trainable_q_d_) * 2. * np.pi
 
-        q_dot_d = 0.2 * torch.tensor(self.q_dot_d)[None, None]
-        q_ddot_d = -30. * q_dot_d
+        #q_dot_d = 0.2 * torch.tensor(self.q_dot_d)[None, None]
+        #q_ddot_d = -30. * q_dot_d
 
         #q_d_bias = self.q_d_bias
         #q_bias_ = self.compute_bias(q_0)
         #q_d = trainable_q_d + q_0#q_d_bias
         q_d = trainable_q_d + self.q_d_bias[None, None]
+
+        # Jacobian computations
+        def get_q_dot_d(robot):
+            assert robot in ["left", "right"]
+            site_id = self._data.site(f"EE_ur5{robot}").id
+            jacp = np.zeros((3, self._model.nv))
+            jacr = np.zeros((3, self._model.nv))
+            mujoco.mj_jacSite(self._model, self._data, jacp, jacr, site_id)
+            J = jacp[:, self._left_robot_joint_ids] if robot == "left" else jacp[:, self._right_robot_joint_ids]
+            pinvJ = np.linalg.pinv(J)
+            q_dot_d = pinvJ @ np.array([0., 0., -1.])
+            return q_dot_d
+        self._data.qpos[self._robot_joint_ids] = q_d
+        mujoco.mj_fwdPosition(self._model, self._data)
+        left_q_dot_d = get_q_dot_d("left")
+        right_q_dot_d = get_q_dot_d("right")
+
+        q_dot_d = 0.2 * torch.tensor(np.concatenate([[0.], left_q_dot_d, right_q_dot_d]))[None, None]
+        q_ddot_d = -30. * q_dot_d
 
         q1, q2, qm2, qm1 = self.compute_boundary_control_points_exp(trainable_t_cps, q_0, q_dot_0, q_ddot_0,
                                                                     q_d, q_dot_d, q_ddot_d)
