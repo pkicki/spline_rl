@@ -63,8 +63,9 @@ def experiment(env: str = 'bimanual',
                t_scale: float = 1.0,
                #q_scale: float = 1. / 1500.,
                #q_d_scale: float = 1. / 500.,
-               q_scale: float = 1. / 3000.,
-               q_d_scale: float = 1. / 1500.,
+               t_scale: float = 0.1,
+               q_scale: float = 1. / 1500,
+               q_d_scale: float = 1. / 1500,
                q_dot_d_scale: float = 1. / 50.,
                q_ddot_d_scale: float = 1.0,
                value_function_bias: float = 2.5,
@@ -129,7 +130,7 @@ def experiment(env: str = 'bimanual',
         cov=cov,
     )
 
-    name = (f"ePPO_bimanual_{alg}_easypm10cm_"
+    name = (f"ePPO_bimanual_{alg}_medium_"
             f"t{t_scale:.2e}_q{q_scale:.2e}_qd{q_d_scale:.2e}_succ{success_scale}_cov{cov}_"
             f"lr{agent_params['mu_lr']}_valuelr{agent_params['value_lr']}_bs{batch_size}_"
             f"constrlr{agent_params['constraint_lr']}_nep{n_episodes}_neppf{n_episodes_per_fit}_"

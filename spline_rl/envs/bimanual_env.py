@@ -86,6 +86,8 @@ class BimanualEnv(MuJoCo):
 
         self.actuator_joint_ids = [self._data.actuator(joint_name).id for joint_name in actuation_spec]
         self.robot_joint_ids = [self._model.actuator(joint_name).trnid[0] for joint_name in actuation_spec]
+        self.left_robot_joint_ids = [self._model.actuator(f"joint{i}_motor_ur5left").trnid[0] for i in range(6)]
+        self.right_robot_joint_ids = [self._model.actuator(f"joint{i}_motor_ur5right").trnid[0] for i in range(6)]
         self.left_gripper_id = self._model.actuator("gripper_ur5left").id
         self.right_gripper_id = self._model.actuator("gripper_ur5right").id
 
@@ -128,6 +130,12 @@ class BimanualEnv(MuJoCo):
         self.env_info['observation_stats'] = self.observation_stats
         #self.env_info['observation_stats'] = None
         self.success_scale = success_scale
+        self.env_info['model'] = copy(self._model)
+        self.env_info['data'] = copy(self._data)
+        self.env_info['dm_physics'] = copy(self.dm_physics)
+        self.env_info['robot']['joint_ids'] = self.robot_joint_ids
+        self.q_desired = []
+        self.q_actual = []
 
 
     def _modify_mdp_info(self, mdp_info):
@@ -310,7 +318,7 @@ class BimanualEnv(MuJoCo):
             #plate_pos = np.array([0.0, 0.6, 0.4])
             # easy
             #plate_pos = np.random.uniform(low=[-0.1, -0.1, -0.1], high=[0.1, 0.1, 0.1]) + np.array([0.0, 0.6, 0.4])
-            # middle, hard
+            # medium, middle, hard
             plate_pos = np.random.uniform(low=[-0.5, -0.4, -0.2], high=[0.5, 0.2, 0.2]) + np.array([0.0, 0.6, 0.4])
             #plate_pos = np.array([0.0, 0.4, 0.5])
 
