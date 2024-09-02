@@ -106,13 +106,19 @@ class BSMPPolicyBimanual(BSMPPolicy):
             pinvJ = np.linalg.pinv(J)
             q_dot_d = pinvJ @ np.array([0., 0., -1.])
             return q_dot_d
-        self._data.qpos[self._robot_joint_ids] = q_d
-        mujoco.mj_fwdPosition(self._model, self._data)
-        left_q_dot_d = get_q_dot_d("left")
-        right_q_dot_d = get_q_dot_d("right")
 
-        q_dot_d = 0.2 * torch.tensor(np.concatenate([[0.], left_q_dot_d, right_q_dot_d]))[None, None]
+        q_dot_d_ = []
+        for i in range(q_d.shape[0]):
+            self._data.qpos[self._robot_joint_ids] = q_d[i].detach().numpy().flatten()
+            mujoco.mj_fwdPosition(self._model, self._data)
+            left_q_dot_d = get_q_dot_d("left")
+            right_q_dot_d = get_q_dot_d("right")
+            q_dot_d_.append(np.concatenate([[0.], left_q_dot_d, right_q_dot_d]))
+        q_dot_d = 0.2 * torch.tensor(q_dot_d_)[:, None]
         q_ddot_d = -30. * q_dot_d
+
+        #q_dot_d = 0.2 * torch.tensor(np.concatenate([[0.], left_q_dot_d, right_q_dot_d]))[None, None]
+        #q_ddot_d = -30. * q_dot_d
 
         q1, q2, qm2, qm1 = self.compute_boundary_control_points_exp(trainable_t_cps, q_0, q_dot_0, q_ddot_0,
                                                                     q_d, q_dot_d, q_ddot_d)
