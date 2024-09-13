@@ -5,9 +5,6 @@ from scipy.interpolate import interp1d
 from mushroom_rl.policy import Policy
 from baseline.baseline_agent.optimizer import TrajectoryOptimizer
 
-from mushroom_rl.features._implementations.basis_features import BasisFeatures
-from mushroom_rl.features.basis import GaussianRBF
-from spline_rl.utils.gaussian_derivative import dGaussianRBF
 from spline_rl.utils.utils import unpack_data_airhockey
 
 
@@ -33,7 +30,8 @@ class MPPolicy(Policy):
         self.horizon = env_info['rl_info'].horizon
 
 
-        self.load_policy(env_info)
+        if "robot_model" in env_info['robot'].keys():
+            self.load_policy(env_info)
         self.generate_basis()
 
         policy_state_shape = (1,)
