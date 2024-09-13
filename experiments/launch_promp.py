@@ -21,7 +21,7 @@ PARTITION = 'amd2,amd'  # 'amd', 'rtx'
 GRES = 'gpu:1' if USE_CUDA else None  # gpu:rtx2080:1, gpu:rtx3080:1
 CONDA_ENV = "saferl"
 
-experiment_name = 'prodmp_eppo_bimanual'
+experiment_name = 'promp_eppo_bimanual'
 
 launcher = Launcher(
     exp_name=experiment_name,
@@ -44,7 +44,7 @@ launcher = Launcher(
 )
 
 launcher.add_experiment(
-    alg="prodmp_eppo_bimanual",
+    alg="promp_eppo_bimanual",
     group_name=f"medium_{experiment_name}_t01q1500qd1500_klth1e10_ss100",
 
     initial_entropy_lb=131.,

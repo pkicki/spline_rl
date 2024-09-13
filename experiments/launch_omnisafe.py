@@ -22,7 +22,8 @@ GRES = 'gpu:1' if USE_CUDA else None  # gpu:rtx2080:1, gpu:rtx3080:1
 CONDA_ENV = "saferl"
 
 #env = 'kinodynamic'
-env = 'air_hockey'
+#env = 'air_hockey'
+env = 'bimanual'
 
 if env == 'kinodynamic':
     n_epochs = 800
