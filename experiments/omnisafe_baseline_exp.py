@@ -71,6 +71,10 @@ def experiment(
 
     if alg == "PPOLag":
         custom_cfgs["algo_cfgs"]["clip"] = 0.05
+    
+    if env == "bimanual":
+        custom_cfgs["algo_cfgs"]["gamma"] = 0.997
+        custom_cfgs["algo_cfgs"]["cost_gamma"] = 0.997
 
     agent = omnisafe.Agent(
         alg,

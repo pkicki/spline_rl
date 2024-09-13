@@ -34,6 +34,11 @@ elif env == 'air_hockey':
     avg_steps_per_episode = 65
     cost_limit = 1e-3
     lambda_lr = 1e-2
+elif env == 'bimanual':
+    n_epochs = 3000
+    avg_steps_per_episode = 270
+    cost_limit = 1e-3
+    lambda_lr = 1e-2
 
 #alg = 'PPOLag'
 alg = 'TRPOLag'

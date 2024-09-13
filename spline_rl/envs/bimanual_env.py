@@ -512,6 +512,9 @@ class BimanualEnv(MuJoCo):
         task_info['left_ee_orientation'] = mat2euler(self._data.site("EE_ur5left").xmat.reshape(3, 3))
         task_info['right_ee_orientation'] = mat2euler(self._data.site("EE_ur5right").xmat.reshape(3, 3))
 
+        task_info['cost'] = np.stack([task_info['joint_vel_constraint'],
+                                      task_info['ee_dist_constraint']])
+
         #task_info["success"] = goal_pos_dist < 0.015#and goal_rot_dist < 0.015
         task_info["success"] = (self.absorbing_type == AbsorbType.SUCCESS)
         return task_info
