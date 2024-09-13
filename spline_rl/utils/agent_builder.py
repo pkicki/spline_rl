@@ -8,12 +8,14 @@ from spline_rl.distribution.bsmp_distribution import DiagonalGaussianBSMPSigmaDi
 from spline_rl.policy.bsmp_policy import BSMPPolicy
 from spline_rl.policy.bsmp_unstructured_policy import BSMPUnstructuredPolicy
 from spline_rl.policy.prodmp_policy import ProDMPPolicy
+from spline_rl.policy.prodmp_policy_bimanual import ProDMPPolicyBimanual
 from spline_rl.policy.promp_policy import ProMPPolicy
 from spline_rl.policy.bsmp_policy_bimanual import BSMPPolicyBimanual
 from spline_rl.policy.bsmp_policy_box_pushing import BSMPPolicyBoxPushing
 from spline_rl.policy.bsmp_policy_kino import BSMPPolicyKino
 from spline_rl.policy.bsmp_unstructured_policy_kino import BSMPPolicyUnstructuredKino
 from spline_rl.policy.prodmp_policy_kino import ProDMPPolicyKino
+from spline_rl.policy.promp_policy_bimanual import ProMPPolicyBimanual
 from spline_rl.policy.promp_policy_kino import ProMPPolicyKino
 from spline_rl.policy.bsmp_policy_stop import BSMPPolicyStop
 from spline_rl.algorithm.bsmp_eppo import BSMPePPO
@@ -221,10 +223,14 @@ def build_agent_ProMPePPO(env_info, eppo_params, agent_params):
         policy = ProMPPolicy(env_info, **agent_params)
     elif agent_params["alg"] == "promp_eppo_kinodynamic":
         policy = ProMPPolicyKino(env_info, **agent_params)
+    elif agent_params["alg"] == "promp_eppo_bimanual":
+        policy = ProMPPolicyBimanual(env_info, **agent_params)
     elif agent_params["alg"] == "prodmp_eppo_unstructured":
          policy = ProDMPPolicy(env_info, **agent_params)
     elif agent_params["alg"] == "prodmp_eppo_kinodynamic":
          policy = ProDMPPolicyKino(env_info, **agent_params)
+    elif agent_params["alg"] == "prodmp_eppo_bimanual":
+         policy = ProDMPPolicyBimanual(env_info, **agent_params)
     else:
         raise ValueError(f"Unknown algorithm: {agent_params['alg']}")
 
