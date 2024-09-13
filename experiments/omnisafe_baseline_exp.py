@@ -6,7 +6,8 @@ from spline_rl.envs.omnisafe_wrapper import OmnisafeWrapper
 @single_experiment
 def experiment(
     alg: str = 'TRPOLag',
-    env: str = 'kinodynamic',
+    #env: str = 'kinodynamic',
+    env: str = 'bimanual',
     n_episodes: int = 256,
     avg_steps_per_episode: int = 100,
     n_epochs: int = 800,
@@ -21,7 +22,11 @@ def experiment(
     seed: int = 444,
     **kwargs
 ):
-    wandb_group = f"{alg}_{env}_cl{cost_limit}_{group_name_postfix}"
+    #wandb_group = f"{alg}_{env}_cl{cost_limit}_{group_name_postfix}"
+    #if "Lag" in alg:
+    #    wandb_group += f"_clr{lambda_lr}"
+    #wandb_group = f"medium_{alg}_cl{cost_limit}"
+    wandb_group = f"middle_{alg}_cl{cost_limit}"
     if "Lag" in alg:
         wandb_group += f"_clr{lambda_lr}"
     custom_cfgs = {
