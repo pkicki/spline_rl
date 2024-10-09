@@ -17,6 +17,7 @@ def experiment(
     critic_lr: float = 5e-4,
     cost_limit: float =  1e1,
     lambda_lr: float = 0.01,
+    entropy_coef: float = 0.0,
     group_name_postfix: str = '',
     results_dir: str = './logs',
     seed: int = 444,
@@ -41,6 +42,7 @@ def experiment(
             'update_iters': 32,
             "batch_size": batch_size,
             "kl_early_stop": False,
+            "entropy_coef": entropy_coef,
         },
         "logger_cfgs": {
             "use_wandb": False,

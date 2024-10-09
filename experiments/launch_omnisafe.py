@@ -22,8 +22,8 @@ GRES = 'gpu:1' if USE_CUDA else None  # gpu:rtx2080:1, gpu:rtx3080:1
 CONDA_ENV = "saferl"
 
 #env = 'kinodynamic'
-#env = 'air_hockey'
-env = 'bimanual'
+env = 'air_hockey'
+#env = 'bimanual'
 
 if env == 'kinodynamic':
     n_epochs = 800
@@ -36,16 +36,20 @@ elif env == 'air_hockey':
     cost_limit = 1e-3
     lambda_lr = 1e-2
 elif env == 'bimanual':
+    #n_epochs = 2
+    #avg_steps_per_episode = 20
     n_epochs = 3000
     avg_steps_per_episode = 270
     cost_limit = 1e-3
     lambda_lr = 1e-2
 
-#alg = 'PPOLag'
-alg = 'TRPOLag'
+entropy_coef = 0.0
+alg = 'PPOLag'
+#alg = 'TRPOLag'
 #alg = 'PCPO'
 
-postfix = "equality"
+#postfix = "equality"
+postfix = f"entropybonus{entropy_coef}"
 experiment_name = f'omnisafe_{env}_{alg}_{postfix}'
 
 launcher = Launcher(
@@ -73,6 +77,7 @@ launcher.add_experiment(
     avg_steps_per_episode=avg_steps_per_episode,
     cost_limit=cost_limit,
     lambda_lr=lambda_lr,
+    entropy_coef=entropy_coef,
     group_name_postfix=postfix,
     #mode="disabled",
 )
